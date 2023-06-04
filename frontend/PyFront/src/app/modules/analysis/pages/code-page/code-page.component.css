@@ -1,0 +1,65 @@
+.input-tittle{
+  display: inline-block;
+  width: 60%;
+  margin: 10px 25px;
+  font-weight: bold;
+}
+
+.output-tittle{
+  display: inline-block;
+  width: 30%;
+  margin: 10px 25px;
+  font-weight: bold;
+}
+
+.code-container{
+  width: 100%;
+  height: 1024px;
+  background: #E5E5E5;
+}
+
+.input{
+  display: inline-block;
+  width: 60%;
+  height: 450px;
+  margin: 0 20px;
+  background: white;
+  border-radius: 24px;
+}
+
+
+
+.input-editor{
+  display: block;
+  width: 90%;
+  height: 400px;
+  margin: 15px auto;
+}
+
+.btn-analisis{
+  float: right;
+  margin: 35px 0;
+}
+
+.output{
+  float: right;
+  display: inline-block;
+  width: 35%;
+  height: 450px;
+  background: white;
+  margin: 0 20px 0 0;
+  border-radius: 24px;
+}
+
+.out-area{
+  display: block;
+  width: 80%;
+  margin: 30px auto;
+  border: none;
+  background: white;
+  color: #495057;
+  outline: none;
+  resize: none;
+}
+
+

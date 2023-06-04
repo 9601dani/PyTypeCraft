@@ -1,0 +1,19 @@
+<app-header></app-header>
+<div class="code-container">
+
+  <h6 class="input-tittle">Entrada</h6>
+  <h6 class="output-tittle">Salida</h6>
+  <div class="input">
+    <ngs-code-editor
+      class="input-editor"
+      [theme] = "theme"
+      [codeModel]="model"
+      [options]="options">
+
+    </ngs-code-editor>
+    <button type="button" class="btn btn-primary btn-analisis">Analizar</button>
+  </div>
+  <div class="output">
+    <textarea class="out-area" cols="50" rows="15" readonly></textarea>
+  </div>
+</div>
