@@ -2,6 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+# Node.js y TypeScript
+node_modules/
+dist/
+*.js
+*.js.map
 
 # C extensions
 *.so
