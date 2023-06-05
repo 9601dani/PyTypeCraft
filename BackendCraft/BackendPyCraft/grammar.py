@@ -1,1 +1,6 @@
-#aqui ira la gramatica
+# here start grammar
+#--------------------------------------------------------------
+# 04-06-2023: Created by Daniel Morales
+# proyecto 1 - compiladores 2 usac 2023
+#--------------------------------------------------------------
+
