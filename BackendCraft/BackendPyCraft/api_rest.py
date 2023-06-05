@@ -6,5 +6,5 @@ app = FastAPI()
 def test_api():
     return {"Hello": "from test_api"}
 @app.get("/compiler/{text}")
-def get_text_compiler():
+async def get_text_compiler():
     return {"text from compiler/texto"}
