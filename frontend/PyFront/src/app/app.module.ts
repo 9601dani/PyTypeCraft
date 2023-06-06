@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {CodeEditorModule} from "@ngstack/code-editor";
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -12,9 +13,9 @@ import {CodeEditorModule} from "@ngstack/code-editor";
   imports: [
     BrowserModule,
     AppRoutingModule,
-    CodeEditorModule.forRoot()
+    CodeEditorModule.forRoot(),
+    HttpClientModule
   ],
-  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,13 +1,20 @@
 <app-header></app-header>
-<div class="report-container">
+<div>
   <h1>Reportes del último análisis</h1>
   <p class="content">A continuación se muestran los reportes generados por el más reciente análisis.</p>
 
   <div class="btn-container">
     <div class="btns">
-      <button type="button" class="btn btn-primary btn-report">Reporte de errores</button>
-          <button type="button" class="btn btn-primary btn-report">Reporte de Tabla de símbolos</button>
-          <button type="button" class="btn btn-primary btn-report">AST</button>
+      <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.ERROR_REPORT)">Reporte de errores</button>
+      <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.TABLE_REPORT)">Reporte de Tabla de símbolos</button>
+      <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.AST_REPORT)">AST</button>
     </div>
   </div>
+
+  <div class="report-container">
+    <div *ngIf="reportType == ReportType.ERROR_REPORT"><app-error-report></app-error-report></div>
+    <div *ngIf="reportType == ReportType.TABLE_REPORT"><app-table-report></app-table-report></div>
+    <div *ngIf="reportType == ReportType.AST_REPORT"><app-ast-report></app-ast-report></div>
+  </div>
+
 </div>

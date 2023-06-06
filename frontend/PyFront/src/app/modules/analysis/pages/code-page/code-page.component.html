@@ -11,9 +11,9 @@
       [options]="options">
 
     </ngs-code-editor>
-    <button type="button" class="btn btn-primary btn-analisis">Analizar</button>
+    <button type="button" class="btn btn-primary btn-analisis" (click)="compile()">Analizar</button>
   </div>
   <div class="output">
-    <textarea class="out-area" cols="50" rows="15" readonly></textarea>
+    <textarea class="out-area" [value]="outValue" cols="50" rows="15" readonly></textarea>
   </div>
 </div>

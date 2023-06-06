@@ -18,3 +18,8 @@
 .btn-report{
   padding: 10px 45px;
 }
+
+.report-container{
+  width: 80%;
+  margin: 50px auto;
+}
