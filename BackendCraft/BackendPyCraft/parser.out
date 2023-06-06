@@ -1,0 +1,250 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    AND
+    ANY
+    BOOLEAN
+    BREAK
+    COLON
+    COMA
+    CONCAT
+    CONTINUE
+    DISTINTO_QUE
+    DIVIDE
+    DOBLE_IGUAL
+    ELSE
+    FOR
+    FUNCTION
+    IF
+    IGUAL
+    INTERFACE
+    LET
+    L_CORCHETE
+    L_LLAVE
+    MAS
+    MAYOR_IGUAL_QUE
+    MAYOR_QUE
+    MENOR_IGUAL_QUE
+    MENOR_QUE
+    MENOS
+    MOD
+    NOT
+    NULL
+    NUMBER
+    OR
+    RETURN
+    R_CORCHETE
+    R_LLAVE
+    SPLIT
+    STRING
+    TIMES
+    TOEXPONENTIAL
+    TOFIXED
+    TOLOWERCASE
+    TOSTRING
+    TOUPPERCASE
+    WHILE
+
+Grammar
+
+Rule 0     S' -> init
+Rule 1     init -> instrucciones
+Rule 2     instrucciones -> instrucciones instruccion
+Rule 3     instrucciones -> instruccion
+Rule 4     instruccion -> console_pro
+Rule 5     console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
+Rule 6     expresion -> CADENA
+Rule 7     expresion -> LITERAL
+
+Terminals, with rules where they appear
+
+AND                  : 
+ANY                  : 
+BOOLEAN              : 
+BREAK                : 
+CADENA               : 6
+COLON                : 
+COMA                 : 
+CONCAT               : 
+CONSOLE              : 5
+CONTINUE             : 
+DISTINTO_QUE         : 
+DIVIDE               : 
+DOBLE_IGUAL          : 
+ELSE                 : 
+FOR                  : 
+FUNCTION             : 
+IF                   : 
+IGUAL                : 
+INTERFACE            : 
+LET                  : 
+LITERAL              : 7
+LOG                  : 5
+L_CORCHETE           : 
+L_LLAVE              : 
+L_PAREN              : 5
+MAS                  : 
+MAYOR_IGUAL_QUE      : 
+MAYOR_QUE            : 
+MENOR_IGUAL_QUE      : 
+MENOR_QUE            : 
+MENOS                : 
+MOD                  : 
+NOT                  : 
+NULL                 : 
+NUMBER               : 
+OR                   : 
+PUNTO                : 5
+RETURN               : 
+R_CORCHETE           : 
+R_LLAVE              : 
+R_PAREN              : 5
+SEMI_COLON           : 5
+SPLIT                : 
+STRING               : 
+TIMES                : 
+TOEXPONENTIAL        : 
+TOFIXED              : 
+TOLOWERCASE          : 
+TOSTRING             : 
+TOUPPERCASE          : 
+WHILE                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+console_pro          : 4
+expresion            : 5
+init                 : 0
+instruccion          : 2 3
+instrucciones        : 1 2
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . init
+    (1) init -> . instrucciones
+    (2) instrucciones -> . instrucciones instruccion
+    (3) instrucciones -> . instruccion
+    (4) instruccion -> . console_pro
+    (5) console_pro -> . CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
+
+    CONSOLE         shift and go to state 5
+
+    init                           shift and go to state 1
+    instrucciones                  shift and go to state 2
+    instruccion                    shift and go to state 3
+    console_pro                    shift and go to state 4
+
+state 1
+
+    (0) S' -> init .
+
+
+
+state 2
+
+    (1) init -> instrucciones .
+    (2) instrucciones -> instrucciones . instruccion
+    (4) instruccion -> . console_pro
+    (5) console_pro -> . CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
+
+    $end            reduce using rule 1 (init -> instrucciones .)
+    CONSOLE         shift and go to state 5
+
+    instruccion                    shift and go to state 6
+    console_pro                    shift and go to state 4
+
+state 3
+
+    (3) instrucciones -> instruccion .
+
+    CONSOLE         reduce using rule 3 (instrucciones -> instruccion .)
+    $end            reduce using rule 3 (instrucciones -> instruccion .)
+
+
+state 4
+
+    (4) instruccion -> console_pro .
+
+    CONSOLE         reduce using rule 4 (instruccion -> console_pro .)
+    $end            reduce using rule 4 (instruccion -> console_pro .)
+
+
+state 5
+
+    (5) console_pro -> CONSOLE . PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
+
+    PUNTO           shift and go to state 7
+
+
+state 6
+
+    (2) instrucciones -> instrucciones instruccion .
+
+    CONSOLE         reduce using rule 2 (instrucciones -> instrucciones instruccion .)
+    $end            reduce using rule 2 (instrucciones -> instrucciones instruccion .)
+
+
+state 7
+
+    (5) console_pro -> CONSOLE PUNTO . LOG L_PAREN expresion R_PAREN SEMI_COLON
+
+    LOG             shift and go to state 8
+
+
+state 8
+
+    (5) console_pro -> CONSOLE PUNTO LOG . L_PAREN expresion R_PAREN SEMI_COLON
+
+    L_PAREN         shift and go to state 9
+
+
+state 9
+
+    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN . expresion R_PAREN SEMI_COLON
+    (6) expresion -> . CADENA
+    (7) expresion -> . LITERAL
+
+    CADENA          shift and go to state 11
+    LITERAL         shift and go to state 12
+
+    expresion                      shift and go to state 10
+
+state 10
+
+    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion . R_PAREN SEMI_COLON
+
+    R_PAREN         shift and go to state 13
+
+
+state 11
+
+    (6) expresion -> CADENA .
+
+    R_PAREN         reduce using rule 6 (expresion -> CADENA .)
+
+
+state 12
+
+    (7) expresion -> LITERAL .
+
+    R_PAREN         reduce using rule 7 (expresion -> LITERAL .)
+
+
+state 13
+
+    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN . SEMI_COLON
+
+    SEMI_COLON      shift and go to state 14
+
+
+state 14
+
+    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .
+
+    CONSOLE         reduce using rule 5 (console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .)
+    $end            reduce using rule 5 (console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .)
+

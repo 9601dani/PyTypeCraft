@@ -1,3 +1,5 @@
+
+import re
 import ply.lex as lex
 # here start grammar
 #--------------------------------------------------------------
@@ -23,7 +25,8 @@ reservadas ={
     '.split' : 'SPLIT',
     '.concat' : 'CONCAT',
     # Print Console
-    'console.log' : 'CONSOLELOG',
+    'console' : 'CONSOLE',
+    'log' : 'LOG',
     # Declaration
     'let' : 'LET',
     # Types Declaration
@@ -57,8 +60,6 @@ tokens = [
     'R_CORCHETE',
     'L_CORCHETE',
     # Operadores Aritmeticos
-    'MAS_MAS'
-    'MENOS_MENOS',
     'MAS',
     'MENOS',
     'MOD',
@@ -66,6 +67,7 @@ tokens = [
     'TIMES',
     'IGUAL',
     # Signos de Puntuacion
+    'PUNTO',
     'COLON',
     'SEMI_COLON',
     'COMA',
@@ -89,14 +91,13 @@ t_L_LLAVE = r'\{'
 t_R_LLAVE = r'\}'
 t_R_CORCHETE = r'\]'
 t_L_CORCHETE = r'\['
-t_MAS_MAS = r'\+\+'
-t_MENOS_MENOS = r'--'
 t_MAS = r'\+'
 t_MENOS = r'-'
 t_MOD = r'%'
 t_DIVIDE = r'/'
 t_TIMES = r'\*'
 t_IGUAL = r'='
+t_PUNTO = r'\.'
 t_COLON = r':'
 t_SEMI_COLON = r';'
 t_COMA = r','
@@ -162,7 +163,7 @@ def t_BOOLEANO(t):
 # Expresion Regular para literales
 def t_LITERAL(t):
     r'[a-zA-Z][a-zA-Z_0-9]*'
-    t.type = reservadas.get(t.value,'LITERAL)')
+    t.type = reservadas.get(t.value,'LITERAL')
     return t
 
 
@@ -188,6 +189,64 @@ def find_column(input, token):
     line_start = input.rfind('\n', 0, token.lexpos) + 1
     return (token.lexpos - line_start) + 1
 
+def t_error(t):
+    errores.append(Excepcion("Lexico","Error léxico." + t.value[0] , t.lexer.lineno, find_column(input, t)))
+    t.lexer.skip(1)
+
 # Se construye el analizador lexico
+import ply.lex as lex
 lexer = lex.lex(reflags= re.IGNORECASE)
 
+##GRAMATICA "CUP"
+import os
+def p_init(t):
+    'init            : instrucciones'
+    t[0] = t[1]
+
+def p_instrucciones_lista(t):
+    'instrucciones    : instrucciones instruccion'
+    if(t[2] != ""):
+        t[1].append(t[2])
+    t[0] = t[1]
+
+
+def p_instrucciones_instruccion(t):
+    'instrucciones    : instruccion'
+    if(t[1] == ""):
+        t[0] = []
+    else:
+        t[0] = [t[1]]
+
+def p_instruccion(t):
+    '''instruccion      : console_pro'''
+    t[0] = t[1]
+
+def p_instruccion_console(t):
+    '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON '''
+    #t[0] = ConsoleLog(t.lineno(1),find_column(input, t.slice[1]),t[3])
+    print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
+
+def p_instruccion_expresion(t):
+    '''expresion      : CADENA
+                      | LITERAL'''
+    t[0] = t[1]
+def p_error(t):
+    print("Error sintáctico en '%s'" % t.value+" "+ t.type)
+
+def test_lexer(lexer):
+    while True:
+        tok = lexer.token()
+        if not tok:
+            break  # No more input
+        print(tok)
+import ply.yacc as yacc
+def parse(input):
+    parser= yacc.yacc()
+    lexer.lineno = 1
+    return parser.parse(input)
+"""
+lexer.input('console.log')
+test_lexer(lexer)
+"""
+
+#parse('console.log("hola");')
