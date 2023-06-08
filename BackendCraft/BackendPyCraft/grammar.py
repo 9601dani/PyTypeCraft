@@ -288,7 +288,7 @@ def p_instruccion_declarationInstruction(t):
 
 def p_instruccion_declaracion_list(t):
     '''declaracion_list      : declaracion_list COMA assignacion_instruction'''
-    t[0].append(t[3])
+    [t[0]].append(t[3])
 
 def p_instruccion_declaracion_list2(t):
     '''declaracion_list      : assignacion_instruction'''
@@ -461,7 +461,8 @@ test_lexer(lexer)
 
 
 instruccion:[Instruction] =parse("""
-let edad: number = 18;
+let edad: number, edad1 = 18;
+edad= 19;
 
 if (edad < 18) {
     console.log("Eres menor de edad.");
