@@ -72,6 +72,7 @@ tokens = [
     'MOD',
     'DIVIDE',
     'TIMES',
+    'POTENCIA',
     'IGUAL',
     # Signos de Puntuacion
     'PUNTO',
@@ -105,6 +106,7 @@ t_MENOS = r'-'
 t_MOD = r'%'
 t_DIVIDE = r'/'
 t_TIMES = r'\*'
+t_POTENCIA = r'\^'
 t_IGUAL = r'='
 t_PUNTO = r'\.'
 t_COLON = r':'
@@ -212,6 +214,38 @@ from src.models.ConsoleLog import ConsoleLog
 from src.models.Instruction import Instruction
 from src.models.OperationType import OperationType
 from src.models.BinaryOperation import BinaryOperation
+
+def return_operation_type(operation_type):
+    if(operation_type== "OR"):
+        return OperationType.OR
+    elif(operation_type== "AND"):
+        return OperationType.AND
+    elif(operation_type== "NOT"):
+        return OperationType.NOT
+    elif(operation_type== "MAYOR_QUE"):
+        return OperationType.MAYOR_QUE
+    elif(operation_type== "MENOR_QUE"):
+        return OperationType.MENOR_QUE
+    elif(operation_type== "MAYOR_IGUAL_QUE"):
+        return OperationType.MAYOR_IGUAL_QUE
+    elif(operation_type== "MENOR_IGUAL_QUE"):
+        return OperationType.MENOR_IGUAL_QUE
+    elif(operation_type== "DISTINTO_QUE"):
+        return OperationType.DISTINTO_QUE
+    elif(operation_type== "MAS"):
+        return OperationType.MAS
+    elif(operation_type== "MENOS"):
+        return OperationType.MENOS
+    elif(operation_type== "TIMES"):
+        return OperationType.TIMES
+    elif(operation_type== "DIVIDE"):
+        return OperationType.DIVIDE
+    elif(operation_type== "MOD"):
+        return OperationType.MOD
+    elif(operation_type== "POTENCIA"):
+        return OperationType.POTENCIA
+
+
 def p_init(t):
     'init            : instrucciones'
     t[0] = t[1]
@@ -249,14 +283,14 @@ def p_instruccion_expresion2(t):
 
 def p_instruccion_expresion3(t):
     '''a      : a OR b'''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType.OR)
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], t[3], OperationType.OR)
 def p_instruccion_expresion4(t):
     '''a      : b'''
     t[0] = t[1]
 
 def p_instruccion_expresion5(t):
     ''' b      : b AND c'''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType.AND)
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], t[3], OperationType.AND)
 
 def p_instruccion_expresion6(t):
     ''' b      : c'''
@@ -277,7 +311,7 @@ def p_instruccion_expresion9(t):
                 | d MAYOR_QUE e
                 | d MAYOR_IGUAL_QUE e
                 | d TRIPLE_IGUAL e '''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
 
 def p_instruccion_expresion10(t):
     ''' d     : e '''
@@ -286,7 +320,7 @@ def p_instruccion_expresion10(t):
 def p_instruccion_expresion11(t):
     ''' e     : e MAS f
                 | e MENOS f '''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
 
 def p_instruccion_expresion12(t):
     ''' e     : f '''
@@ -295,16 +329,20 @@ def p_instruccion_expresion12(t):
 def p_instruccion_expresion13(t):
     ''' f     : f TIMES g
                 | f DIVIDE g
-                | f MOD g '''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+                | f MOD g
+                | f POTENCIA g'''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
 
 def p_instruccion_expresion14(t):
+    ''' f     : g '''
+    t[0] = t[1]
+def p_instruccion_expresion15(t):
     ''' g     : ENTERO
               | DECIMAL
               | CADENA'''
 
     t[0] = t[1]
-def p_instruccion_expresion15(t):
+def p_instruccion_expresion16(t):
     ''' g     : L_PAREN a R_PAREN'''
 
     t[0] = t[2]
@@ -334,5 +372,5 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion =parse('/*console.log("hola");*/ console.log("hola2");')
-print(f"""este es el arbol {(instruccion).__str__()}""")
+instruccion =parse('/*console.log("hola");*/ console.log(2^2);')
+print(f"""este es el arbol {(instruccion)}""")

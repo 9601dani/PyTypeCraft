@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AND ANY BOOLEAN BREAK CADENA COLON COMA CONCAT CONSOLE CONTINUE DISTINTO_QUE DIVIDE DOBLE_IGUAL ELSE FOR FUNCTION IF IGUAL INTERFACE LET LITERAL LOG L_CORCHETE L_LLAVE L_PAREN MAS MAYOR_IGUAL_QUE MAYOR_QUE MENOR_IGUAL_QUE MENOR_QUE MENOS MOD NOT NULL NUMBER OR PUNTO RETURN R_CORCHETE R_LLAVE R_PAREN SEMI_COLON SPLIT STRING TIMES TOEXPONENTIAL TOFIXED TOLOWERCASE TOSTRING TOUPPERCASE WHILEinit            : instruccionesinstrucciones    : instrucciones instruccioninstrucciones    : instruccioninstruccion      : console_proconsole_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON expresion      : CADENA\n                      | LITERAL'
+_lr_signature = 'AND ANY BOOLEAN BREAK CADENA COLON COMA CONCAT CONSOLE CONTINUE DECIMAL DISTINTO_QUE DIVIDE ELSE ENTERO FOR FUNCTION IF IGUAL INTERFACE LET LITERAL LOG L_CORCHETE L_LLAVE L_PAREN MAS MAYOR_IGUAL_QUE MAYOR_QUE MENOR_IGUAL_QUE MENOR_QUE MENOS MOD NOT NULL NUMBER OR POTENCIA PUNTO RETURN R_CORCHETE R_LLAVE R_PAREN SEMI_COLON SPLIT STRING TIMES TOEXPONENTIAL TOFIXED TOLOWERCASE TOSTRING TOUPPERCASE TRIPLE_IGUAL WHILEinit            : instruccionesinstrucciones    : instrucciones instruccioninstrucciones    : instruccioninstruccion      : console_proconsole_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON expresion      : expresion COMA aexpresion      : aa      : a OR ba      : b b      : b AND c b      : c c      : NOT d c      : d  d     : d DISTINTO_QUE e\n                | d MENOR_QUE e\n                | d MENOR_IGUAL_QUE e\n                | d MAYOR_QUE e\n                | d MAYOR_IGUAL_QUE e\n                | d TRIPLE_IGUAL e  d     : e  e     : e MAS f\n                | e MENOS f  e     : f  f     : f TIMES g\n                | f DIVIDE g\n                | f MOD g\n                | f POTENCIA g f     : g  g     : ENTERO\n              | DECIMAL\n              | CADENA g     : L_PAREN a R_PAREN'
     
-_lr_action_items = {'CONSOLE':([0,2,3,4,6,14,],[5,5,-3,-4,-2,-5,]),'$end':([1,2,3,4,6,14,],[0,-1,-3,-4,-2,-5,]),'PUNTO':([5,],[7,]),'LOG':([7,],[8,]),'L_PAREN':([8,],[9,]),'CADENA':([9,],[11,]),'LITERAL':([9,],[12,]),'R_PAREN':([10,11,12,],[13,-6,-7,]),'SEMI_COLON':([13,],[14,]),}
+_lr_action_items = {'CONSOLE':([0,2,3,4,6,42,],[5,5,-3,-4,-2,-5,]),'$end':([1,2,3,4,6,42,],[0,-1,-3,-4,-2,-5,]),'PUNTO':([5,],[7,]),'LOG':([7,],[8,]),'L_PAREN':([8,9,10,15,25,26,27,29,30,31,32,33,34,35,36,37,38,39,40,],[9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,]),'NOT':([9,10,25,26,27,],[15,15,15,15,15,]),'ENTERO':([9,10,15,25,26,27,29,30,31,32,33,34,35,36,37,38,39,40,],[20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,]),'DECIMAL':([9,10,15,25,26,27,29,30,31,32,33,34,35,36,37,38,39,40,],[21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,]),'CADENA':([9,10,15,25,26,27,29,30,31,32,33,34,35,36,37,38,39,40,],[22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,]),'R_PAREN':([11,12,13,14,16,17,18,19,20,21,22,23,28,41,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,],[24,-7,-9,-11,-13,-20,-23,-28,-29,-30,-31,41,-12,-32,-6,-8,-10,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'COMA':([11,12,13,14,16,17,18,19,20,21,22,28,41,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,],[25,-7,-9,-11,-13,-20,-23,-28,-29,-30,-31,-12,-32,-6,-8,-10,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'OR':([12,13,14,16,17,18,19,20,21,22,23,28,41,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,],[26,-9,-11,-13,-20,-23,-28,-29,-30,-31,26,-12,-32,26,-8,-10,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'AND':([13,14,16,17,18,19,20,21,22,28,41,44,45,46,47,48,49,50,51,52,53,54,55,56,57,],[27,-11,-13,-20,-23,-28,-29,-30,-31,-12,-32,27,-10,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'DISTINTO_QUE':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[29,-20,-23,-28,-29,-30,-31,29,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'MENOR_QUE':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[30,-20,-23,-28,-29,-30,-31,30,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'MENOR_IGUAL_QUE':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[31,-20,-23,-28,-29,-30,-31,31,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'MAYOR_QUE':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[32,-20,-23,-28,-29,-30,-31,32,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'MAYOR_IGUAL_QUE':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[33,-20,-23,-28,-29,-30,-31,33,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'TRIPLE_IGUAL':([16,17,18,19,20,21,22,28,41,46,47,48,49,50,51,52,53,54,55,56,57,],[34,-20,-23,-28,-29,-30,-31,34,-32,-14,-15,-16,-17,-18,-19,-21,-22,-24,-25,-26,-27,]),'MAS':([17,18,19,20,21,22,41,46,47,48,49,50,51,52,53,54,55,56,57,],[35,-23,-28,-29,-30,-31,-32,35,35,35,35,35,35,-21,-22,-24,-25,-26,-27,]),'MENOS':([17,18,19,20,21,22,41,46,47,48,49,50,51,52,53,54,55,56,57,],[36,-23,-28,-29,-30,-31,-32,36,36,36,36,36,36,-21,-22,-24,-25,-26,-27,]),'TIMES':([18,19,20,21,22,41,52,53,54,55,56,57,],[37,-28,-29,-30,-31,-32,37,37,-24,-25,-26,-27,]),'DIVIDE':([18,19,20,21,22,41,52,53,54,55,56,57,],[38,-28,-29,-30,-31,-32,38,38,-24,-25,-26,-27,]),'MOD':([18,19,20,21,22,41,52,53,54,55,56,57,],[39,-28,-29,-30,-31,-32,39,39,-24,-25,-26,-27,]),'POTENCIA':([18,19,20,21,22,41,52,53,54,55,56,57,],[40,-28,-29,-30,-31,-32,40,40,-24,-25,-26,-27,]),'SEMI_COLON':([24,],[42,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'init':([0,],[1,]),'instrucciones':([0,],[2,]),'instruccion':([0,2,],[3,6,]),'console_pro':([0,2,],[4,4,]),'expresion':([9,],[10,]),}
+_lr_goto_items = {'init':([0,],[1,]),'instrucciones':([0,],[2,]),'instruccion':([0,2,],[3,6,]),'console_pro':([0,2,],[4,4,]),'expresion':([9,],[11,]),'a':([9,10,25,],[12,23,43,]),'b':([9,10,25,26,],[13,13,13,44,]),'c':([9,10,25,26,27,],[14,14,14,14,45,]),'d':([9,10,15,25,26,27,],[16,16,28,16,16,16,]),'e':([9,10,15,25,26,27,29,30,31,32,33,34,],[17,17,17,17,17,17,46,47,48,49,50,51,]),'f':([9,10,15,25,26,27,29,30,31,32,33,34,35,36,],[18,18,18,18,18,18,18,18,18,18,18,18,52,53,]),'g':([9,10,15,25,26,27,29,30,31,32,33,34,35,36,37,38,39,40,],[19,19,19,19,19,19,19,19,19,19,19,19,19,19,54,55,56,57,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,11 +27,36 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> init","S'",1,None,None,None),
-  ('init -> instrucciones','init',1,'p_init','grammar.py',203),
-  ('instrucciones -> instrucciones instruccion','instrucciones',2,'p_instrucciones_lista','grammar.py',207),
-  ('instrucciones -> instruccion','instrucciones',1,'p_instrucciones_instruccion','grammar.py',214),
-  ('instruccion -> console_pro','instruccion',1,'p_instruccion','grammar.py',221),
-  ('console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON','console_pro',7,'p_instruccion_console','grammar.py',225),
-  ('expresion -> CADENA','expresion',1,'p_instruccion_expresion','grammar.py',229),
-  ('expresion -> LITERAL','expresion',1,'p_instruccion_expresion','grammar.py',230),
+  ('init -> instrucciones','init',1,'p_init','grammar.py',250),
+  ('instrucciones -> instrucciones instruccion','instrucciones',2,'p_instrucciones_lista','grammar.py',254),
+  ('instrucciones -> instruccion','instrucciones',1,'p_instrucciones_instruccion','grammar.py',261),
+  ('instruccion -> console_pro','instruccion',1,'p_instruccion','grammar.py',268),
+  ('console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON','console_pro',7,'p_instruccion_console','grammar.py',272),
+  ('expresion -> expresion COMA a','expresion',3,'p_instruccion_expresion','grammar.py',277),
+  ('expresion -> a','expresion',1,'p_instruccion_expresion2','grammar.py',280),
+  ('a -> a OR b','a',3,'p_instruccion_expresion3','grammar.py',285),
+  ('a -> b','a',1,'p_instruccion_expresion4','grammar.py',288),
+  ('b -> b AND c','b',3,'p_instruccion_expresion5','grammar.py',292),
+  ('b -> c','b',1,'p_instruccion_expresion6','grammar.py',296),
+  ('c -> NOT d','c',2,'p_instruccion_expresion7','grammar.py',300),
+  ('c -> d','c',1,'p_instruccion_expresion8','grammar.py',304),
+  ('d -> d DISTINTO_QUE e','d',3,'p_instruccion_expresion9','grammar.py',308),
+  ('d -> d MENOR_QUE e','d',3,'p_instruccion_expresion9','grammar.py',309),
+  ('d -> d MENOR_IGUAL_QUE e','d',3,'p_instruccion_expresion9','grammar.py',310),
+  ('d -> d MAYOR_QUE e','d',3,'p_instruccion_expresion9','grammar.py',311),
+  ('d -> d MAYOR_IGUAL_QUE e','d',3,'p_instruccion_expresion9','grammar.py',312),
+  ('d -> d TRIPLE_IGUAL e','d',3,'p_instruccion_expresion9','grammar.py',313),
+  ('d -> e','d',1,'p_instruccion_expresion10','grammar.py',317),
+  ('e -> e MAS f','e',3,'p_instruccion_expresion11','grammar.py',321),
+  ('e -> e MENOS f','e',3,'p_instruccion_expresion11','grammar.py',322),
+  ('e -> f','e',1,'p_instruccion_expresion12','grammar.py',326),
+  ('f -> f TIMES g','f',3,'p_instruccion_expresion13','grammar.py',330),
+  ('f -> f DIVIDE g','f',3,'p_instruccion_expresion13','grammar.py',331),
+  ('f -> f MOD g','f',3,'p_instruccion_expresion13','grammar.py',332),
+  ('f -> f POTENCIA g','f',3,'p_instruccion_expresion13','grammar.py',333),
+  ('f -> g','f',1,'p_instruccion_expresion14','grammar.py',337),
+  ('g -> ENTERO','g',1,'p_instruccion_expresion15','grammar.py',340),
+  ('g -> DECIMAL','g',1,'p_instruccion_expresion15','grammar.py',341),
+  ('g -> CADENA','g',1,'p_instruccion_expresion15','grammar.py',342),
+  ('g -> L_PAREN a R_PAREN','g',3,'p_instruccion_expresion16','grammar.py',346),
 ]

@@ -14,3 +14,6 @@ class Instruction(ABC):
     @abstractmethod
     def accept(self, visitor):
         pass
+
+    def __str__(self):
+        return f"""{{"Instruction": {self.line} {self.column}}}"""
