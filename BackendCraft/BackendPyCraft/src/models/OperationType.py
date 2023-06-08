@@ -13,5 +13,7 @@ class OperationType:
     DIVIDE = "DIVIDE",
     TIMES = "TIMES",
     POTENCIA = "POTENCIA",
+    INCREMENT= "INCREMENT",
+    DECREMENT = "DECREMENT",
 
 

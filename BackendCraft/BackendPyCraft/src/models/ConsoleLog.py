@@ -5,7 +5,7 @@ class ConsoleLog(Instruction):
     def accept(self, visitor):
         return visitor.visit_console_log(self)
 
-    def __init__(self, line, column, value: []):
+    def __init__(self, line, column, value: [Instruction]):
         super().__init__(line, column)
         self.value = value
 

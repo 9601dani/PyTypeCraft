@@ -213,7 +213,15 @@ import os
 from src.models.ConsoleLog import ConsoleLog
 from src.models.Instruction import Instruction
 from src.models.OperationType import OperationType
+from src.models.VariableType import VariableType
 from src.models.BinaryOperation import BinaryOperation
+from src.models.UnaryOperation import UnaryOperation
+from src.models.Declaration import Declaration
+from src.models.Assignment import Assignment
+from src.models.OnlyAssignment import OnlyAssignment
+from src.models.IfState import IfState
+from src.models.ElseState import ElseState
+from src.models.WhileState import WhileState
 
 def return_operation_type(operation_type):
     if(operation_type== "OR"):
@@ -265,9 +273,79 @@ def p_instrucciones_instruccion(t):
         t[0] = [t[1]]
 
 def p_instruccion(t):
-    '''instruccion      : console_pro'''
+    '''instruccion      : console_pro
+                        | declaration_instruction
+                        | assig_pro
+                        | if_pro
+                        | while_pro
+                        | sumadores SEMI_COLON'''
     t[0] = t[1]
 
+############################################## DECLARACION DE VARIABLE ##############################################
+def p_instruccion_declarationInstruction(t):
+    '''declaration_instruction      : LET declaracion_list SEMI_COLON'''
+    t[0] = Declaration(t.lineno(1),find_column(input, t.slice[1]),"LET",t[3])
+
+def p_instruccion_declaracion_list(t):
+    '''declaracion_list      : declaracion_list COMA assignacion_instruction'''
+    t[0].append(t[3])
+
+def p_instruccion_declaracion_list2(t):
+    '''declaracion_list      : assignacion_instruction'''
+    t[0] = []
+    t[0].append(t[1])
+
+def p_instruccion_assignacion_instruction(t):
+    '''assignacion_instruction      : LITERAL COLON type IGUAL a'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],t[5])
+
+def p_instruccion_assingnacion_instruction2(t):
+    '''assignacion_instruction      : LITERAL COLON type'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],None)
+
+def p_instruccion_assignacion_instruction3(t):
+    '''assignacion_instruction      : LITERAL IGUAL a'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,t[3])
+def p_instruccion_type(t):
+    '''type      : NUMBER
+                 | STRING
+                 | BOOLEAN
+                 | ANY '''
+    t[0] = t[1]
+############################################## ASIGNACION DE VARIABLE ##############################################
+def p_instruccion_assig_pro(t):
+    '''assig_pro      : LITERAL IGUAL a SEMI_COLON'''
+    t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType.DEFINIRLA,t[3])
+############################################## IF ##############################################
+def p_instruccion_if_pro(t):
+    '''if_pro      : IF L_PAREN a R_PAREN L_LLAVE instrucciones R_LLAVE else_pro'''
+    t[0] = IfState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[6],t[8])
+
+#CONTENPLAR LA IDEA QUE instrucciones PUEDE VENIR VACIO
+############################################## ELSE ##############################################
+def p_instruccion_else_pro(t):
+    '''else_pro      : ELSE IF L_PAREN a R_PAREN L_LLAVE instrucciones R_LLAVE else_pro'''
+    t[0] = IfState(t.lineno(1),find_column(input, t.slice[1]),t[4],t[7],t[9])
+
+def p_instruccion_else_pro2(t):
+    '''else_pro      : ELSE L_LLAVE instrucciones R_LLAVE'''
+    t[0] = ElseState(t.lineno(1),find_column(input, t.slice[1]),t[3])
+
+def p_instruccion_else_pro3(t):
+    '''else_pro      : '''
+    t[0] = None
+
+############################################## WHILE ##############################################
+def p_instruccion_while_pro(t):
+    '''while_pro      : WHILE L_PAREN a R_PAREN L_LLAVE instrucciones R_LLAVE'''
+    t[0] = WhileState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[6])
+
+############################################## FOR ##############################################
+#def p_instruccion_for_pro(t):
+ #   '''for_pro      : FOR L_PAREN declaration_instruction SEMI_COLON a SEMI_COLON assignmentInDec R_PAREN L_LLAVE instrucciones R_LLAVE'''
+  #  t[0] = ForState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[6])
+
+############################################## CONSOLE.LOG ##############################################
 def p_instruccion_console(t):
     '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON '''
     t[0] = ConsoleLog (t.lineno(1),find_column(input, t.slice[1]),t[5])
@@ -283,14 +361,14 @@ def p_instruccion_expresion2(t):
 
 def p_instruccion_expresion3(t):
     '''a      : a OR b'''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], t[3], OperationType.OR)
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], OperationType.OR)
 def p_instruccion_expresion4(t):
     '''a      : b'''
     t[0] = t[1]
 
 def p_instruccion_expresion5(t):
     ''' b      : b AND c'''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], t[3], OperationType.AND)
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], OperationType.AND)
 
 def p_instruccion_expresion6(t):
     ''' b      : c'''
@@ -298,7 +376,7 @@ def p_instruccion_expresion6(t):
 
 def p_instruccion_expresion7(t):
     ''' c      : NOT d'''
-    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], OperationType.NOT)
+    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[2], OperationType.NOT)
 
 def p_instruccion_expresion8(t):
     ''' c      : d '''
@@ -336,16 +414,26 @@ def p_instruccion_expresion13(t):
 def p_instruccion_expresion14(t):
     ''' f     : g '''
     t[0] = t[1]
+
 def p_instruccion_expresion15(t):
     ''' g     : ENTERO
               | DECIMAL
-              | CADENA'''
+              | CADENA
+              | LITERAL'''
 
     t[0] = t[1]
 def p_instruccion_expresion16(t):
     ''' g     : L_PAREN a R_PAREN'''
 
     t[0] = t[2]
+
+def p_instruccion_sumadores(t):
+        ''' sumadores     : LITERAL MAS MAS
+                          | LITERAL MENOS MENOS '''
+        if(t[2] == "MAS"):
+            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.INCREMENT)
+        else:
+            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.DECREMENT)
 
 
 
@@ -372,5 +460,21 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion =parse('/*console.log("hola");*/ console.log(2^2);')
-print(f"""este es el arbol {(instruccion)}""")
+instruccion:[Instruction] =parse("""
+let edad: number = 18;
+
+if (edad < 18) {
+    console.log("Eres menor de edad.");
+} else if (edad >= 18 && edad < 60) {
+    console.log("Eres adulto.");
+} else {
+    console.log("Eres un adulto mayor.");
+}
+while (contador <= 5) {
+    console.log("Contador: " + contador);
+    contador++;
+}
+""")
+
+for i in instruccion:
+    print(str(type(i)).__str__())

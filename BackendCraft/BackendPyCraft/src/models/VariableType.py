@@ -5,3 +5,4 @@ class VariableType:
     ANY = "ANY"
     NULL = "NULL"
     ARRAY = "ARRAY"
+    DEFINIRLA = "DEFINIRLA"
