@@ -1,6 +1,9 @@
 
 import re
 import ply.lex as lex
+from src.models.ForEachState import ForEachState
+from src.models.ForState import ForState
+
 # here start grammar
 #--------------------------------------------------------------
 # 04-06-2023: Created by Daniel Morales
@@ -12,7 +15,8 @@ reservadas ={
     'if' : 'IF',
     'else' : 'ELSE',
     # Loops
-    'for ' : 'FOR',
+    'for' : 'FOR',
+    'of' : 'OF',
     'while' : 'WHILE',
     'continue' : 'CONTINUE',
     'break' : 'BREAK',
@@ -201,7 +205,7 @@ def find_column(inp, token):
     return (token.lexpos - line_start) + 1
 
 def t_error(t):
-    errores.append(Excepcion("Lexico","Error léxico." + t.value[0] , t.lexer.lineno, find_column(input, t)))
+    #errores.append(Excepcion("Lexico","Error léxico." + t.value[0] , t.lexer.lineno, find_column(input, t)))
     t.lexer.skip(1)
 
 # Se construye el analizador lexico
@@ -273,18 +277,20 @@ def p_instrucciones_instruccion(t):
         t[0] = [t[1]]
 
 def p_instruccion(t):
-    '''instruccion      : console_pro
-                        | declaration_instruction
-                        | assig_pro
+    '''instruccion      : console_pro SEMI_COLON
+                        | declaration_instruction SEMI_COLON
+                        | assig_pro SEMI_COLON
                         | if_pro
                         | while_pro
+                        | for_pro
+                        | for_each_pro
                         | sumadores SEMI_COLON'''
     t[0] = t[1]
 
 ############################################## DECLARACION DE VARIABLE ##############################################
 def p_instruccion_declarationInstruction(t):
-    '''declaration_instruction      : LET declaracion_list SEMI_COLON'''
-    t[0] = Declaration(t.lineno(1),find_column(input, t.slice[1]),"LET",t[3])
+    '''declaration_instruction      : LET declaracion_list'''
+    t[0] = Declaration(t.lineno(1),find_column(input, t.slice[1]),"LET",t[2])
 
 def p_instruccion_declaracion_list(t):
     '''declaracion_list      : declaracion_list COMA assignacion_instruction'''
@@ -314,7 +320,7 @@ def p_instruccion_type(t):
     t[0] = t[1]
 ############################################## ASIGNACION DE VARIABLE ##############################################
 def p_instruccion_assig_pro(t):
-    '''assig_pro      : LITERAL IGUAL a SEMI_COLON'''
+    '''assig_pro      : LITERAL IGUAL a'''
     t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType.DEFINIRLA,t[3])
 ############################################## IF ##############################################
 def p_instruccion_if_pro(t):
@@ -341,13 +347,27 @@ def p_instruccion_while_pro(t):
     t[0] = WhileState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[6])
 
 ############################################## FOR ##############################################
-#def p_instruccion_for_pro(t):
- #   '''for_pro      : FOR L_PAREN declaration_instruction SEMI_COLON a SEMI_COLON assignmentInDec R_PAREN L_LLAVE instrucciones R_LLAVE'''
-  #  t[0] = ForState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[6])
+def p_instruccion_for_pro(t):
+    '''for_pro      : FOR L_PAREN declaration_instruction SEMI_COLON a SEMI_COLON assig_pro R_PAREN L_LLAVE instrucciones R_LLAVE
+                    | FOR L_PAREN assig_pro SEMI_COLON a SEMI_COLON assig_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
+
+    t[0] = ForState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[5],t[7],t[10])
+
+############################################## FOR EACH ##############################################
+
+def p_instruccion_for_each_pro(t):
+    '''for_each_pro : FOR L_PAREN for_each_dec R_PAREN L_LLAVE instrucciones R_LLAVE'''
+
+def p_instruccion_fore_dec(t):
+    '''for_each_dec : LET LITERAL OF a'''
+
+def p_instruccion_fore_dec_type(t):
+    '''for_each_dec : LET LITERAL COLON type OF a'''
+
 
 ############################################## CONSOLE.LOG ##############################################
 def p_instruccion_console(t):
-    '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON '''
+    '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN'''
     t[0] = ConsoleLog (t.lineno(1),find_column(input, t.slice[1]),t[5])
     print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
 
@@ -460,7 +480,7 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion:[Instruction] =parse("""
+instruccion : [Instruction] =parse("""
 let edad: number, edad1 = 18;
 edad= 19;
 
@@ -475,6 +495,25 @@ while (contador <= 5) {
     console.log("Contador: " + contador);
     contador++;
 }
+
+console.log("todo  nice");
+
+for (let i = 0; i < 10; i = i +1){
+    console.log("a");
+}
+
+for (i = 0; i < 10; i = i +1){
+    console.log("a");
+}
+
+for(let letra:string of "hola mundo") {
+    console.log("for each ezzzz");
+}
+
+for(let letra of cadena) {
+    console.log("for each ezzzz");
+}
+
 """)
 
 for i in instruccion:
