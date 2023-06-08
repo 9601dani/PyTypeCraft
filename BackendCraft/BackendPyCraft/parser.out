@@ -2,17 +2,12 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
-    AND
     ANY
     BOOLEAN
     BREAK
     COLON
-    COMA
     CONCAT
     CONTINUE
-    DISTINTO_QUE
-    DIVIDE
-    DOBLE_IGUAL
     ELSE
     FOR
     FUNCTION
@@ -20,25 +15,16 @@ Unused terminals:
     IGUAL
     INTERFACE
     LET
+    LITERAL
     L_CORCHETE
     L_LLAVE
-    MAS
-    MAYOR_IGUAL_QUE
-    MAYOR_QUE
-    MENOR_IGUAL_QUE
-    MENOR_QUE
-    MENOS
-    MOD
-    NOT
     NULL
     NUMBER
-    OR
     RETURN
     R_CORCHETE
     R_LLAVE
     SPLIT
     STRING
-    TIMES
     TOEXPONENTIAL
     TOFIXED
     TOLOWERCASE
@@ -54,197 +40,101 @@ Rule 2     instrucciones -> instrucciones instruccion
 Rule 3     instrucciones -> instruccion
 Rule 4     instruccion -> console_pro
 Rule 5     console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
-Rule 6     expresion -> CADENA
-Rule 7     expresion -> LITERAL
+Rule 6     expresion -> expresion COMA a
+Rule 7     expresion -> a
+Rule 8     a -> a OR b
+Rule 9     a -> b
+Rule 10    b -> b AND c
+Rule 11    b -> c
+Rule 12    c -> NOT d
+Rule 13    c -> d
+Rule 14    d -> d DISTINTO_QUE e
+Rule 15    d -> d MENOR_QUE e
+Rule 16    d -> d MENOR_IGUAL_QUE e
+Rule 17    d -> d MAYOR_QUE e
+Rule 18    d -> d MAYOR_IGUAL_QUE e
+Rule 19    d -> d TRIPLE_IGUAL e
+Rule 20    d -> e
+Rule 21    e -> e MAS f
+Rule 22    e -> e MENOS f
+Rule 23    e -> f
+Rule 24    f -> f TIMES g
+Rule 25    f -> f DIVIDE g
+Rule 26    f -> f MOD g
+Rule 27    g -> ENTERO
+Rule 28    g -> DECIMAL
+Rule 29    g -> CADENA
+Rule 30    g -> L_PAREN a R_PAREN
 
 Terminals, with rules where they appear
 
-AND                  : 
+AND                  : 10
 ANY                  : 
 BOOLEAN              : 
 BREAK                : 
-CADENA               : 6
+CADENA               : 29
 COLON                : 
-COMA                 : 
+COMA                 : 6
 CONCAT               : 
 CONSOLE              : 5
 CONTINUE             : 
-DISTINTO_QUE         : 
-DIVIDE               : 
-DOBLE_IGUAL          : 
+DECIMAL              : 28
+DISTINTO_QUE         : 14
+DIVIDE               : 25
 ELSE                 : 
+ENTERO               : 27
 FOR                  : 
 FUNCTION             : 
 IF                   : 
 IGUAL                : 
 INTERFACE            : 
 LET                  : 
-LITERAL              : 7
+LITERAL              : 
 LOG                  : 5
 L_CORCHETE           : 
 L_LLAVE              : 
-L_PAREN              : 5
-MAS                  : 
-MAYOR_IGUAL_QUE      : 
-MAYOR_QUE            : 
-MENOR_IGUAL_QUE      : 
-MENOR_QUE            : 
-MENOS                : 
-MOD                  : 
-NOT                  : 
+L_PAREN              : 5 30
+MAS                  : 21
+MAYOR_IGUAL_QUE      : 18
+MAYOR_QUE            : 17
+MENOR_IGUAL_QUE      : 16
+MENOR_QUE            : 15
+MENOS                : 22
+MOD                  : 26
+NOT                  : 12
 NULL                 : 
 NUMBER               : 
-OR                   : 
+OR                   : 8
 PUNTO                : 5
 RETURN               : 
 R_CORCHETE           : 
 R_LLAVE              : 
-R_PAREN              : 5
+R_PAREN              : 5 30
 SEMI_COLON           : 5
 SPLIT                : 
 STRING               : 
-TIMES                : 
+TIMES                : 24
 TOEXPONENTIAL        : 
 TOFIXED              : 
 TOLOWERCASE          : 
 TOSTRING             : 
 TOUPPERCASE          : 
+TRIPLE_IGUAL         : 19
 WHILE                : 
 error                : 
 
 Nonterminals, with rules where they appear
 
+a                    : 6 7 8 30
+b                    : 8 9 10
+c                    : 10 11
 console_pro          : 4
-expresion            : 5
+d                    : 12 13 14 15 16 17 18 19
+e                    : 14 15 16 17 18 19 20 21 22
+expresion            : 5 6
+f                    : 21 22 23 24 25 26
+g                    : 24 25 26
 init                 : 0
 instruccion          : 2 3
 instrucciones        : 1 2
-
-Parsing method: LALR
-
-state 0
-
-    (0) S' -> . init
-    (1) init -> . instrucciones
-    (2) instrucciones -> . instrucciones instruccion
-    (3) instrucciones -> . instruccion
-    (4) instruccion -> . console_pro
-    (5) console_pro -> . CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
-
-    CONSOLE         shift and go to state 5
-
-    init                           shift and go to state 1
-    instrucciones                  shift and go to state 2
-    instruccion                    shift and go to state 3
-    console_pro                    shift and go to state 4
-
-state 1
-
-    (0) S' -> init .
-
-
-
-state 2
-
-    (1) init -> instrucciones .
-    (2) instrucciones -> instrucciones . instruccion
-    (4) instruccion -> . console_pro
-    (5) console_pro -> . CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
-
-    $end            reduce using rule 1 (init -> instrucciones .)
-    CONSOLE         shift and go to state 5
-
-    instruccion                    shift and go to state 6
-    console_pro                    shift and go to state 4
-
-state 3
-
-    (3) instrucciones -> instruccion .
-
-    CONSOLE         reduce using rule 3 (instrucciones -> instruccion .)
-    $end            reduce using rule 3 (instrucciones -> instruccion .)
-
-
-state 4
-
-    (4) instruccion -> console_pro .
-
-    CONSOLE         reduce using rule 4 (instruccion -> console_pro .)
-    $end            reduce using rule 4 (instruccion -> console_pro .)
-
-
-state 5
-
-    (5) console_pro -> CONSOLE . PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON
-
-    PUNTO           shift and go to state 7
-
-
-state 6
-
-    (2) instrucciones -> instrucciones instruccion .
-
-    CONSOLE         reduce using rule 2 (instrucciones -> instrucciones instruccion .)
-    $end            reduce using rule 2 (instrucciones -> instrucciones instruccion .)
-
-
-state 7
-
-    (5) console_pro -> CONSOLE PUNTO . LOG L_PAREN expresion R_PAREN SEMI_COLON
-
-    LOG             shift and go to state 8
-
-
-state 8
-
-    (5) console_pro -> CONSOLE PUNTO LOG . L_PAREN expresion R_PAREN SEMI_COLON
-
-    L_PAREN         shift and go to state 9
-
-
-state 9
-
-    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN . expresion R_PAREN SEMI_COLON
-    (6) expresion -> . CADENA
-    (7) expresion -> . LITERAL
-
-    CADENA          shift and go to state 11
-    LITERAL         shift and go to state 12
-
-    expresion                      shift and go to state 10
-
-state 10
-
-    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion . R_PAREN SEMI_COLON
-
-    R_PAREN         shift and go to state 13
-
-
-state 11
-
-    (6) expresion -> CADENA .
-
-    R_PAREN         reduce using rule 6 (expresion -> CADENA .)
-
-
-state 12
-
-    (7) expresion -> LITERAL .
-
-    R_PAREN         reduce using rule 7 (expresion -> LITERAL .)
-
-
-state 13
-
-    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN . SEMI_COLON
-
-    SEMI_COLON      shift and go to state 14
-
-
-state 14
-
-    (5) console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .
-
-    CONSOLE         reduce using rule 5 (console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .)
-    $end            reduce using rule 5 (console_pro -> CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON .)
 

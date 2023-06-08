@@ -17,13 +17,20 @@ reservadas ={
     'continue' : 'CONTINUE',
     'break' : 'BREAK',
     # Natives Functions
-    '.toString' : 'TOSTRING',
-    '.tofixed' : 'TOFIXED',
-    '.toExponential' : 'TOEXPONENTIAL',
-    '.toLowercase' : 'TOLOWERCASE',
-    '.toUppercase' : 'TOUPPERCASE',
-    '.split' : 'SPLIT',
-    '.concat' : 'CONCAT',
+    #'.toString' : 'TOSTRING',
+    #'.tofixed' : 'TOFIXED',
+    #'.toExponential' : 'TOEXPONENTIAL',
+    #'.toLowercase' : 'TOLOWERCASE',
+    #'.toUppercase' : 'TOUPPERCASE',
+    #'.split' : 'SPLIT',
+    #'.concat' : 'CONCAT',
+    'toString' : 'TOSTRING',
+    'tofixed' : 'TOFIXED',
+    'toExponential' : 'TOEXPONENTIAL',
+    'toLowercase' : 'TOLOWERCASE',
+    'toUppercase' : 'TOUPPERCASE',
+    'split' : 'SPLIT',
+    'concat' : 'CONCAT',
     # Print Console
     'console' : 'CONSOLE',
     'log' : 'LOG',
@@ -43,7 +50,7 @@ reservadas ={
 }
 tokens = [
     # Operadores Booleanos
-    'DOBLE_IGUAL',
+    'TRIPLE_IGUAL',
     'MENOR_IGUAL_QUE',
     'MAYOR_IGUAL_QUE',
     'MENOR_QUE',
@@ -73,10 +80,12 @@ tokens = [
     'COMA',
     'CADENA',
     'LITERAL',
+    'ENTERO',
+    'DECIMAL',
 ] + list(reservadas.values())
 
 # Tokens
-t_DOBLE_IGUAL = r'=='
+t_TRIPLE_IGUAL = r'==='
 t_MENOR_IGUAL_QUE = r'<='
 t_MAYOR_IGUAL_QUE = r'>='
 t_MENOR_QUE = r'<'
@@ -169,12 +178,12 @@ def t_LITERAL(t):
 
 # Expresion Regular para comentarios multilinea
 def t_COMENTARIO_MULTILINEA(t):
-    r'\#\*(.|\n)*?\*\#'
+    r'\/\*(.|\n)*?\*\/'
     t.lexer.lineno += t.value.count('\n')
 
 # Expresion Regular para comentarios simple
 def t_COMENTARIO_SIMPLE(t):
-    r'\#.*\n'
+    r'\/\/.*'
     t.lexer.lineno += 1
 
 # ignorar espacios
@@ -185,8 +194,8 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 # Manejo de columna
-def find_column(input, token):
-    line_start = input.rfind('\n', 0, token.lexpos) + 1
+def find_column(inp, token):
+    line_start = str(inp).rfind('\n', 0, token.lexpos) + 1
     return (token.lexpos - line_start) + 1
 
 def t_error(t):
@@ -199,6 +208,10 @@ lexer = lex.lex(reflags= re.IGNORECASE)
 
 ##GRAMATICA "CUP"
 import os
+from src.models.ConsoleLog import ConsoleLog
+from src.models.Instruction import Instruction
+from src.models.OperationType import OperationType
+from src.models.BinaryOperation import BinaryOperation
 def p_init(t):
     'init            : instrucciones'
     t[0] = t[1]
@@ -223,13 +236,81 @@ def p_instruccion(t):
 
 def p_instruccion_console(t):
     '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN SEMI_COLON '''
-    #t[0] = ConsoleLog(t.lineno(1),find_column(input, t.slice[1]),t[3])
+    t[0] = ConsoleLog (t.lineno(1),find_column(input, t.slice[1]),t[5])
     print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
 
 def p_instruccion_expresion(t):
-    '''expresion      : CADENA
-                      | LITERAL'''
+    '''expresion      : expresion COMA a'''
+    t[0].append(t[3])
+def p_instruccion_expresion2(t):
+    '''expresion      : a'''
+    t[0] = []
+    t[0].append(t[1])
+
+def p_instruccion_expresion3(t):
+    '''a      : a OR b'''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType.OR)
+def p_instruccion_expresion4(t):
+    '''a      : b'''
     t[0] = t[1]
+
+def p_instruccion_expresion5(t):
+    ''' b      : b AND c'''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType.AND)
+
+def p_instruccion_expresion6(t):
+    ''' b      : c'''
+    t[0] = t[1]
+
+def p_instruccion_expresion7(t):
+    ''' c      : NOT d'''
+    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], OperationType.NOT)
+
+def p_instruccion_expresion8(t):
+    ''' c      : d '''
+    t[0] = t[1]
+
+def p_instruccion_expresion9(t):
+    ''' d     : d DISTINTO_QUE e
+                | d MENOR_QUE e
+                | d MENOR_IGUAL_QUE e
+                | d MAYOR_QUE e
+                | d MAYOR_IGUAL_QUE e
+                | d TRIPLE_IGUAL e '''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+
+def p_instruccion_expresion10(t):
+    ''' d     : e '''
+    t[0] = t[1]
+
+def p_instruccion_expresion11(t):
+    ''' e     : e MAS f
+                | e MENOS f '''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+
+def p_instruccion_expresion12(t):
+    ''' e     : f '''
+    t[0] = t[1]
+
+def p_instruccion_expresion13(t):
+    ''' f     : f TIMES g
+                | f DIVIDE g
+                | f MOD g '''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], t[3], OperationType(t[2]))
+
+def p_instruccion_expresion14(t):
+    ''' g     : ENTERO
+              | DECIMAL
+              | CADENA'''
+
+    t[0] = t[1]
+def p_instruccion_expresion15(t):
+    ''' g     : L_PAREN a R_PAREN'''
+
+    t[0] = t[2]
+
+
+
 def p_error(t):
     print("Error sintáctico en '%s'" % t.value+" "+ t.type)
 
@@ -240,13 +321,18 @@ def test_lexer(lexer):
             break  # No more input
         print(tok)
 import ply.yacc as yacc
-def parse(input):
+def parse(inp):
+    global parser
+    global lexer
+    lexer = lex.lex(reflags=re.IGNORECASE)
     parser= yacc.yacc()
     lexer.lineno = 1
-    return parser.parse(input)
-"""
-lexer.input('console.log')
-test_lexer(lexer)
-"""
+    return parser.parse(inp)
 
-#parse('console.log("hola");')
+lexer.input('''
+console.log(3+5);''')
+test_lexer(lexer)
+
+
+instruccion =parse('/*console.log("hola");*/ console.log("hola2");')
+print(f"""este es el arbol {(instruccion).__str__()}""")

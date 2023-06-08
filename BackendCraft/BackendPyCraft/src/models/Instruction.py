@@ -12,9 +12,5 @@ class Instruction(ABC):
 
     # Methods to be implemented Visitor
     @abstractmethod
-    def run(self, table):
-        pass
-
-    @abstractmethod
     def accept(self, visitor):
         pass

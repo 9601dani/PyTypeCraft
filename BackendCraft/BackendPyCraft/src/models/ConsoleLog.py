@@ -1,15 +1,15 @@
-from PyTypeCraft.BackendCraft.BackendPyCraft.src.models.Instruction import Instruction
+from .Instruction import Instruction
 
 
 class ConsoleLog(Instruction):
-    def run(self, table):
-        pass
-
     def accept(self, visitor):
-        pass
+        return visitor.visit_console_log(self)
 
     def __init__(self, line, column, value: []):
         super().__init__(line, column)
         self.value = value
-        print("Constructor* "+self.value, self.line, self.column)
+
+
+    def __str__(self):
+        return f"""{{"console.log": {self.value}}}"""
 
