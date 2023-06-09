@@ -344,25 +344,26 @@ def p_instruccion_declaracion_list2(t):
 
 def p_instruccion_assignacion_instruction(t):
     '''assignacion_instruction      : LITERAL COLON type IGUAL a'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],t[5])
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),t[5], False)
 
 def p_instruccion_assingnacion_instruction2(t):
     '''assignacion_instruction      : LITERAL COLON type'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],None)
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),None,False)
 
 def p_instruccion_assignacion_instruction3(t):
     '''assignacion_instruction      : LITERAL IGUAL a'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,t[3])
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,t[3], True)
 def p_instruccion_type(t):
     '''type      : NUMBER
                  | STRING
                  | BOOLEAN
-                 | ANY '''
+                 | ANY
+                 | LITERAL'''
     t[0] = t[1]
 ############################################## ASIGNACION DE VARIABLE ##############################################
 def p_instruccion_assig_pro(t):
     '''assig_pro      : LITERAL IGUAL a'''
-    t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType.DEFINIRLA,t[3])
+    t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType().buscar_type("DEFINIRLA"),t[3])
 ############################################## IF ##############################################
 def p_instruccion_if_pro(t):
     '''if_pro      : IF L_PAREN a R_PAREN L_LLAVE instrucciones R_LLAVE else_pro'''
@@ -590,7 +591,7 @@ interface Carro {
     color: string;
 };
 
-let c1: string = {
+let c1: Carro = {
     placa: "P0S22",
     color: "verde"
 };

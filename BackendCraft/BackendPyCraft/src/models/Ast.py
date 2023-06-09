@@ -4,7 +4,7 @@ class Ast:
     # instance from singleton
     _instance = None
 
-    # singleton, the method __new__ is called when the object is created
+    # singleton
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(Ast, cls).__new__(cls, *args, **kwargs)
