@@ -302,6 +302,10 @@ def p_instruccion(t):
                         | for_pro sc
                         | for_each_pro sc
                         | interface_pro sc
+                        | continue_pro sc
+                        | break_pro sc
+                        | return_pro sc
+                        | function_pro sc
                         | sumadores sc'''
     t[0] = t[1]
 ############################################## PRODUCCION ';' ##############################################
@@ -309,6 +313,44 @@ def p_semi_colon(t):
     '''sc   : SEMI_COLON
             |'''
 
+
+############################################## DECLARACION DE FUNCIÓN ##############################################
+def p_instruccion_function(t):
+    '''function_pro : FUNCTION LITERAL L_PAREN parameters_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
+
+def p_instruccion_function2(t):
+    '''function_pro : FUNCTION LITERAL L_PAREN R_PAREN L_LLAVE instrucciones R_LLAVE'''
+
+############################################## PARAMETROS ##############################################
+
+def p_instruccion_parameters(t):
+    '''parameters_pro   : parameters_pro COMA parameter_pro'''
+
+def p_instruccion_parameters2(t):
+    '''parameters_pro   : parameter_pro'''
+
+
+def p_instruccion_parameter(t):
+    '''parameter_pro    : LITERAL COLON type'''
+
+def p_instruccion_parameter2(t):
+    '''parameter_pro    : LITERAL'''
+
+
+
+
+############################################## CONTINUE / BREAK / RETURN ##############################################
+def p_instruccion_continue(t):
+    '''continue_pro : CONTINUE'''
+
+def p_instruccion_break(t):
+    '''break_pro : BREAK'''
+
+def p_instruccion_return(t):
+    '''return_pro : RETURN'''
+
+def p_instruccion_return2(t):
+    '''return_pro : RETURN a'''
 
 ############################################## DECLARACION DE INTERFACE ##############################################
 
@@ -576,6 +618,8 @@ for (let i = 0; i < 10; i = i +1){
 
 for (i = 0; i < 10; i = i +1){
     console.log("a");
+    continue;
+    
 };
 
 for(let letra:string of "hola mundo") {
@@ -584,6 +628,7 @@ for(let letra:string of "hola mundo") {
 
 for(let letra of cadena) {
     console.log("for each ezzzz");
+    break;
 };
 
 interface Carro {
@@ -595,6 +640,16 @@ let c1: Carro = {
     placa: "P0S22",
     color: "verde"
 };
+
+function suma(c: Carro){
+    console.log("sumando algo...");
+    return;
+    
+};
+
+function suma(a:number, b){
+    return a + b;
+}
 
 """)
 
