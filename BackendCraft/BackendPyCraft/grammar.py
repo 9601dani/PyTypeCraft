@@ -301,6 +301,7 @@ def p_instruccion(t):
                         | while_pro sc
                         | for_pro sc
                         | for_each_pro sc
+                        | interface_pro sc
                         | sumadores sc'''
     t[0] = t[1]
 ############################################## PRODUCCION ';' ##############################################
@@ -308,6 +309,24 @@ def p_semi_colon(t):
     '''sc   : SEMI_COLON
             |'''
 
+
+############################################## DECLARACION DE INTERFACE ##############################################
+
+def p_instruccion_declarationInterface(t):
+    '''interface_pro    : INTERFACE LITERAL L_LLAVE interface_atributos R_LLAVE'''
+
+
+def p_instruccion_interfaceAtributos(t):
+    '''interface_atributos  : interface_atributos interface_atributo sc'''
+
+def p_instruccion_interfaceAtributos2(t):
+    '''interface_atributos  : '''
+
+def p_intruccion_interfaceAtributo(t):
+    '''interface_atributo   : LITERAL COLON type'''
+
+def p_instruccion_interfaceAtributo2(t):
+    '''interface_atributo   : LITERAL'''
 
 ############################################## DECLARACION DE VARIABLE ##############################################
 def p_instruccion_declarationInstruction(t):
@@ -464,7 +483,8 @@ def p_instruccion_expresion16(t):
     ''' g     : ENTERO
               | DECIMAL
               | CADENA
-              | LITERAL'''
+              | LITERAL
+              | interface_assi'''
 
     t[0] = t[1]
 def p_instruccion_expresion17(t):
@@ -479,6 +499,17 @@ def p_instruccion_sumadores(t):
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.INCREMENT)
         else:
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.DECREMENT)
+############################################## ASIGNAR INTERFACE ##############################################
+def p_instruccion_interfaceAssi(t):
+    '''interface_assi   : L_LLAVE atributos_assi R_LLAVE'''
+
+############################################## ASIGNAR ATRIBUTOS INTERFACE ##############################################
+def p_instruccion_inter_atributesAssi(t):
+    '''atributos_assi   : atributos_assi COMA LITERAL COLON a'''
+
+def p_instruccion_inter_atributesAssi2(t):
+    '''atributos_assi   : LITERAL COLON a'''
+
 
 ############################################## NATIVAS ##############################################
 
@@ -552,6 +583,16 @@ for(let letra:string of "hola mundo") {
 
 for(let letra of cadena) {
     console.log("for each ezzzz");
+};
+
+interface Carro {
+    placa: string;
+    color: string;
+};
+
+let c1: string = {
+    placa: "P0S22",
+    color: "verde"
 };
 
 """)
