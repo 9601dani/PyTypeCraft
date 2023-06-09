@@ -227,6 +227,8 @@ from src.models.WhileState import WhileState
 from src.models.ForEachState import ForEachState
 from src.models.ForState import ForState
 from src.models.NativeFunType import NativeFunType
+from src.models.FunctionState import FunctionState
+from src.models.InterfaceState import InterfaceState
 
 def return_operation_type(operation_type):
     if(operation_type== "OR"):
@@ -306,6 +308,7 @@ def p_instruccion(t):
                         | break_pro sc
                         | return_pro sc
                         | function_pro sc
+                        | call_function_pro sc
                         | sumadores sc'''
     t[0] = t[1]
 ############################################## PRODUCCION ';' ##############################################
@@ -317,9 +320,30 @@ def p_semi_colon(t):
 ############################################## DECLARACION DE FUNCIÓN ##############################################
 def p_instruccion_function(t):
     '''function_pro : FUNCTION LITERAL L_PAREN parameters_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[6])
 
 def p_instruccion_function2(t):
     '''function_pro : FUNCTION LITERAL L_PAREN R_PAREN L_LLAVE instrucciones R_LLAVE'''
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, None, t[6])
+
+############################################## LLAMADA DE FUNCIÓN ##############################################
+def p_instruccion_call_function(t):
+    '''call_function_pro    : LITERAL L_PAREN values R_PAREN'''
+
+def p_instruccion_call_function2(t):
+    '''call_function_pro    : LITERAL L_PAREN R_PAREN'''
+
+
+############################################## VALUES ##############################################
+### ESTA PRODUCCIÓN ES LA UTILIZADA PARA LOS PARÁMETROS DE LA FUNCIÓN Y DE LOS ARREGLOS
+### suma ( 3, 4, 3 ) ó let a = [ 1, 4, 3 ]
+###       _^ _^ _^              _^ _^ _^
+###################################################################################################
+def p_instruccion_values(t):
+    '''values   : values COMA a'''
+
+def p_instruccion_values2(t):
+    '''values   : a'''
 
 ############################################## PARAMETROS ##############################################
 
@@ -335,8 +359,6 @@ def p_instruccion_parameter(t):
 
 def p_instruccion_parameter2(t):
     '''parameter_pro    : LITERAL'''
-
-
 
 
 ############################################## CONTINUE / BREAK / RETURN ##############################################
@@ -356,7 +378,7 @@ def p_instruccion_return2(t):
 
 def p_instruccion_declarationInterface(t):
     '''interface_pro    : INTERFACE LITERAL L_LLAVE interface_atributos R_LLAVE'''
-
+    t[0] = InterfaceState(t.lineno(1), find_column(input, t.slice[1]), t[2], t[4])
 
 def p_instruccion_interfaceAtributos(t):
     '''interface_atributos  : interface_atributos interface_atributo sc'''
@@ -527,6 +549,8 @@ def p_instruccion_expresion16(t):
               | DECIMAL
               | CADENA
               | LITERAL
+              | call_function_pro
+              | array_pro
               | interface_assi'''
 
     t[0] = t[1]
@@ -542,9 +566,12 @@ def p_instruccion_sumadores(t):
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.INCREMENT)
         else:
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.DECREMENT)
+
+
 ############################################## ASIGNAR INTERFACE ##############################################
 def p_instruccion_interfaceAssi(t):
     '''interface_assi   : L_LLAVE atributos_assi R_LLAVE'''
+
 
 ############################################## ASIGNAR ATRIBUTOS INTERFACE ##############################################
 def p_instruccion_inter_atributesAssi(t):
@@ -552,6 +579,11 @@ def p_instruccion_inter_atributesAssi(t):
 
 def p_instruccion_inter_atributesAssi2(t):
     '''atributos_assi   : LITERAL COLON a'''
+
+############################################## ASIGNACION DE ARREGLOS ##############################################
+def p_instruccion_array_pro(t):
+    '''array_pro    : L_CORCHETE values R_CORCHETE'''
+
 
 
 ############################################## NATIVAS ##############################################
@@ -650,6 +682,11 @@ function suma(c: Carro){
 function suma(a:number, b){
     return a + b;
 }
+
+suma(a, b, 5+3, 3^suma([a]));
+
+let a = [1,2,3];
+let b = [ [2,3], [1,2,3], [1,4,d,a+2, suma()] ];
 
 """)
 
