@@ -1,8 +1,6 @@
 
 import re
 import ply.lex as lex
-from src.models.ForEachState import ForEachState
-from src.models.ForState import ForState
 
 # here start grammar
 #--------------------------------------------------------------
@@ -29,7 +27,7 @@ reservadas ={
     #'.split' : 'SPLIT',
     #'.concat' : 'CONCAT',
     'toString' : 'TOSTRING',
-    'tofixed' : 'TOFIXED',
+    'toFixed' : 'TOFIXED',
     'toExponential' : 'TOEXPONENTIAL',
     'toLowercase' : 'TOLOWERCASE',
     'toUppercase' : 'TOUPPERCASE',
@@ -226,6 +224,9 @@ from src.models.OnlyAssignment import OnlyAssignment
 from src.models.IfState import IfState
 from src.models.ElseState import ElseState
 from src.models.WhileState import WhileState
+from src.models.ForEachState import ForEachState
+from src.models.ForState import ForState
+from src.models.NativeFunType import NativeFunType
 
 def return_operation_type(operation_type):
     if(operation_type== "OR"):
@@ -257,6 +258,22 @@ def return_operation_type(operation_type):
     elif(operation_type== "POTENCIA"):
         return OperationType.POTENCIA
 
+######## FUNCIÓN UTILIZADA PARA RETORNAR EL TIPO DE FUNCIÓN NATIVA USADA EN LA PRODUCCIÓN 'nativeFun'
+def return_native_fun_type(native_type):
+    if(native_type == "TOSTRING"):
+        return NativeFunType.TOSTRING
+    elif(native_type == "TOFIXED"):
+        return NativeFunType.TOFIXED
+    elif(native_type == "TOEXPONENTIAL"):
+        return NativeFunType.TOEXPONENTIAL
+    elif(native_type == "TOLOWERCASE"):
+        return NativeFunType.TOLOWERCASE
+    elif(native_type == "TOUPPERCASE"):
+        return NativeFunType.TOUPPERCASE
+    elif(native_type == "SPLIT"):
+        return NativeFunType.SPLIT
+    elif(native_type == "CONCAT"):
+        return NativeFunType.CONCAT
 
 def p_init(t):
     'init            : instrucciones'
@@ -277,15 +294,20 @@ def p_instrucciones_instruccion(t):
         t[0] = [t[1]]
 
 def p_instruccion(t):
-    '''instruccion      : console_pro SEMI_COLON
-                        | declaration_instruction SEMI_COLON
-                        | assig_pro SEMI_COLON
-                        | if_pro
-                        | while_pro
-                        | for_pro
-                        | for_each_pro
-                        | sumadores SEMI_COLON'''
+    '''instruccion      : console_pro sc
+                        | declaration_instruction sc
+                        | assig_pro sc
+                        | if_pro sc
+                        | while_pro sc
+                        | for_pro sc
+                        | for_each_pro sc
+                        | sumadores sc'''
     t[0] = t[1]
+############################################## PRODUCCION ';' ##############################################
+def p_semi_colon(t):
+    '''sc   : SEMI_COLON
+            |'''
+
 
 ############################################## DECLARACION DE VARIABLE ##############################################
 def p_instruccion_declarationInstruction(t):
@@ -368,7 +390,7 @@ def p_instruccion_fore_dec_type(t):
 ############################################## CONSOLE.LOG ##############################################
 def p_instruccion_console(t):
     '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN'''
-    t[0] = ConsoleLog (t.lineno(1),find_column(input, t.slice[1]),t[5])
+    t[0] = ConsoleLog(t.lineno(1),find_column(input, t.slice[1]),t[5])
     print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
 
 def p_instruccion_expresion(t):
@@ -436,13 +458,16 @@ def p_instruccion_expresion14(t):
     t[0] = t[1]
 
 def p_instruccion_expresion15(t):
+    '''f    : g PUNTO nativeFun L_PAREN expresion R_PAREN'''
+
+def p_instruccion_expresion16(t):
     ''' g     : ENTERO
               | DECIMAL
               | CADENA
               | LITERAL'''
 
     t[0] = t[1]
-def p_instruccion_expresion16(t):
+def p_instruccion_expresion17(t):
     ''' g     : L_PAREN a R_PAREN'''
 
     t[0] = t[2]
@@ -454,6 +479,18 @@ def p_instruccion_sumadores(t):
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.INCREMENT)
         else:
             t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.DECREMENT)
+
+############################################## NATIVAS ##############################################
+
+def p_instruccion_nativas(t):
+    '''nativeFun    : TOSTRING
+                    | TOFIXED
+                    | TOEXPONENTIAL
+                    | TOLOWERCASE
+                    | TOUPPERCASE
+                    | SPLIT
+                    | CONCAT'''
+    t[0] = return_native_fun_type(t[1])
 
 
 
@@ -482,7 +519,10 @@ test_lexer(lexer)
 
 instruccion : [Instruction] =parse("""
 let edad: number, edad1 = 18;
-edad= 19;
+edad= 19
+
+
+let numero: number =10.toFixed(1);
 
 if (edad < 18) {
     console.log("Eres menor de edad.");
@@ -490,29 +530,29 @@ if (edad < 18) {
     console.log("Eres adulto.");
 } else {
     console.log("Eres un adulto mayor.");
-}
+};
 while (contador <= 5) {
     console.log("Contador: " + contador);
     contador++;
-}
+};
 
 console.log("todo  nice");
 
 for (let i = 0; i < 10; i = i +1){
     console.log("a");
-}
+};
 
 for (i = 0; i < 10; i = i +1){
     console.log("a");
-}
+};
 
 for(let letra:string of "hola mundo") {
     console.log("for each ezzzz");
-}
+};
 
 for(let letra of cadena) {
     console.log("for each ezzzz");
-}
+};
 
 """)
 
