@@ -12,4 +12,4 @@ class InterfaceState(Instruction):
         self.attributes = attributes
 
     def __str__(self):
-        return f"""{{"ForState": {self.id} {self.attributes}}}"""
+        return f"""{{"InterfaceState": {self.id} {self.attributes}}}"""

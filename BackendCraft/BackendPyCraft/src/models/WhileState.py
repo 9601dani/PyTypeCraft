@@ -11,4 +11,4 @@ class WhileState(Instruction):
         self.instructions = instructions
 
     def __str__(self):
-        return f"""{{"WhileState": {self.condition} {self.instructions}}}"""
+        return f"""{{"WhileState": {self.condition} {self.instructions.__str__()}}}"""

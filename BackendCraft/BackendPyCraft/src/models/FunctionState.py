@@ -14,4 +14,4 @@ class FunctionState(Instruction):
         self.instructions = instructions
 
     def __str__(self):
-        return f"""{{"ForState": {self.id} {self.parameters} {self.instructions}}}"""
+        return f"""{{"FunctionState": {self.id} {self.parameters} {self.instructions}}}"""

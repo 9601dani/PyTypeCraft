@@ -236,50 +236,52 @@ from src.models.CallFunction import CallFunction
 from src.models.NativeFunction import NativeFunction
 
 def return_operation_type(operation_type):
-    if(operation_type== "OR"):
+    if(operation_type== "||"):
         return OperationType.OR
-    elif(operation_type== "AND"):
+    elif(operation_type== "&&"):
         return OperationType.AND
-    elif(operation_type== "NOT"):
+    elif(operation_type== "!"):
         return OperationType.NOT
-    elif(operation_type== "MAYOR_QUE"):
+    elif(operation_type== ">"):
         return OperationType.MAYOR_QUE
-    elif(operation_type== "MENOR_QUE"):
+    elif(operation_type== "<"):
         return OperationType.MENOR_QUE
-    elif(operation_type== "MAYOR_IGUAL_QUE"):
+    elif(operation_type== ">="):
         return OperationType.MAYOR_IGUAL_QUE
-    elif(operation_type== "MENOR_IGUAL_QUE"):
+    elif(operation_type== "<="):
         return OperationType.MENOR_IGUAL_QUE
-    elif(operation_type== "DISTINTO_QUE"):
+    elif(operation_type == "==="):
+        return OperationType.TRIPLE_IGUAL
+    elif(operation_type== "!=="):
         return OperationType.DISTINTO_QUE
-    elif(operation_type== "MAS"):
+    elif(operation_type== "+"):
         return OperationType.MAS
-    elif(operation_type== "MENOS"):
+    elif(operation_type== "-"):
         return OperationType.MENOS
-    elif(operation_type== "TIMES"):
+    elif(operation_type== "*"):
         return OperationType.TIMES
-    elif(operation_type== "DIVIDE"):
+    elif(operation_type== "/"):
         return OperationType.DIVIDE
-    elif(operation_type== "MOD"):
+    elif(operation_type== "%"):
         return OperationType.MOD
-    elif(operation_type== "POTENCIA"):
+    elif(operation_type== "^"):
         return OperationType.POTENCIA
 
 ######## FUNCIÓN UTILIZADA PARA RETORNAR EL TIPO DE FUNCIÓN NATIVA USADA EN LA PRODUCCIÓN 'nativeFun'
 def return_native_fun_type(native_type):
-    if(native_type == "TOSTRING"):
+    if(native_type == "toString"):
         return NativeFunType.TOSTRING
-    elif(native_type == "TOFIXED"):
+    elif(native_type == "toFixed"):
         return NativeFunType.TOFIXED
-    elif(native_type == "TOEXPONENTIAL"):
+    elif(native_type == "toExponential"):
         return NativeFunType.TOEXPONENTIAL
-    elif(native_type == "TOLOWERCASE"):
+    elif(native_type == "toLowerCase"):
         return NativeFunType.TOLOWERCASE
-    elif(native_type == "TOUPPERCASE"):
+    elif(native_type == "toUpperCase"):
         return NativeFunType.TOUPPERCASE
-    elif(native_type == "SPLIT"):
+    elif(native_type == "split"):
         return NativeFunType.SPLIT
-    elif(native_type == "CONCAT"):
+    elif(native_type == "concat"):
         return NativeFunType.CONCAT
 
 def p_init(t):
@@ -406,15 +408,25 @@ def p_instruccion_interfaceAtributo2(t):
 def p_instruccion_declarationInstruction(t):
     '''declaration_instruction      : LET declaracion_list'''
     t[0] = Declaration(t.lineno(1),find_column(input, t.slice[1]),"LET",t[2])
+    # print("###### IMPRIMIENDO LISTA ######")
+    # print(t[2])
 
 def p_instruccion_declaracion_list(t):
     '''declaracion_list      : declaracion_list COMA assignacion_instruction'''
-    [t[0]].append(t[3])
+    t[0] = t[1]
+    t[0].append(t[3])
+    # print("####ASIGNACION EN LISTA####")
+    # print(t[3])
+    # print("#####IMPRIMIENDO LISTA EN LISTA########")
+    # print(t[0])
+
 
 def p_instruccion_declaracion_list2(t):
     '''declaracion_list      : assignacion_instruction'''
     t[0] = []
     t[0].append(t[1])
+    # print("####ASIGNACION####")
+    # print(t[1])
 
 def p_instruccion_assignacion_instruction(t):
     '''assignacion_instruction      : LITERAL COLON type IGUAL a'''
@@ -554,6 +566,8 @@ def p_instruccion_expresion14(t):
 def p_instruccion_expresion15(t):
     '''f    : g PUNTO nativeFun L_PAREN expresion R_PAREN
             | g PUNTO nativeFun L_PAREN R_PAREN'''
+    # print("EVALUANDO NATIVAS")
+    # print(t[3])
     if(t[5] == ")"):
         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
     else:
@@ -611,7 +625,10 @@ def p_instruccion_nativas(t):
                     | TOUPPERCASE
                     | SPLIT
                     | CONCAT'''
+
     t[0] = return_native_fun_type(t[1])
+    # print("EVALUANDO NATIVAS EN RETURN")
+    # print(t[0])
 
 
 
@@ -640,7 +657,7 @@ test_lexer(lexer)
 
 instruccion : [Instruction] =parse("""
 let edad: number, edad1 = 18;
-edad= 19
+edad= 19 + 5;
 
 
 let numero: number =10.toFixed(1);

@@ -7,6 +7,7 @@ class OperationType:
     MENOR_QUE = "MENOR_QUE",
     MAYOR_QUE = "MAYOR_QUE",
     DISTINTO_QUE = "DISTINTO_QUE",
+    TRIPLE_IGUAL = "TRIPLE_IGUAL",
     MAS = "MAS",
     MENOS = "MENOS",
     MOD = "MOD",

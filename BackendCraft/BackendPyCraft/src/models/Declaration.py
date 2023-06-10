@@ -10,4 +10,4 @@ class Declaration (Instruction):
         self.instructions = instructions
 
     def __str__(self):
-        return f"""{{"Declaration": {self.type}, {self.instructions}}}"""
+        return f"""{{"Declaration": {self.type}, {self.instructions.__str__()}}}"""
