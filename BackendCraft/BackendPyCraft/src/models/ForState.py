@@ -4,7 +4,7 @@ from .Instruction import Instruction
 class ForState(Instruction):
 
     def accept(self, visitor):
-        pass
+        visitor.visit(self)
 
     def __init__(self, line: int,
                  column: int,

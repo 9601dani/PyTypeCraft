@@ -4,7 +4,7 @@ from .Instruction import Instruction
 class ForEachState(Instruction):
 
     def accept(self, visitor):
-        pass
+        visitor.visit(self)
 
     def __init__(self, line: int, column: int, declaration: Instruction, instructions: [Instruction]):
         super().__init__(line, column)

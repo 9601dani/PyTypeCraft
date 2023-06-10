@@ -3,7 +3,7 @@ from .Instruction import Instruction
 
 class CallFunction(Instruction):
     def accept(self, visitor):
-        pass
+        visitor.visit(self)
 
     def __init__(self, line, column, name, assignments: [Instruction]):
         super().__init__(line, column)

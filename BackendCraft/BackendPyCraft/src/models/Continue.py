@@ -3,7 +3,7 @@ from .Instruction import Instruction
 
 class Continue(Instruction):
     def accept(self, visitor):
-        pass
+        visitor.visit(self)
 
     def __init__(self, line, column):
         super().__init__(line, column)

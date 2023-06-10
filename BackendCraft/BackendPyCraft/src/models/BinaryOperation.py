@@ -5,7 +5,7 @@ from .Instruction import Instruction
 
 class BinaryOperation(Instruction):
     def accept(self, visitor):
-        pass
+        visitor.visit(self)
 
     def __init__(self, line, column, left_operator, right_operator, operator):
         super().__init__(line, column)
