@@ -10,3 +10,6 @@ class Assignment (Instruction):
         self.type = type
         self.value = value
         self.isAny= isAny
+        
+    def __str__(self):
+        return f"""{{"Assignment": {self.id}, {self.type}, {self.value.__str__()}}}"""

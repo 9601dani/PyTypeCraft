@@ -229,6 +229,11 @@ from src.models.ForState import ForState
 from src.models.NativeFunType import NativeFunType
 from src.models.FunctionState import FunctionState
 from src.models.InterfaceState import InterfaceState
+from src.models.Break import Break
+from src.models.Return import Return
+from src.models.Continue import Continue
+from src.models.CallFunction import CallFunction
+from src.models.NativeFunction import NativeFunction
 
 def return_operation_type(operation_type):
     if(operation_type== "OR"):
@@ -329,9 +334,11 @@ def p_instruccion_function2(t):
 ############################################## LLAMADA DE FUNCIÓN ##############################################
 def p_instruccion_call_function(t):
     '''call_function_pro    : LITERAL L_PAREN values R_PAREN'''
+    t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], t[3])
 
 def p_instruccion_call_function2(t):
     '''call_function_pro    : LITERAL L_PAREN R_PAREN'''
+    t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], None)
 
 
 ############################################## VALUES ##############################################
@@ -364,15 +371,18 @@ def p_instruccion_parameter2(t):
 ############################################## CONTINUE / BREAK / RETURN ##############################################
 def p_instruccion_continue(t):
     '''continue_pro : CONTINUE'''
+    t[0]= Continue(t.lineno(1), find_column(input, t.slice[1]))
 
 def p_instruccion_break(t):
     '''break_pro : BREAK'''
-
+    t[0]= Break(t.lineno(1), find_column(input, t.slice[1]))
 def p_instruccion_return(t):
     '''return_pro : RETURN'''
+    t[0]= Return(t.lineno(1), find_column(input, t.slice[1]), None)
 
 def p_instruccion_return2(t):
     '''return_pro : RETURN a'''
+    t[0]= Return(t.lineno(1), find_column(input, t.slice[1]), t[2])
 
 ############################################## DECLARACION DE INTERFACE ##############################################
 
@@ -542,7 +552,12 @@ def p_instruccion_expresion14(t):
     t[0] = t[1]
 
 def p_instruccion_expresion15(t):
-    '''f    : g PUNTO nativeFun L_PAREN expresion R_PAREN'''
+    '''f    : g PUNTO nativeFun L_PAREN expresion R_PAREN
+            | g PUNTO nativeFun L_PAREN R_PAREN'''
+    if(t[5] == ")"):
+        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
+    else:
+        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
 
 def p_instruccion_expresion16(t):
     ''' g     : ENTERO
@@ -688,7 +703,14 @@ suma(a, b, 5+3, 3^suma([a]));
 let a = [1,2,3];
 let b = [ [2,3], [1,2,3], [1,4,d,a+2, suma()] ];
 
+break;
+return
+continue
+
+a=var1.toString();
+
 """)
 
+print("instrucciones:")
 for i in instruccion:
-    print(str(type(i)).__str__())
+    print(str((i)).__str__())

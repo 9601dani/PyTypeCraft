@@ -8,3 +8,6 @@ class Declaration (Instruction):
         super().__init__(line, column)
         self.type = type
         self.instructions = instructions
+
+    def __str__(self):
+        return f"""{{"Declaration": {self.type}, {self.instructions}}}"""

@@ -11,5 +11,5 @@ class ConsoleLog(Instruction):
 
 
     def __str__(self):
-        return f"""{{"console.log": {self.value}}}"""
+        return f"""{{"console.log": {self.value.__str__()}}}"""
 

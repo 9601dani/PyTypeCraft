@@ -9,3 +9,6 @@ class OnlyAssignment (Instruction):
         self.id = id
         self.type = type
         self.value = value
+
+    def __str__(self):
+        return f"""{{"OnlyAssignment": {self.id}, {self.type}, {self.value.__str__()}}}"""
