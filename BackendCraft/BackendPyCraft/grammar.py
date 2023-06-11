@@ -49,6 +49,8 @@ reservadas ={
     'return' : 'RETURN',
     # Struct
     'interface' : 'INTERFACE',
+    'true' : 'TRUE',
+    'false' : 'FALSE',
 }
 tokens = [
     # Operadores Booleanos
@@ -93,7 +95,7 @@ t_MENOR_IGUAL_QUE = r'<='
 t_MAYOR_IGUAL_QUE = r'>='
 t_MENOR_QUE = r'<'
 t_MAYOR_QUE = r'>'
-t_DISTINTO_QUE = r'!='
+t_DISTINTO_QUE = r'!=='
 t_NOT = r'!'
 t_AND = r'&&'
 t_OR = r'\|\|'
@@ -162,16 +164,7 @@ def t_ENTERO(t):
     return t
 
 # Expresion Regular para Booleano
-def t_BOOLEANO(t):
-    r'true|false'
-    try:
-        if t.value.lower()=='true':
-            t.value=True
-        elif t.value.lower()=='false':
-            t.value=False
-    except ValueError:
-        t.value = 0
-    return t
+
 
 # Expresion Regular para literales
 def t_LITERAL(t):
@@ -234,6 +227,8 @@ from src.models.Return import Return
 from src.models.Continue import Continue
 from src.models.CallFunction import CallFunction
 from src.models.NativeFunction import NativeFunction
+from src.models.Value import Value
+from src.models.ValueType import ValueType
 
 def return_operation_type(operation_type):
     if(operation_type== "||"):
@@ -449,7 +444,7 @@ def p_instruccion_type(t):
 ############################################## ASIGNACION DE VARIABLE ##############################################
 def p_instruccion_assig_pro(t):
     '''assig_pro      : LITERAL IGUAL a'''
-    t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType().buscar_type("DEFINIRLA"),t[3])
+    t[0] = OnlyAssignment(t.lineno(1),find_column(input, t.slice[1]), t[1],VariableType().buscar_type("definirla"),t[3])
 ############################################## IF ##############################################
 def p_instruccion_if_pro(t):
     '''if_pro      : IF L_PAREN a R_PAREN L_LLAVE instrucciones R_LLAVE else_pro'''
@@ -574,18 +569,33 @@ def p_instruccion_expresion15(t):
         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
 
 def p_instruccion_expresion16(t):
-    ''' g     : ENTERO
-              | DECIMAL
-              | CADENA
-              | LITERAL
-              | call_function_pro
+    ''' g     : ENTERO'''
+    t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.ENTERO)
+
+def p_instruccion_expresion17(t):
+    ''' g     : DECIMAL'''
+    t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.DECIMAL)
+
+def p_instruccion_expresion18(t):
+    ''' g     : CADENA'''
+    t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.CADENA)
+
+def p_instruccion_expresion19(t):
+    ''' g     : LITERAL'''
+    t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL)
+
+def p_instruccion_expresion20(t):
+    ''' g     : TRUE
+              | FALSE'''
+    t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.BOOLEANO)
+
+def p_instruccion_expresion21(t):
+    ''' g     : call_function_pro
               | array_pro
               | interface_assi'''
-
     t[0] = t[1]
-def p_instruccion_expresion17(t):
+def p_instruccion_expresion24(t):
     ''' g     : L_PAREN a R_PAREN'''
-
     t[0] = t[2]
 
 def p_instruccion_sumadores(t):
@@ -725,7 +735,8 @@ return
 continue
 
 a=var1.toString();
-
+a=true;
+b="hola";
 """)
 
 print("instrucciones:")

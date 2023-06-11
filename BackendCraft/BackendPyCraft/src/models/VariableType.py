@@ -23,7 +23,7 @@ class VariableType:
 
     def buscar_type(self, tipo):
         for key, value in self.lista_variables.items():
-            if value == key:
+            if value == tipo:
                 return key
         self.lista_variables[tipo] = tipo
         return tipo

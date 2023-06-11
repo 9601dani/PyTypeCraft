@@ -4,7 +4,7 @@ class OnlyAssignment (Instruction):
     def accept(self, visitor):
         visitor.visit(self)
 
-    def __init__(self, line, column, id, type: VariableType,value: Instruction):
+    def __init__(self, line, column, id, type,value: Instruction):
         super().__init__(line, column)
         self.id = id
         self.type = type
