@@ -1,0 +1,5 @@
+class SymbolType:
+    FUNCTION = "FUNCTION",
+    ARRAY = "ARRAY",
+    INTERFACE = "INTERFACE",
+    VARIABLE = "VARIABLE"

@@ -516,6 +516,7 @@ def p_instruccion_console(t):
 
 def p_instruccion_expresion(t):
     '''expresion      : expresion COMA a'''
+    t[0] = t[1]
     t[0].append(t[3])
 def p_instruccion_expresion2(t):
     '''expresion      : a'''
@@ -686,79 +687,20 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-let edad: number, edad1 = 18;
-edad= 19 + 5;
+let val1:number = 1;
+let val2:number = 10;
+let val3:number = 2021.2020;
+console.log("Probando declaracion de variables \n");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
 
-
-let numero: number =10.toFixed(1);
-
-if (edad < 18) {
-    console.log("Eres menor de edad.");
-} else if (edad >= 18 && edad < 60) {
-    console.log("Eres adulto.");
-} else {
-    console.log("Eres un adulto mayor.");
-};
-
-while (contador <= 5) {
-    console.log("Contador: " + contador);
-    contador++;
-};
-
-console.log("todo  nice");
-
-for (let i = 0; i < 10; i = i +1){
-    console.log("a");
-};
-
-for (i = 0; i < 10; i = i +1){
-    console.log("a");
-    continue;
-    
-};
-
-for(let letra:string of "hola mundo") {
-    console.log("for each ezzzz");
-};
-
-for(let letra of cadena) {
-    console.log("for each ezzzz");
-    break;
-};
-
-interface Carro {
-    placa: string;
-    color: string;
-};
-
-let c1: Carro = {
-    placa: "P0S22",
-    color: "verde"
-};
-
-function suma(c: Carro){
-    console.log("sumando algo...");
-    return;
-    
-};
-
-function suma(a:number, b, d: string){
-    console.log("probando funcion")
-    return a + 2;
-}
-
-suma(a, b, 5+3, 3^suma([a]));
-
-let a = [1,2,3];
-let b = [ [2,3], [1,2,3], [1,4,d,a+2, suma()] ];
-
-break;
-return a + 3;
-continue
-
-a=var1.toString();
-a=true;
-b="hola";
+// COMENTARIO DE UNA LINEA
+val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
+val2 = 11 * (11 % (12 + 10)) + 22 / 2;
+val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
+console.log("Probando asignación de variables y aritmeticas");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
 """)
 
 print("instrucciones:")
