@@ -221,6 +221,7 @@ from src.models.ForEachState import ForEachState
 from src.models.ForState import ForState
 from src.models.NativeFunType import NativeFunType
 from src.models.FunctionState import FunctionState
+from src.models.Parameter import Parameter
 from src.models.InterfaceState import InterfaceState
 from src.models.Break import Break
 from src.models.Return import Return
@@ -322,7 +323,7 @@ def p_semi_colon(t):
 ############################################## DECLARACION DE FUNCIÓN ##############################################
 def p_instruccion_function(t):
     '''function_pro : FUNCTION LITERAL L_PAREN parameters_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
-    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[6])
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[7])
 
 def p_instruccion_function2(t):
     '''function_pro : FUNCTION LITERAL L_PAREN R_PAREN L_LLAVE instrucciones R_LLAVE'''
@@ -353,16 +354,27 @@ def p_instruccion_values2(t):
 
 def p_instruccion_parameters(t):
     '''parameters_pro   : parameters_pro COMA parameter_pro'''
+    t[0] = t[1]
+    t[0].append(t[3])
+    # print("---- ASIGNANDO  PARAMETRO ----- "+t[3].id)
+
 
 def p_instruccion_parameters2(t):
     '''parameters_pro   : parameter_pro'''
+    t[0] = []
+    t[0].append(t[1])
+    # print("---- ASIGNANDO  PARAMETRO ----- "+t[1].id)
 
 
 def p_instruccion_parameter(t):
     '''parameter_pro    : LITERAL COLON type'''
+    t[0] = Parameter(t.lineno(1), find_column(input, t.slice[1]), t[1], None, False)
+
+
 
 def p_instruccion_parameter2(t):
     '''parameter_pro    : LITERAL'''
+    t[0] = Parameter(t.lineno(1), find_column(input, t.slice[1]), t[1], None, True)
 
 
 ############################################## CONTINUE / BREAK / RETURN ##############################################
@@ -389,15 +401,22 @@ def p_instruccion_declarationInterface(t):
 
 def p_instruccion_interfaceAtributos(t):
     '''interface_atributos  : interface_atributos interface_atributo sc'''
+    t[0] = t[1]
+    t[0].append(t[2])
 
 def p_instruccion_interfaceAtributos2(t):
     '''interface_atributos  : '''
+    t[0] = []
 
 def p_intruccion_interfaceAtributo(t):
     '''interface_atributo   : LITERAL COLON type'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),None,False)
+
 
 def p_instruccion_interfaceAtributo2(t):
     '''interface_atributo   : LITERAL'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,None, True)
+
 
 ############################################## DECLARACION DE VARIABLE ##############################################
 def p_instruccion_declarationInstruction(t):
@@ -721,8 +740,9 @@ function suma(c: Carro){
     
 };
 
-function suma(a:number, b){
-    return a + b;
+function suma(a:number, b, d: string){
+    console.log("probando funcion")
+    return a + 2;
 }
 
 suma(a, b, 5+3, 3^suma([a]));
@@ -731,7 +751,7 @@ let a = [1,2,3];
 let b = [ [2,3], [1,2,3], [1,4,d,a+2, suma()] ];
 
 break;
-return
+return a + 3;
 continue
 
 a=var1.toString();
