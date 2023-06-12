@@ -4,7 +4,7 @@ from .Instruction import Instruction
 class FunctionState(Instruction):
 
     def accept(self, visitor):
-        visitor.visit(self)
+        visitor.visit_function(self)
 
     def __init__(self, line: int, column: int, id: str, isInTable: bool, parameters: [Instruction], instructions: [Instruction]):
         super().__init__(line, column)

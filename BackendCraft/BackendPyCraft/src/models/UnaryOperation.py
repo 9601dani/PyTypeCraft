@@ -3,7 +3,7 @@ from .Instruction import Instruction
 
 class UnaryOperation(Instruction):
     def accept(self, visitor):
-        visitor.visit(self)
+        visitor.visit_unary_op(self)
 
     def __init__(self, line, column, right_operator, operator):
         super().__init__(line, column)

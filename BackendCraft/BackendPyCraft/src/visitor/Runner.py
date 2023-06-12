@@ -1,5 +1,5 @@
 from .Visitor import Visitor
-from ..models import Assignment
+from ..models import Assignment, Parameter
 from ..models import BinaryOperation
 from ..models import Break
 from ..models import CallFunction
@@ -22,59 +22,65 @@ from ..models import Value
 
 class Runner(Visitor):
 
-    def visit(self, i: Assignment):
+    def __init__(self):
+        super().__init__()
+
+    def visit_assignment(self, i: Assignment):
         pass
 
-    def visit(self, i: BinaryOperation):
+    def visit_binary_op(self, i: BinaryOperation):
         pass
 
-    def visit(self, i: Break):
+    def visit_break(self, i: Break):
         pass
 
-    def visit(self, i: CallFunction):
+    def visit_call_fun(self, i: CallFunction):
         pass
 
-    def visit(self, i: ConsoleLog):
+    def visit_console(self, i: ConsoleLog):
         pass
 
-    def visit(self, i: Continue):
+    def visit_continue(self, i: Continue):
         pass
 
-    def visit(self, i: Declaration):
+    def visit_declaration(self, i: Declaration):
         pass
 
-    def visit(self, i: ElseState):
+    def visit_else(self, i: ElseState):
         pass
 
-    def visit(self, i: ForEachState):
+    def visit_foreach(self, i: ForEachState):
         pass
 
-    def visit(self, i: ForState):
+    def visit_for(self, i: ForState):
         pass
 
-    def visit(self, i: FunctionState):
+    def visit_function(self, i: FunctionState):
         pass
 
-    def visit(self, i: IfState):
+    def visit_if(self, i: IfState):
         pass
 
-    def visit(self, i: InterfaceState):
+    def visit_interface(self, i: InterfaceState):
         pass
 
-    def visit(self, i: NativeFunction):
+    def visit_native(self, i: NativeFunction):
         pass
 
-    def visit(self, i: OnlyAssignment):
+    def visit_only_assign(self, i: OnlyAssignment):
         pass
 
-    def visit(self, i: Return):
+    def visit_parameter(self, i: Parameter):
         pass
 
-    def visit(self, i: UnaryOperation):
+    def visit_return(self, i: Return):
         pass
 
-    def visit(self, i: WhileState):
+    def visit_unary_op(self, i: UnaryOperation):
         pass
 
-    def visit(self, i: Value):
+    def visit_while(self, i: WhileState):
+        pass
+
+    def visit_value(self, i: Value):
         pass

@@ -230,6 +230,7 @@ from src.models.CallFunction import CallFunction
 from src.models.NativeFunction import NativeFunction
 from src.models.Value import Value
 from src.models.ValueType import ValueType
+from src.visitor.Debugger import Debugger
 
 def return_operation_type(operation_type):
     if(operation_type== "||"):
@@ -698,6 +699,7 @@ if (edad < 18) {
 } else {
     console.log("Eres un adulto mayor.");
 };
+
 while (contador <= 5) {
     console.log("Contador: " + contador);
     contador++;
@@ -760,5 +762,9 @@ b="hola";
 """)
 
 print("instrucciones:")
+
+debugger = Debugger()
+
 for i in instruccion:
-    print(str((i)).__str__())
+    if isinstance(i, Instruction):
+        i.accept(debugger)

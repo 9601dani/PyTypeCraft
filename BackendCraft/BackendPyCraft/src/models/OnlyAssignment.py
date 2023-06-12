@@ -2,7 +2,7 @@ from .Instruction import Instruction
 from .VariableType import VariableType
 class OnlyAssignment (Instruction):
     def accept(self, visitor):
-        visitor.visit(self)
+        visitor.visit_only_assign(self)
 
     def __init__(self, line, column, id, type,value: Instruction):
         super().__init__(line, column)

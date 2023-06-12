@@ -8,7 +8,7 @@ class Value(Instruction):
         self.type = value_type
 
     def accept(self, visitor):
-        visitor.visit(self)
+        visitor.visit_value(self)
 
     def __str__(self):
         return f"""{{"Value": {self.value}, {self.type}}}"""

@@ -18,81 +18,90 @@ from ..models import Return
 from ..models import UnaryOperation
 from ..models import WhileState
 from ..models import Value
+from ..models import Parameter
 
 
 class Visitor(ABC):
+
+    def __init__(self):
+        print("")
+
     @abstractmethod
-    def visit(self, i: Assignment):
+    def visit_assignment(self, i: Assignment):
         pass
 
     @abstractmethod
-    def visit(self, i: BinaryOperation):
+    def visit_binary_op(self, i: BinaryOperation):
         pass
 
     @abstractmethod
-    def visit(self, i: Break):
+    def visit_break(self, i: Break):
         pass
 
     @abstractmethod
-    def visit(self, i: CallFunction):
+    def visit_call_fun(self, i: CallFunction):
         pass
 
     @abstractmethod
-    def visit(self, i: ConsoleLog):
+    def visit_console(self, i: ConsoleLog):
         pass
 
     @abstractmethod
-    def visit(self, i: Continue):
+    def visit_continue(self, i: Continue):
         pass
 
     @abstractmethod
-    def visit(self, i: Declaration):
+    def visit_declaration(self, i: Declaration):
         pass
 
     @abstractmethod
-    def visit(self, i: ElseState):
+    def visit_else(self, i: ElseState):
         pass
 
     @abstractmethod
-    def visit(self, i: ForEachState):
+    def visit_foreach(self, i: ForEachState):
         pass
 
     @abstractmethod
-    def visit(self, i: ForState):
+    def visit_for(self, i: ForState):
         pass
 
     @abstractmethod
-    def visit(self, i: FunctionState):
+    def visit_function(self, i: FunctionState):
         pass
 
     @abstractmethod
-    def visit(self, i: IfState):
+    def visit_if(self, i: IfState):
         pass
 
     @abstractmethod
-    def visit(self, i: InterfaceState):
+    def visit_interface(self, i: InterfaceState):
         pass
 
     @abstractmethod
-    def visit(self, i: NativeFunction):
+    def visit_native(self, i: NativeFunction):
         pass
 
     @abstractmethod
-    def visit(self, i: OnlyAssignment):
+    def visit_only_assign(self, i: OnlyAssignment):
         pass
 
     @abstractmethod
-    def visit(self, i: Return):
+    def visit_parameter(self, i: Parameter):
         pass
 
     @abstractmethod
-    def visit(self, i: UnaryOperation):
+    def visit_return(self, i: Return):
         pass
 
     @abstractmethod
-    def visit(self, i: WhileState):
+    def visit_unary_op(self, i: UnaryOperation):
         pass
 
     @abstractmethod
-    def visit(self, i: Value):
+    def visit_while(self, i: WhileState):
+        pass
+
+    @abstractmethod
+    def visit_value(self, i: Value):
         pass

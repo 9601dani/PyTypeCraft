@@ -1,8 +1,11 @@
+import src.visitor.Visitor
 from .Instruction import Instruction
-class Declaration (Instruction):
+from src.visitor import Visitor
+class Declaration(Instruction):
 
-    def accept(self, visitor):
-        visitor.visit(self)
+    def accept(self, visitor: Visitor):
+        # print(visitor)
+        visitor.visit_declaration(self)
 
     def __init__(self, line: int, column: int, type: str, instructions: [Instruction]):
         super().__init__(line, column)
