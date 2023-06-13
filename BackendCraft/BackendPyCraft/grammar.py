@@ -726,15 +726,5 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion : [Instruction] =parse("""
-let daniel:number=1;
-daniel--;
-let b=daniel;
-console.log(daniel);
-""")
-
-tabla_simbolos = SymbolTable()
-debug= Runner(tabla_simbolos, [])
-for instr in instruccion:
-    instr.accept(debug)
+instruccion : [Instruction] =parse("""""")
 
