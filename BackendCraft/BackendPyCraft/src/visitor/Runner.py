@@ -1,3 +1,5 @@
+import copy
+
 from .Visitor import Visitor
 from ..models import Assignment, Parameter
 from ..models import BinaryOperation
@@ -18,6 +20,9 @@ from ..models import Return
 from ..models import UnaryOperation
 from ..models import WhileState
 from ..models import Value
+from ..models.Variable import Variable
+from ..models.VariableType import VariableType
+from ..models.ValueType import ValueType
 
 
 class Runner(Visitor):
@@ -38,7 +43,20 @@ class Runner(Visitor):
         pass
 
     def visit_console(self, i: ConsoleLog):
-        pass
+        array_datos = []
+        if i.value is not None:
+            dato: str = ""
+            for value in i.value:
+                vr = value.accept(self)
+                if vr is not None:
+                    str += vr
+            if dato is not None:
+                print(dato)
+                array_datos.append(dato)
+        else:
+            pass
+         #AÑADIR ERROR PORQUE EL VALOR DE CONSOLE ES NULL, NO HAY INSTRUCCIONES
+
 
     def visit_continue(self, i: Continue):
         pass
@@ -83,4 +101,30 @@ class Runner(Visitor):
         pass
 
     def visit_value(self, i: Value):
-        pass
+        variable = Variable()
+        if i.value_type == ValueType.CADENA:
+            variable.data_type = VariableType.buscar_type("STRING")
+            variable.value = str(i.value)
+            return variable
+        elif i.value_type == ValueType.ENTERO:
+            variable.data_type = VariableType.buscar_type("NUMBER")
+            variable.value = int(i.value)
+            return variable
+        elif i.value_type == ValueType.DECIMAL:
+            variable.data_type = VariableType.buscar_type("NUMBER")
+            variable.value = float(i.value)
+            return variable
+        elif i.value_type == ValueType.BOOLEANO:
+            variable.data_type = VariableType.buscar_type("BOOLEAN")
+            variable.value = bool(i.value)
+            return variable
+        elif i.value_type == ValueType.LITERAL:
+            var_in_table = self.table.get_variable(i.value)
+            if var_in_table is None:
+                print("Error: variable no declarada")
+                # AÑADIR ERROR
+                return None
+            variable = copy.deepcopy(var_in_table)
+            return variable
+
+
