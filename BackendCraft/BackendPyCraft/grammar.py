@@ -491,10 +491,18 @@ def p_instruccion_while_pro(t):
 
 ############################################## FOR ##############################################
 def p_instruccion_for_pro(t):
-    '''for_pro      : FOR L_PAREN declaration_instruction SEMI_COLON a SEMI_COLON assig_pro R_PAREN L_LLAVE instrucciones R_LLAVE
-                    | FOR L_PAREN assig_pro SEMI_COLON a SEMI_COLON assig_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
+    '''for_pro      : FOR L_PAREN declaration_instruction SEMI_COLON a SEMI_COLON inDec_pro R_PAREN L_LLAVE instrucciones R_LLAVE
+                    | FOR L_PAREN assig_pro SEMI_COLON a SEMI_COLON inDec_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
 
     t[0] = ForState(t.lineno(1),find_column(input, t.slice[1]),t[3],t[5],t[7],t[10])
+
+
+
+############################################## INCREMENTO DECREMENTO PRODUCCIÓN PARA FOR ##############################################
+def p_instruccion_in_dec_pro(t):
+    '''inDec_pro   : assig_pro
+                    | sumadores'''
+    t[0] = t[1]
 
 ############################################## FOR EACH ##############################################
 
@@ -512,7 +520,7 @@ def p_instruccion_fore_dec_type(t):
 def p_instruccion_console(t):
     '''console_pro      : CONSOLE PUNTO LOG L_PAREN expresion R_PAREN'''
     t[0] = ConsoleLog(t.lineno(1),find_column(input, t.slice[1]),t[5])
-    print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
+    # print(f"""si encontre algo en la produccion console.log -> {t[5]} """)
 
 def p_instruccion_expresion(t):
     '''expresion      : expresion COMA a'''
@@ -579,6 +587,7 @@ def p_instruccion_expresion13(t):
 def p_instruccion_expresion14(t):
     ''' f     : g '''
     t[0] = t[1]
+
 def p_instruccion_expresion15(t):
     ''' g     : g TIMES h
                 | g DIVIDE h
@@ -629,6 +638,18 @@ def p_instruccion_expresion23(t):
 def p_instruccion_expresion24(t):
     ''' h     : L_PAREN a R_PAREN'''
     t[0] = t[2]
+
+def p_instruccion_expresion25(t):
+    '''h    : array_val_pro'''
+
+def p_instruccion_array_val_pro(t):
+    '''array_val_pro    : LITERAL dimensions'''
+
+def p_instruccion_dimensions(t):
+    '''dimensions   : dimensions L_CORCHETE a R_CORCHETE'''
+
+def p_instruccion_dimensions2(t):
+    '''dimensions   : L_CORCHETE a R_CORCHETE'''
 
 def p_instruccion_sumadores(t):
         ''' sumadores     : LITERAL MAS MAS
@@ -698,41 +719,167 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-let val1:number = 1;
-let val2:number = 10;
-let val3:number = 2021.2020;
+let array = [32, 21, 7, 89, 56, 909, 109, 2];
 
-console.log("Probando declaracion de variables \n");
-console.log(val1, " ", val2, " ", val3);
-console.log("---------------------------------");
-// COMENTARIO DE UNA LINEA
-val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
-val2 = 11 * (11 % (12 + -10)) + 22 / 2;
-val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
-console.log("Probando asignación de variables y aritmeticas");
-console.log(val1, " ", val2, " ", val3);
-console.log("---------------------------------");
+console.log("=======================================================================");
+console.log("==================================IF===================================");
+console.log("=======================================================================");
 
-let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
-let rel2 = (7*7) <= (15+555) && 1 < 2;
-let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
-console.log("Probando relacionales y logicas");
-console.log(rel1, " ", rel2, " ", rel3);
-console.log("---------------------------------");
+if (array[4] > 50){
+    console.log("IF CORRECTO");
+} else if (array[4] === 56) {
+    console.log("IF INCORRECTO");
+} else {
+    console.log("IF INCORRECTO");
+};
 
-console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
-let despedida = "Adios mundo :c";
-let saludo:string = "Hola Mundo! ";
-console.log(saludo.toLowerCase(), despedida.toUpperCase());
+console.log("");
+console.log("=======================================================================");
+console.log("=============================IFs ANIDADOS==============================");
+console.log("=======================================================================");
+let aux:number = 10;
+if (aux > 0){
+    console.log("PRIMER IF CORRECTO");
+    if (true && (aux === 1)){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else if (aux > 10){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else{
+        console.log("SEGUNDO IF CORRECTO");
+    };
+} else if (aux <= 3){
+    console.log("PRIMER IF INCORRECTO");
+    if (true && (aux === 1)){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else if (aux > 10){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else {
+        console.log("SEGUNDO IF CORRECTO");
+    };
+} else if (aux === array[4]){
+    console.log("PRIMER IF INCORRECTO");
+    if (true && (aux === 1)){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else if (aux > 10){
+        console.log("SEGUNDO IF INCORRECTO");
+    } else {
+        console.log("SEGUNDO IF CORRECTO");
+    };
+};
 
-console.log("Probando algunas funciones nativas de PyTypeCraft");
-console.log("Funciones relacionadas a conversiones");
-let aprox_1 = 3.141516;
-console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
-let carnet:string = "201903865";
-//console.log("Hola " + String(carnet));
-//console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
-console.log("---------------------------------");
+console.log("");
+console.log("=======================================================================");
+console.log("=================================WHILE=================================");
+console.log("=======================================================================");
+
+let index: number;
+index = 0;
+while (index >= 0) {
+    if (index === 0) {
+    	index = index + 100;
+    } else if (index > 50) { 
+        index = index / 2 - 25;
+    } else {
+        index = (index / 2) - 1;
+    
+    };
+
+    console.log(index);
+};
+
+console.log("");
+console.log("=======================================================================");
+console.log("================================WHILE-2================================");
+console.log("=======================================================================");
+
+index= -2;
+index = index + 1;
+
+while (index !== 12) {
+    index = index + 1;
+    
+    if (index === 0 || index === 1 || index === 11 || index === 12) {
+        console.log("*********************************************************************************************************");
+    }else if (index === 2) {
+        console.log("**********  ***************  ******                 ******                 ******              **********");
+    }else if (index >= 3 && index <= 5) {
+        console.log("**********  ***************  ******  *********************  *************  ******  **********************");
+    }else if (index === 6) {
+        console.log("**********  ***************  ******                 ******                 ******  **********************");
+    } else if (index >= 7 && index <= 9) {
+        console.log("**********  ***************  ********************   ******  *************  ******  **********************");
+    } else if (index === 10) {
+        console.log("**********                   ******                 ******  *************  ******              **********");
+    };
+};
+
+console.log("");
+console.log("=======================================================================");
+console.log("=============================TRANSFERENCIA=============================");
+console.log("=======================================================================");
+
+let a:number = -1;
+while (a < 5){
+    a = a + 1;
+    if (a === 3){
+        console.log("a");
+        continue;
+    } else if (a === 4){
+        console.log("b");
+        break;
+    };
+    console.log("El valor de a es: ", a, ", ");
+};
+
+console.log("Se debió imprimir");
+
+console.log("");
+console.log("=======================================================================");
+console.log("==================================FOR==================================");
+console.log("=======================================================================");
+
+for (let i=0; i<=9; i++){
+    let output = "";
+    for (let j =0; j<10; j++){
+        output = output + " ";
+    };
+
+    for (let k =0; k<10; k++ ){
+        output = output + "* ";
+    };
+
+
+    console.log(output);
+
+};
+
+console.log("");
+console.log("=======================================================================");
+console.log("=================================FOR-2=================================");
+console.log("=======================================================================");
+
+let arr = [1,2,3,4,5,6];
+for (let i of [1,2,3,4,5,6]){
+    console.log(arr[i] === 1, arr[i] === 2, arr[i] === 3, arr[i] === 4, arr[i] === 5, arr[i] === 6);
+};
+
+console.log("");
+console.log("=======================================================================");
+console.log("=================================FOR-3=================================");
+console.log("=======================================================================");
+for (let e of [1,2,3,4,5,6]){
+    if(ar > e){
+        console.log(e+arr[e],e+arr[e],e+arr[e],e+arr[e],e+arr[e],e+arr[e]);
+    };
+};
+
+console.log("");
+console.log("=======================================================================");
+console.log("=================================FOR-4=================================");
+console.log("=======================================================================");
+for (let letra of "Calificacion de Intermedio"){
+    console.log(letra);
+};
 """)
 
 print("instrucciones:")
