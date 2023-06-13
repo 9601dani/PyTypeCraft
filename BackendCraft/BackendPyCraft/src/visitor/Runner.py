@@ -49,10 +49,10 @@ class Runner(Visitor):
             for value in i.value:
                 vr = value.accept(self)
                 if vr is not None:
-                    str += vr
+                    dato += str(vr.value)
             if dato is not None:
-                print(dato)
                 array_datos.append(dato)
+            print(array_datos.__str__())
         else:
             pass
          #AÑADIR ERROR PORQUE EL VALOR DE CONSOLE ES NULL, NO HAY INSTRUCCIONES
@@ -103,19 +103,20 @@ class Runner(Visitor):
     def visit_value(self, i: Value):
         variable = Variable()
         if i.value_type == ValueType.CADENA:
-            variable.data_type = VariableType.buscar_type("STRING")
+            variable.data_type = VariableType().buscar_type("STRING")
             variable.value = str(i.value)
             return variable
         elif i.value_type == ValueType.ENTERO:
-            variable.data_type = VariableType.buscar_type("NUMBER")
+            variable.data_type = VariableType().buscar_type("NUMBER")
             variable.value = int(i.value)
             return variable
         elif i.value_type == ValueType.DECIMAL:
-            variable.data_type = VariableType.buscar_type("NUMBER")
+            variable.data_type = VariableType().buscar_type("NUMBER")
             variable.value = float(i.value)
+            print("retorne numero float")
             return variable
         elif i.value_type == ValueType.BOOLEANO:
-            variable.data_type = VariableType.buscar_type("BOOLEAN")
+            variable.data_type = VariableType().buscar_type("BOOLEAN")
             variable.value = bool(i.value)
             return variable
         elif i.value_type == ValueType.LITERAL:

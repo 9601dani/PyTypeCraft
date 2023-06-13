@@ -1,10 +1,9 @@
 from ..models.SymbolType import SymbolType
 from ..models.Variable import Variable
-from ..symbolTable.SymbolTable import SymbolTable
 
 class SymbolTable:
 
-    def __init__(self, *parent: SymbolTable):
+    def __init__(self, *parent):
         self.symbols = []
         if parent:
             self.parent = parent
