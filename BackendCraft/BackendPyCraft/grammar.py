@@ -455,12 +455,19 @@ def p_instruccion_assingnacion_instruction2(t):
 def p_instruccion_assignacion_instruction3(t):
     '''assignacion_instruction      : LITERAL IGUAL a'''
     t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,t[3], True)
+
+def p_instruccion_assignacion_instruction4(t):
+    '''assignacion_instruction      : LITERAL'''
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,None, True)
+    #print("####ASIGNACION####")
+    #print(t[0])
 def p_instruccion_type(t):
     '''type      : NUMBER
                  | STRING
                  | BOOLEAN
                  | ANY
-                 | LITERAL'''
+                 | LITERAL
+                 | NULL'''
     t[0] = t[1]
 ############################################## ASIGNACION DE VARIABLE ##############################################
 def p_instruccion_assig_pro(t):
@@ -549,7 +556,7 @@ def p_instruccion_expresion6(t):
 
 def p_instruccion_expresion7(t):
     ''' c      : NOT d'''
-    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], OperationType.NOT)
+    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], OperationType.NOT)
 
 def p_instruccion_expresion8(t):
     ''' c      : d '''
@@ -720,3 +727,5 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""""")
+
+

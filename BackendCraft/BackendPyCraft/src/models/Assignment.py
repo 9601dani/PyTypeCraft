@@ -13,4 +13,4 @@ class Assignment (Instruction):
         self.isAny= isAny
         
     def __str__(self):
-        return f"""{{"Assignment": {self.id}, {self.type}, {self.value.__str__()}}}"""
+        return f"""{{"Assignment": {self.id}, {self.type}, {self.value.__str__()}, {self.isAny}}}"""

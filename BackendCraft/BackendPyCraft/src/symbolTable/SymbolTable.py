@@ -48,3 +48,9 @@ class SymbolTable:
     #BOOLEAN METHOD, RETURN TRUE IF FUNCTION IS IN TABLE, IF NOT RETURN FALSE
     def fun_in_table(self, id: str):
         return any( (var.id == id and var.symbol_type == SymbolType.FUNCTION) for var in self.symbols)
+
+    def __str__(self):
+        data = ""
+        for symbol in self.symbols:
+            data+= symbol.__str__()
+        return f"""{{"SymbolTable": {data}}}"""
