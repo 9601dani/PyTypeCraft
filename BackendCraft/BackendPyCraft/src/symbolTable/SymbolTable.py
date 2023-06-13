@@ -7,6 +7,8 @@ class SymbolTable:
         self.symbols = []
         if parent:
             self.parent = parent
+        else:
+            self.parent = None
 
     def add_variable(self, variable: Variable):
         self.symbols.append(variable)
@@ -17,10 +19,11 @@ class SymbolTable:
         current_table = self
 
         while current_table is not None:
-            var_in_table = filter(lambda var: (var.id == id and var.symbol_type == SymbolType.VARIABLE), self.symbols)
 
-            if var_in_table is not None:
-                return var_in_table
+            for symbol in current_table.symbols:
+                if symbol.symbol_type == SymbolType.VARIABLE and symbol.id == id:
+                    print("Variable encontrada: "+symbol.__str__())
+                    return symbol
 
             current_table = current_table.parent
 
@@ -36,10 +39,10 @@ class SymbolTable:
         current_table = self
 
         while current_table is not None:
-            fun_in_table = filter(lambda var: (var.id == id and var.symbol_type == SymbolType.FUNCTION), self.symbols)
-
-            if fun_in_table is not None:
-                return fun_in_table
+            for symbol in current_table.symbols:
+                if symbol.symbol_type == SymbolType.FUNCTION and symbol.id == id:
+                    print("Variable encontrada: "+symbol.__str__())
+                    return symbol
 
             current_table = current_table.parent
 

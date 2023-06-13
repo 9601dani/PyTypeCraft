@@ -386,7 +386,7 @@ class Debugger(Visitor):
             result.value = True if i.value == "true" else False
             return result
         elif i.value_type == ValueType.LITERAL:
-            var_in_table = self.symbol_table.var_in_table(i.value)
+            var_in_table = self.symbol_table.find_var_by_id(i.value)
             if var_in_table is None:
                 print("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
                 return None
