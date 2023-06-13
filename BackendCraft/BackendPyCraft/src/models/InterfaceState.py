@@ -4,7 +4,7 @@ from .Instruction import Instruction
 class InterfaceState(Instruction):
 
     def accept(self, visitor):
-        visitor.visit_interface(self)
+        return visitor.visit_interface(self)
 
     def __init__(self, line: int, column: int, id: str, attributes: [Instruction]):
         super().__init__(line, column)

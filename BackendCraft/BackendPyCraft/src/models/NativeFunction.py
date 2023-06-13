@@ -4,7 +4,7 @@ from .NativeFunType import NativeFunType
 
 class NativeFunction(Instruction):
     def accept(self, visitor):
-        visitor.visit_native(self)
+        return visitor.visit_native(self)
 
     def __init__(self, line, column, variable, type: NativeFunType, parameter):
         super().__init__(line, column)

@@ -2,7 +2,7 @@ from .Instruction import Instruction
 from .VariableType import VariableType
 class Assignment (Instruction):
     def accept(self, visitor):
-        visitor.visit_assignment(self)
+        return visitor.visit_assignment(self)
 
 
     def __init__(self, line, column, id, type,value: Instruction, isAny):

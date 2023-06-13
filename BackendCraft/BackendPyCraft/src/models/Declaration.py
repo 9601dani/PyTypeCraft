@@ -5,7 +5,7 @@ class Declaration(Instruction):
 
     def accept(self, visitor: Visitor):
         # print(visitor)
-        visitor.visit_declaration(self)
+        return visitor.visit_declaration(self)
 
     def __init__(self, line: int, column: int, type: str, instructions: [Instruction]):
         super().__init__(line, column)

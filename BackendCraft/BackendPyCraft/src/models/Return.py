@@ -3,7 +3,7 @@ from .Instruction import Instruction
 
 class Return(Instruction):
     def accept(self, visitor):
-        visitor.visit_return(self)
+       return visitor.visit_return(self)
 
     def __init__(self, line, column, expression):
         super().__init__(line, column)

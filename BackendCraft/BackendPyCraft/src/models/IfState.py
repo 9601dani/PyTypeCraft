@@ -2,7 +2,7 @@ from .Instruction import Instruction
 class IfState (Instruction):
 
         def accept(self, visitor):
-            visitor.visit_if(self)
+           return visitor.visit_if(self)
 
         def __init__(self, line, column, condition, bloque_verdadero, bloque_falso):
             super().__init__(line, column)

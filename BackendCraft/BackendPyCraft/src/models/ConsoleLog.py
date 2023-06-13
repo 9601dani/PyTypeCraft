@@ -3,7 +3,7 @@ from .Instruction import Instruction
 
 class ConsoleLog(Instruction):
     def accept(self, visitor):
-        visitor.visit_console(self)
+       return visitor.visit_console(self)
 
     def __init__(self, line, column, value: [Instruction]):
         super().__init__(line, column)
