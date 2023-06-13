@@ -16,5 +16,7 @@ class OperationType:
     POTENCIA = "POTENCIA",
     INCREMENT= "INCREMENT",
     DECREMENT = "DECREMENT",
+    NEGATIVE = "NEGATIVE",
+    POSITIVE = "POSITIVE"
 
 

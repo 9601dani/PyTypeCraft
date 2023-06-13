@@ -29,8 +29,8 @@ reservadas ={
     'toString' : 'TOSTRING',
     'toFixed' : 'TOFIXED',
     'toExponential' : 'TOEXPONENTIAL',
-    'toLowercase' : 'TOLOWERCASE',
-    'toUppercase' : 'TOUPPERCASE',
+    'toLowerCase' : 'TOLOWERCASE',
+    'toUpperCase' : 'TOUPPERCASE',
     'split' : 'SPLIT',
     'concat' : 'CONCAT',
     # Print Console
@@ -540,7 +540,7 @@ def p_instruccion_expresion6(t):
 
 def p_instruccion_expresion7(t):
     ''' c      : NOT d'''
-    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[2], OperationType.NOT)
+    t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[1], OperationType.NOT)
 
 def p_instruccion_expresion8(t):
     ''' c      : d '''
@@ -565,23 +565,34 @@ def p_instruccion_expresion11(t):
     t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
 
 def p_instruccion_expresion12(t):
-    ''' e     : f '''
+    ''' e     :  f '''
     t[0] = t[1]
 
 def p_instruccion_expresion13(t):
-    ''' f     : f TIMES g
-                | f DIVIDE g
-                | f MOD g
-                | f POTENCIA g'''
-    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
+    ''' f     : MENOS g
+                | MAS g '''
+    if t[1] == "-":
+        t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], OperationType.NEGATIVE)
+    elif t[1] == "+":
+        t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[1]),t[2], OperationType.POSITIVE)
 
 def p_instruccion_expresion14(t):
     ''' f     : g '''
     t[0] = t[1]
-
 def p_instruccion_expresion15(t):
-    '''f    : g PUNTO nativeFun L_PAREN expresion R_PAREN
-            | g PUNTO nativeFun L_PAREN R_PAREN'''
+    ''' g     : g TIMES h
+                | g DIVIDE h
+                | g MOD h
+                | g POTENCIA h'''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
+
+def p_instruccion_expresion16(t):
+    ''' g     : h '''
+    t[0] = t[1]
+
+def p_instruccion_expresion17(t):
+    '''g    : h PUNTO nativeFun L_PAREN expresion R_PAREN
+            | h PUNTO nativeFun L_PAREN R_PAREN'''
     # print("EVALUANDO NATIVAS")
     # print(t[3])
     if(t[5] == ")"):
@@ -589,34 +600,34 @@ def p_instruccion_expresion15(t):
     else:
         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
 
-def p_instruccion_expresion16(t):
-    ''' g     : ENTERO'''
+def p_instruccion_expresion18(t):
+    ''' h     : ENTERO'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.ENTERO)
 
-def p_instruccion_expresion17(t):
-    ''' g     : DECIMAL'''
+def p_instruccion_expresion19(t):
+    ''' h     : DECIMAL'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.DECIMAL)
 
-def p_instruccion_expresion18(t):
-    ''' g     : CADENA'''
+def p_instruccion_expresion20(t):
+    ''' h     : CADENA'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.CADENA)
 
-def p_instruccion_expresion19(t):
-    ''' g     : LITERAL'''
+def p_instruccion_expresion21(t):
+    ''' h     : LITERAL'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL)
 
-def p_instruccion_expresion20(t):
-    ''' g     : TRUE
+def p_instruccion_expresion22(t):
+    ''' h     : TRUE
               | FALSE'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.BOOLEANO)
 
-def p_instruccion_expresion21(t):
-    ''' g     : call_function_pro
+def p_instruccion_expresion23(t):
+    ''' h     : call_function_pro
               | array_pro
               | interface_assi'''
     t[0] = t[1]
 def p_instruccion_expresion24(t):
-    ''' g     : L_PAREN a R_PAREN'''
+    ''' h     : L_PAREN a R_PAREN'''
     t[0] = t[2]
 
 def p_instruccion_sumadores(t):
@@ -690,16 +701,37 @@ instruccion : [Instruction] =parse("""
 let val1:number = 1;
 let val2:number = 10;
 let val3:number = 2021.2020;
+
 console.log("Probando declaracion de variables \n");
 console.log(val1, " ", val2, " ", val3);
 console.log("---------------------------------");
-
 // COMENTARIO DE UNA LINEA
 val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
-val2 = 11 * (11 % (12 + 10)) + 22 / 2;
+val2 = 11 * (11 % (12 + -10)) + 22 / 2;
 val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
 console.log("Probando asignación de variables y aritmeticas");
 console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
+
+let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
+let rel2 = (7*7) <= (15+555) && 1 < 2;
+let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
+console.log("Probando relacionales y logicas");
+console.log(rel1, " ", rel2, " ", rel3);
+console.log("---------------------------------");
+
+console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
+let despedida = "Adios mundo :c";
+let saludo:string = "Hola Mundo! ";
+console.log(saludo.toLowerCase(), despedida.toUpperCase());
+
+console.log("Probando algunas funciones nativas de PyTypeCraft");
+console.log("Funciones relacionadas a conversiones");
+let aprox_1 = 3.141516;
+console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
+let carnet:string = "201903865";
+//console.log("Hola " + String(carnet));
+//console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
 console.log("---------------------------------");
 """)
 

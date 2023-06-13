@@ -1,5 +1,3 @@
-from symtable import SymbolTable
-
 from src.models.SymbolType import SymbolType
 from src.models.Variable import Variable
 
