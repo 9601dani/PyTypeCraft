@@ -11,4 +11,4 @@ class Value(Instruction):
        return visitor.visit_value(self)
 
     def __str__(self):
-        return f"""{{"Value": {self.value}, {self.type}}}"""
+        return f"""{{"Value": {self.value}, {self.value_type}}}"""

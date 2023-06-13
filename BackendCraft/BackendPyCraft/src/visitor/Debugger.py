@@ -20,9 +20,20 @@ from ..models import Return
 from ..models import UnaryOperation
 from ..models import WhileState
 from ..models import Value
+from ..models.Variable import Variable
+from ..models.SymbolType import SymbolType
+from ..symbolTable.SymbolTable import SymbolTable
+from ..models.ValueType import ValueType
+from ..models.VariableType import VariableType
+import copy
 
 
 class Debugger(Visitor):
+
+    def __init__(self, symbol_table: SymbolTable, errors):
+        super().__init__()
+        self.symbol_table = symbol_table
+        self.errors = errors
 
     def visit_assignment(self, i: Assignment):
         print("assignment debug")
@@ -40,7 +51,15 @@ class Debugger(Visitor):
         print("callFun debug")
 
     def visit_console(self, i: ConsoleLog):
-        print("console debug")
+        if i.value is None:
+            print("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+            pass
+
+        for value in i.value:
+            result = value.accept(self)
+            if result is None:
+                print("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+
 
     def visit_continue(self, i: Continue):
         print("continue debug")
@@ -96,4 +115,31 @@ class Debugger(Visitor):
         print("while debug")
 
     def visit_value(self, i: Value):
-        print("value debug")
+        result = Variable()
+        if i.value_type == ValueType.CADENA:
+            result.data_type = VariableType.buscar_type("STRING")
+            result.value = str(i.value)
+            return result
+        elif i.value_type == ValueType.ENTERO:
+            result.data_type = VariableType.buscar_type("NUMBER")
+            result.value = int(i.value)
+            return result
+        elif i.value_type == ValueType.DECIMAL:
+            result.data_type = VariableType.buscar_type("NUMBER")
+            result.value = float(i.value)
+            return result
+        elif i.value_type == ValueType.BOOLEANO:
+            result.data_type = VariableType.buscar_type("BOOLEAN")
+            result.value = bool(i.value)
+        elif i.value_type == ValueType.LITERAL:
+            var_in_table = self.symbol_table.var_in_table(i.value)
+            if var_in_table is None:
+                print("NO SE ENCONTRÓ LA VARIABLE: "+i.value+" EN LA TABLA DE SIMBOLOS")
+                return None
+
+            result = copy.deepcopy(var_in_table)
+            return result
+
+
+
+
