@@ -662,10 +662,10 @@ def p_instruccion_dimensions2(t):
 def p_instruccion_sumadores(t):
         ''' sumadores     : LITERAL MAS MAS
                           | LITERAL MENOS MENOS '''
-        if(t[2] == "MAS"):
-            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.INCREMENT)
+        if(t[2] == "+"):
+            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL), OperationType.INCREMENT)
         else:
-            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], OperationType.DECREMENT)
+            t[0] = UnaryOperation(t.lineno(1),find_column(input, t.slice[2]),Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL), OperationType.DECREMENT)
 
 
 ############################################## ASIGNAR INTERFACE ##############################################
@@ -726,4 +726,15 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion : [Instruction] =parse("""""")
+instruccion : [Instruction] =parse("""
+let daniel:number=1;
+daniel--;
+let b=daniel;
+console.log(daniel);
+""")
+
+tabla_simbolos = SymbolTable()
+debug= Runner(tabla_simbolos, [])
+for instr in instruccion:
+    instr.accept(debug)
+

@@ -450,7 +450,6 @@ class Runner(Visitor):
 
     def visit_unary_op(self, i: UnaryOperation):
         right = i.right_operator.accept(self)
-
         if right is None:
             self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA.")
             return None
@@ -482,22 +481,26 @@ class Runner(Visitor):
             result.value = not right.value
             return result
 
-        elif i.operator == OperationType.INCREMENTO:
+        elif i.operator == OperationType.INCREMENT:
+            var = self.symbol_table.find_var_by_id(right.id)
             if right.data_type != VariableType.lista_variables["NUMBER"]:
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = right.value + 1
+            var.value = result.value
             return result
 
-        elif i.operator == OperationType.DECREMENTO:
+        elif i.operator == OperationType.DECREMENT:
+            var = self.symbol_table.find_var_by_id(right.id)
             if right.data_type != VariableType.lista_variables["NUMBER"]:
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = right.value - 1
+            var.value = result.value
             return result
 
     def visit_while(self, i: WhileState):
