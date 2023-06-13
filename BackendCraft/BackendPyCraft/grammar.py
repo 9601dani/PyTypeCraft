@@ -232,6 +232,7 @@ from src.models.Value import Value
 from src.models.ValueType import ValueType
 from src.visitor.Debugger import Debugger
 from src.visitor.Runner import Runner
+from src.symbolTable.SymbolTable import SymbolTable
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
