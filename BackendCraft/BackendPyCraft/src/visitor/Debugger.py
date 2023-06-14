@@ -37,9 +37,70 @@ class Debugger(Visitor):
         self.errors = errors
 
     def visit_assignment(self, i: Assignment):
-        print("assignment debug")
-        if i.value:
-            i.value.accept(self)
+        result = Variable()
+        result.isAny = i.isAny
+        result.id = i.id
+        # print("VARIABLE EN ASSIGNMENT: ",i.id)
+
+        if i.value is None:
+            if i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("NUMBER")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = 0
+                return result
+            elif i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = ""
+                return result
+            elif i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("BOOLEAN")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = False
+                return result
+            elif i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("NULL")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = None
+                return result
+            elif i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = ''
+                return result
+            elif i.type is None:
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = ''
+                return result
+
+        else:
+            value: Variable = i.value.accept(self)
+
+            if value is None:
+                self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                return None
+
+            if result.isAny:
+                # print("VALUE ASSIG: "+value.data_type)
+                result.data_type = value.data_type
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = value.value
+                return result
+
+            if i.type != value.data_type:
+                print(str(value.data_type))
+                self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
+                print("LA VARIABLE NO ES DEL MISMO TIPO")
+                return None
+
+            result.data_type = value.data_type
+            result.symbol_type = SymbolType().VARIABLE
+
+            result.value = value.value
+            return result
+
 
     def visit_binary_op(self, i: BinaryOperation):
         left = i.left_operator.accept(self)
@@ -54,7 +115,7 @@ class Debugger(Visitor):
         if i.operator == OperationType.MAS:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     return None
 
@@ -65,7 +126,7 @@ class Debugger(Visitor):
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     return None
 
@@ -318,9 +379,27 @@ class Debugger(Visitor):
         print("continue debug")
 
     def visit_declaration(self, i: Declaration):
-        print("declaration debug")
+        if i.type is None:
+            self.errors.append("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.")
+
+            return None
         for instruction in i.instructions:
-            instruction.accept(self)
+            variable: Variable = instruction.accept(self)
+
+            if variable is None:
+                self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
+                return None
+
+            if self.symbol_table.var_in_table(variable.id):
+                self.errors.append("VARIABLE YA DECLARADA.")
+                return None
+
+            self.symbol_table.add_variable(variable)
+            # print(variable.data_type)
+            # print("DECLARACION DE VARIABLE EXITOSA.")
+            print(self.symbol_table.__str__())
+
+
 
     def visit_else(self, i: ElseState):
         print("else debug")
@@ -362,7 +441,60 @@ class Debugger(Visitor):
         print("return debug")
 
     def visit_unary_op(self, i: UnaryOperation):
-        print("unary debug")
+        right = i.right_operator.accept(self)
+
+        if right is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA.")
+            return None
+
+        result = Variable()
+
+        if i.operator == OperationType.NEGATIVE:
+            if right.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE VARIABLES TIPO NUMBER")
+                return None
+
+            result.data_type = VariableType().buscar_type("NUMBER")
+            result.value = -right.value
+            return result
+        if i.operator == OperationType.POSITIVE:
+            if right.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER")
+                return None
+
+            result.data_type = VariableType().buscar_type("NUMBER")
+            result.value = right.value
+            return result
+        if i.operator == OperationType.NOT:
+            if right.data_type != VariableType.lista_variables["BOOLEAN"]:
+                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLES TIPO BOOLEAN.")
+                return None
+
+            result.data_type = VariableType().buscar_type("BOOLEAN")
+            result.value = not right.value
+            return result
+        if i.operator == OperationType.INCREMENT:
+            if right.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
+                return None
+
+            var = self.symbol_table.find_var_by_id(right.id)
+
+            result.data_type = VariableType().buscar_type("NUMBER")
+            result.value = right.value + 1
+            var.value = result.value
+            return result
+        if i.operator == OperationType.DECREMENT:
+            if right.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
+                return None
+
+            var = self.symbol_table.find_var_by_id(right.id)
+
+            result.data_type = VariableType().buscar_type("NUMBER")
+            result.value = right.value - 1
+            var.value = result.value
+            return result
 
     def visit_while(self, i: WhileState):
         print("while debug")
@@ -375,10 +507,13 @@ class Debugger(Visitor):
             return result
         elif i.value_type == ValueType.ENTERO:
             result.data_type = VariableType().buscar_type("NUMBER")
+            # print("VALUE DESDE VALUE: "+result.data_type)
+
             result.value = int(i.value)
             return result
         elif i.value_type == ValueType.DECIMAL:
             result.data_type = VariableType().buscar_type("NUMBER")
+            # print("VALUE DESDE VALUE: "+result.data_type)
             result.value = float(i.value)
             return result
         elif i.value_type == ValueType.BOOLEANO:
@@ -386,9 +521,9 @@ class Debugger(Visitor):
             result.value = True if i.value == "true" else False
             return result
         elif i.value_type == ValueType.LITERAL:
-            var_in_table = self.symbol_table.find_var_by_id(i.value)
+            var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                print("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
+                self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
                 return None
 
             result = copy.deepcopy(var_in_table)

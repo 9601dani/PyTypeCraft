@@ -726,5 +726,23 @@ console.log(3+5);''')
 test_lexer(lexer)
 
 
-instruccion : [Instruction] =parse("""""")
+instruccion : [Instruction] =parse("""
+let a = 10;
+let b: boolean = a + 5;
 
+console.log("a:",a);
+console.log("b:",b);
+""")
+
+
+errors = []
+table = SymbolTable()
+debugger = Runner(table, errors)
+
+for i in instruccion:
+    if isinstance(i, Instruction):
+        i.accept(debugger)
+
+# if len(errors) > 0:
+#     for i in errors:
+#         print(str(i))
