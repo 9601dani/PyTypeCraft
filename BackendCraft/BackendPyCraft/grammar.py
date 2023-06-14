@@ -233,6 +233,8 @@ from src.models.ValueType import ValueType
 from src.visitor.Debugger import Debugger
 from src.visitor.Runner import Runner
 from src.symbolTable.SymbolTable import SymbolTable
+from src.models.InterfaceAssign import InterfaceAssign
+from src.models.CallAttribute import CallAttribute
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
@@ -446,11 +448,11 @@ def p_instruccion_declaracion_list2(t):
 
 def p_instruccion_assignacion_instruction(t):
     '''assignacion_instruction      : LITERAL COLON type IGUAL a'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),t[5], False)
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],t[5], False)
 
 def p_instruccion_assingnacion_instruction2(t):
     '''assignacion_instruction      : LITERAL COLON type'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),None,False)
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],None,False)
 
 def p_instruccion_assignacion_instruction3(t):
     '''assignacion_instruction      : LITERAL IGUAL a'''
@@ -650,6 +652,11 @@ def p_instruccion_expresion24(t):
 def p_instruccion_expresion25(t):
     '''h    : array_val_pro'''
 
+# def p_instruccion_expresion26(t):
+#     '''h    : LITERAL PUNTO LITERAL'''
+#     value = Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL)
+#     t[0] = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),value, t[3])
+
 def p_instruccion_array_val_pro(t):
     '''array_val_pro    : LITERAL dimensions'''
 
@@ -671,14 +678,22 @@ def p_instruccion_sumadores(t):
 ############################################## ASIGNAR INTERFACE ##############################################
 def p_instruccion_interfaceAssi(t):
     '''interface_assi   : L_LLAVE atributos_assi R_LLAVE'''
-
+    t[0] = InterfaceAssign(t.lineno(1),find_column(input, t.slice[1]),t[2])
 
 ############################################## ASIGNAR ATRIBUTOS INTERFACE ##############################################
 def p_instruccion_inter_atributesAssi(t):
     '''atributos_assi   : atributos_assi COMA LITERAL COLON a'''
+    t[0] = t[1]
+    t[0].append(Assignment(t.lineno(1),find_column(input, t.slice[3]),t[3],None,t[5], True))
+
+
+
 
 def p_instruccion_inter_atributesAssi2(t):
     '''atributos_assi   : LITERAL COLON a'''
+    t[0] = []
+    t[0].append(Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,t[3], True))
+
 
 ############################################## ASIGNACION DE ARREGLOS ##############################################
 def p_instruccion_array_pro(t):
@@ -727,24 +742,54 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-for (let i = 1; i <= 5; i++) {
-  if (i === 3) {
-    break;
-  }
-  console.log(i);
-}
+let val1:number = 1;
+let val2:number = 10;
+let val3:number = 2021.2020;
+
+console.log("Probando declaracion de variables \n");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
+// COMENTARIO DE UNA LINEA
+val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
+val2 = 11 * (11 % (12 + -10)) + 22 / 2;
+val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
+console.log("Probando asignación de variables y aritmeticas");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
+
+let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
+let rel2 = (7*7) <= (15+555) && 1 < 2;
+let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
+console.log("Probando relacionales y logicas");
+console.log(rel1, " ", rel2, " ", rel3);
+console.log("---------------------------------");
+
+console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
+let despedida = "Adios mundo :c";
+let saludo:string = "Hola Mundo! ";
+console.log(saludo.toLowerCase(), despedida.toUpperCase());
+
+console.log("Probando algunas funciones nativas de PyTypeCraft");
+console.log("Funciones relacionadas a conversiones");
+let aprox_1 = 3.141516;
+console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
+let carnet:string = "201903865";
+//console.log("Hola " + String(carnet));
+//console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
+console.log("---------------------------------");
 """)
 
 
 errors = []
 table = SymbolTable()
-debugger = Runner(table, errors)
+debugger = Debugger(table, errors)
 
 for i in instruccion:
     if isinstance(i, Instruction):
         i.accept(debugger)
 
-print(debugger.symbol_table.__str__())
-# if len(errors) > 0:
-#     for i in errors:
-#         print(str(i))
+# print(debugger.symbol_table.__str__())
+
+if len(errors) > 0:
+    for i in errors:
+        print(str(i))

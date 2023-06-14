@@ -1,11 +1,13 @@
 from ..models.SymbolType import SymbolType
 from ..models.Variable import Variable
+from ..symbolTable.ScopeType import ScopeType
 
 
 class SymbolTable:
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, scope=ScopeType.GLOBAL_SCOPE):
         self.symbols = []
+        self.scope = scope
         if parent:
             self.parent = parent
         else:
@@ -49,9 +51,50 @@ class SymbolTable:
 
         return None
 
+    def find_interface_by_id(self, id: str):
+        current_table = self
+
+        while current_table is not None:
+            for symbol in current_table.symbols:
+                if symbol.symbol_type == SymbolType.INTERFACE and symbol.id == id:
+                    # print("Variable encontrada: "+symbol.__str__())
+                    return symbol
+
+            current_table = current_table.parent
+
+        return None
+
     # BOOLEAN METHOD, RETURN TRUE IF FUNCTION IS IN TABLE, IF NOT RETURN FALSE
     def fun_in_table(self, id: str):
         return any((var.id == id and var.symbol_type == SymbolType.FUNCTION) for var in self.symbols)
+
+    def is_in_fun_scope(self):
+        current_table = self
+
+        if current_table.scope == ScopeType.GLOBAL_SCOPE:
+            return False
+
+        while current_table is not None:
+            if current_table.scope == ScopeType.FUNCTION_SCOPE:
+                return True
+
+            current_table = current_table.parent
+
+        return False
+
+    def is_in_loop_scope(self):
+        current_table = self
+
+        if current_table.scope == ScopeType.GLOBAL_SCOPE:
+            return False
+
+        while current_table is not None:
+            if current_table.scope == ScopeType.LOOP_SCOPE:
+                return True
+
+            current_table = current_table.parent
+
+        return False
 
     def __str__(self):
         data = ""

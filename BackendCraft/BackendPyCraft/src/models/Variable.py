@@ -9,4 +9,4 @@ class Variable:
         self.isAny = None
 
     def __str__(self):
-        return f"""{{"Variable": id: {self.id}, data_type: {self.data_type}, value: {self.value}, type_modifies: {self.type_modifier}, isAny?: {self.isAny}}}"""
+        return f"""{{"Variable": id: {self.id}, data_type: {self.data_type}, value: {self.value}, symbol_type: {self.symbol_type}, type_modifies: {self.type_modifier}, isAny?: {self.isAny}}}"""

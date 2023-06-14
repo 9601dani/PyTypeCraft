@@ -3,6 +3,7 @@ from .Visitor import Visitor
 from ..models import Assignment, Parameter
 from ..models import BinaryOperation
 from ..models import Break
+from ..models import CallAttribute
 from ..models import CallFunction
 from ..models import ConsoleLog
 from ..models import Continue
@@ -12,6 +13,7 @@ from ..models import ForEachState
 from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
+from ..models import InterfaceAssign
 from ..models import InterfaceState
 from ..models import NativeFunction
 from ..models import OnlyAssignment
@@ -381,6 +383,9 @@ class Runner(Visitor):
         else:
             return i
 
+    def visit_call_attr(self, i: CallAttribute):
+        pass
+
     def visit_call_fun(self, i: CallFunction):
         pass
 
@@ -524,6 +529,9 @@ class Runner(Visitor):
             else:
                 self.symbol_table = self.symbol_table.parent
                 return None
+
+    def visit_interface_assign(self, i: InterfaceAssign):
+        pass
 
     def visit_interface(self, i: InterfaceState):
         pass

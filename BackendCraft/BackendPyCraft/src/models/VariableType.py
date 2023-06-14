@@ -25,6 +25,13 @@ class VariableType:
         for key, value in self.lista_variables.items():
             if key == tipo.upper():
                 return value
-        self.lista_variables[tipo] = tipo
-        return tipo
+        return self.lista_variables["DEFINIRLA"]
 
+    def add_type(self, type):
+        self.lista_variables[type.upper()] = type
+
+    def type_declared(self, type):
+        for key, value in self.lista_variables.items():
+            if key == type.upper():
+                return True
+        return False

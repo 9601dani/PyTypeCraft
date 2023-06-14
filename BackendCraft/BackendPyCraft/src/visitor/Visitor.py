@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from ..models import Assignment
 from ..models import BinaryOperation
 from ..models import Break
+from ..models import CallAttribute
 from ..models import CallFunction
 from ..models import ConsoleLog
 from ..models import Continue
@@ -11,6 +12,7 @@ from ..models import ForEachState
 from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
+from ..models import InterfaceAssign
 from ..models import InterfaceState
 from ..models import NativeFunction
 from ..models import OnlyAssignment
@@ -36,6 +38,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_break(self, i: Break):
+        pass
+
+    @abstractmethod
+    def visit_call_attr(self, i: CallAttribute):
         pass
 
     @abstractmethod
@@ -72,6 +78,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_if(self, i: IfState):
+        pass
+
+    @abstractmethod
+    def visit_interface_assign(self, i: InterfaceAssign):
         pass
 
     @abstractmethod

@@ -2,6 +2,7 @@ from .Visitor import Visitor
 from ..models import Assignment
 from ..models import BinaryOperation
 from ..models import Break
+from ..models import CallAttribute
 from ..models import CallFunction
 from ..models import ConsoleLog
 from ..models import Continue
@@ -11,6 +12,7 @@ from ..models import ForEachState
 from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
+from ..models import InterfaceAssign
 from ..models import InterfaceState
 from ..models import Instruction
 from ..models import NativeFunction
@@ -26,7 +28,10 @@ from ..symbolTable.SymbolTable import SymbolTable
 from ..models.ValueType import ValueType
 from ..models.VariableType import VariableType
 from ..models.OperationType import OperationType
+from ..symbolTable.ScopeType import ScopeType
+from ..symbolModel.InterfaceModel import InterfaceModel
 import copy
+from decimal import Decimal
 
 
 class Debugger(Visitor):
@@ -91,7 +96,7 @@ class Debugger(Visitor):
             # print(i.type)
             if value is None:
                 self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
-                print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
                 return None
 
             if i.type is None or i.type == VariableType().buscar_type("ANY"):
@@ -100,6 +105,46 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.value = value.value
                 result.isAny = True
+                return result
+
+            if value.data_type == VariableType().buscar_type("DEFINIRLA"):
+                if not VariableType().type_declared(i.type):
+                    self.errors.append("NO SE ENCONTRÓ EL TIPO")
+                    return None
+
+                interface = self.symbol_table.find_interface_by_id(i.type)
+
+                if interface is None:
+                    self.errors.append("NO SE ENCONTRÓ LA INTERFAZ")
+                    return None
+
+                model: InterfaceModel = interface.value
+                valueModel: InterfaceModel = value.value
+
+                if len(model.attributes) != len(valueModel.attributes):
+                    self.errors.append("EL NÚMERO DE ATRIBUTOS NO COINCIDE")
+                    return None
+
+                for attr in model.attributes:
+                    attrInValue = None
+                    for valueAttr in valueModel.attributes:
+                            if attr.id == valueAttr.id:
+                                attrInValue = valueAttr
+                                break
+
+                    if attrInValue is None:
+                        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: "+attr.id)
+                        return None
+
+                    if attr.data_type != attrInValue.data_type:
+                        self.errors.append("LOS TIPOS DE ATRIBUTOS NO COINCIDEN")
+                        return None
+
+                result.data_type = i.type
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = valueModel
+                result.isAny = False
+
                 return result
 
             if i.type != value.data_type:
@@ -131,9 +176,9 @@ class Debugger(Visitor):
                     self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("NUMBER")
-                result.value = left.value + right.value
+                result.value = Decimal(left.value) + Decimal(right.value)
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -142,7 +187,7 @@ class Debugger(Visitor):
                     self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("STRING")
                 result.value = left.value + right.value
                 # result.type_modifier = False
@@ -160,7 +205,7 @@ class Debugger(Visitor):
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE NUMBER.")
                 return None
 
-            result.symbol_type = SymbolType.VARIABLE
+            result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value - right.value
             # result.type_modifier = False
@@ -172,7 +217,7 @@ class Debugger(Visitor):
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (*) ENTRE NUMBER.")
                 return None
 
-            result.symbol_type = SymbolType.VARIABLE
+            result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value * right.value
             # result.type_modifier = False
@@ -189,7 +234,7 @@ class Debugger(Visitor):
                 self.errors.append("NO PUEDE DIVIDIR ENTRE CERO.")
                 return None
 
-            result.symbol_type = SymbolType.VARIABLE
+            result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value / right.value
             # result.type_modifier = False
@@ -201,7 +246,7 @@ class Debugger(Visitor):
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (%) ENTRE NUMBER.")
                 return None
 
-            result.symbol_type = SymbolType.VARIABLE
+            result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value % right.value
             # result.type_modifier = False
@@ -213,7 +258,7 @@ class Debugger(Visitor):
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (^) ENTRE NUMBER.")
                 return None
 
-            result.symbol_type = SymbolType.VARIABLE
+            result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value ** right.value
             # result.type_modifier = False
@@ -226,7 +271,7 @@ class Debugger(Visitor):
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value > right.value
                 # result.type_modifier = False
@@ -239,7 +284,7 @@ class Debugger(Visitor):
 
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value > right.value
                 # result.type_modifier = False
@@ -256,7 +301,7 @@ class Debugger(Visitor):
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value < right.value
                 # result.type_modifier = False
@@ -269,7 +314,7 @@ class Debugger(Visitor):
 
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value < right.value
                 # result.type_modifier = False
@@ -286,7 +331,7 @@ class Debugger(Visitor):
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value >= right.value
                 # result.type_modifier = False
@@ -299,7 +344,7 @@ class Debugger(Visitor):
 
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value >= right.value
                 # result.type_modifier = False
@@ -316,7 +361,7 @@ class Debugger(Visitor):
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value <= right.value
                 # result.type_modifier = False
@@ -329,7 +374,7 @@ class Debugger(Visitor):
 
                     return None
 
-                result.symbol_type = SymbolType.VARIABLE
+                result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value <= right.value
                 # result.type_modifier = False
@@ -376,6 +421,22 @@ class Debugger(Visitor):
     def visit_break(self, i: Break):
         print("break debug")
 
+    def visit_call_attr(self, i: CallAttribute):
+        value:Variable = i.id.accept(self)
+
+        if value is None:
+            self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
+            return None
+
+        model: InterfaceModel = value.value
+
+        for attribute in model.attributes:
+            if attribute.id == i.attr:
+                return attribute
+
+        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: "+i.attr)
+        return None
+
     def visit_call_fun(self, i: CallFunction):
         print("callFun debug")
 
@@ -388,7 +449,7 @@ class Debugger(Visitor):
         for value in i.value:
             result = value.accept(self)
             if result is None:
-                print("NO SE PUDO REALIZAR LA OPERACIÓN.")
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN.")
                 continue
 
             content = content + " " + str(result.value)
@@ -420,7 +481,7 @@ class Debugger(Visitor):
             print(self.symbol_table.__str__())
 
     def visit_else(self, i: ElseState):
-        temporal_table = SymbolTable(self.symbol_table)
+        temporal_table = SymbolTable(self.symbol_table, ScopeType.ELSE_SCOPE)
         self.symbol_table = temporal_table
         for instruction in i.bloque:
             instruction.accept(self)
@@ -432,9 +493,27 @@ class Debugger(Visitor):
         print("foreach debug")
 
     def visit_for(self, i: ForState):
-        print("for debug")
+        temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+        self.symbol_table = temporal_table
+        i.declaration.accept(self)
+
+        condition = i.condition.accept(self)
+        if condition is None:
+            self.errors.append("NO SE PUDO REALIZAR LA COMPARACIÓN")
+
+        else:
+            if condition.data_type is not VariableType().buscar_type("BOOLEAN"):
+                self.errors.append("LA OPERACIÓN DEBE SER DE TIPO BOOLEAN")
+
         for instruction in i.instructions:
             instruction.accept(self)
+
+        increment = i.increment.accept(self)
+
+        if increment is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+
+        self.symbol_table = temporal_table.parent
 
     def visit_function(self, i: FunctionState):
         print("function debug")
@@ -450,7 +529,7 @@ class Debugger(Visitor):
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append("LA CONDICIÓN DEBE SER TIPO BOOLEAN")
 
-        temporal_table = SymbolTable(self.symbol_table)
+        temporal_table = SymbolTable(self.symbol_table, ScopeType.IF_SCOPE)
         self.symbol_table = temporal_table
 
         for instruction in i.bloque_verdadero:
@@ -461,8 +540,81 @@ class Debugger(Visitor):
         if i.bloque_falso:
             i.bloque_falso.accept(self)
 
+    def visit_interface_assign(self, i: InterfaceAssign):
+        attributes: [Variable] = []
+
+        for attr in i.attributes:
+            result:Variable = attr.accept(self)
+
+            if result is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            else:
+                is_duplicate = False
+                for a in attributes:
+                    if a.id == result.id:
+                        is_duplicate = True
+                        break
+
+                if is_duplicate:
+                    self.errors.append("ATRIBUTO YA DECLARADO")
+
+                else:
+                    attributes.append(result)
+
+        model = InterfaceModel('', attributes)
+        variable = Variable()
+        variable.data_type = VariableType().buscar_type("DEFINIRLA")
+        variable.value = model
+        variable.symbol_type = SymbolType().VARIABLE
+        variable.isAny = False
+
+        return variable
+
     def visit_interface(self, i: InterfaceState):
-        print("interface debug")
+        if VariableType().type_declared(i.id):
+            self.errors.append("YA SE HA DECLARADO LA INTERFAZ.")
+
+        else :
+            VariableType().add_type(i.id)
+
+            attributes: [Variable] = []
+
+            for attribute in i.attributes:
+
+                attr:Variable = attribute.accept(self)
+
+                if attr is None:
+                    self.errors.append("NO  SE PUDO REALIZAR LA ASIGNACIÓN")
+
+                else :
+                    is_duplicate = False
+                    for a in attributes:
+                        if attr.id == a.id:
+                            is_duplicate = True
+                            break
+
+                    if is_duplicate:
+                        self.errors.append("ATRIBUTO YA DECLARADO")
+                        return None
+                    else :
+                        attributes.append(attr)
+                        print("AGREGANDO ATRIBUTO: "+attr.id)
+
+            interfaceModel = InterfaceModel(i.id, attributes)
+
+            result = Variable()
+            result.id = i.id
+            result.symbol_type = SymbolType().INTERFACE
+            result.isAny = False
+            result.data_type = i.id
+            result.value = interfaceModel
+
+            self.symbol_table.add_variable(result)
+            print("AGREGANDO VARIABLE: "+result.__str__())
+
+            return result
+
+
 
     def visit_native(self, i: NativeFunction):
         print("native debug")
@@ -496,7 +648,21 @@ class Debugger(Visitor):
         print("parameter debug")
 
     def visit_return(self, i: Return):
-        print("return debug")
+        if not self.symbol_table.is_in_fun_scope():
+            self.errors.append("SOLO PUEDE UTILIZAR LA INSTRUCCIÓN RETURN DENTRO DE UNA FUNCIÓN")
+            return None
+
+        if i.expression is None:
+            return None
+
+        result: Variable = i.expression.accept(self)
+
+        if result is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            return None
+
+        return result
+
 
     def visit_unary_op(self, i: UnaryOperation):
         right = i.right_operator.accept(self)
@@ -565,7 +731,7 @@ class Debugger(Visitor):
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN")
 
-        temporal_table = SymbolTable(self.symbol_table)
+        temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
         self.symbol_table = temporal_table
         for instruction in i.instructions:
             instruction.accept(self)
