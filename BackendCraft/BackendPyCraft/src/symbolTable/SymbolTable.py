@@ -3,7 +3,7 @@ from ..models.Variable import Variable
 
 class SymbolTable:
 
-    def __init__(self, *parent):
+    def __init__(self, parent=None):
         self.symbols = []
         if parent:
             self.parent = parent

@@ -727,11 +727,22 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-let a = 10;
-let b: boolean = a + 5;
+// Ejemplo de if-else anidados
+let calificacion = 75;
 
-console.log("a:",a);
-console.log("b:",b);
+if (calificacion >= 90) {
+  console.log("Aprobado con una A");
+} else {
+  if (calificacion >= 80) {
+    console.log("Aprobado con una B");
+  } else {
+    if (calificacion >= 70) {
+      console.log("Aprobado con una C porque");
+    } else {
+      console.log("Reprobado");
+    }
+  }
+}
 """)
 
 

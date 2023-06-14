@@ -63,7 +63,7 @@ class Runner(Visitor):
                 elif i.type == VariableType.lista_variables["BOOLEAN"]:
                     variable.data_type = VariableType().buscar_type("BOOLEAN")
                     variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = False
+                    variable.value = True
                     return variable
                 elif i.type == VariableType.lista_variables["NULL"]:
                     variable.data_type = VariableType().buscar_type("NULL")
@@ -373,7 +373,11 @@ class Runner(Visitor):
             return result
 
     def visit_break(self, i: Break):
-        pass
+        if self.symbol_table.parent is None:
+            print("ERROR EN BREAK NO ESTA DENTRO DE UN CICLO.")
+            return None
+        else:
+            return i
 
     def visit_call_fun(self, i: CallFunction):
         pass
@@ -395,7 +399,11 @@ class Runner(Visitor):
         print(content)
 
     def visit_continue(self, i: Continue):
-        pass
+        if self.symbol_table.parent is None:
+            print("ERROR EN CONTINUE NO ESTA DENTRO DE UN CICLO.")
+            return None
+        else:
+            return i
 
     def visit_declaration(self, i: Declaration):
         if i.instructions is None:
@@ -426,7 +434,29 @@ class Runner(Visitor):
 
 
     def visit_else(self, i: ElseState):
-        pass
+        if i.bloque is not None:
+            tmp_if: SymbolTable = SymbolTable(self.symbol_table)
+            self.symbol_table = tmp_if
+            for elemento in i.bloque:
+                result=elemento.accept(self)
+                if result is not None:
+                    if isinstance(result, Return):
+                        return_element: Return = Return(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return return_element
+                    elif isinstance(result, Continue):
+                        continue_element: Continue = Continue(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return continue_element
+                    elif isinstance(result, Break):
+                        break_element: Break = Break(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return break_element
+
+            self.symbol_table = self.symbol_table.parent
+            return None
+        else:
+            return None
 
     def visit_foreach(self, i: ForEachState):
         pass
@@ -451,7 +481,7 @@ class Runner(Visitor):
             self.errors.append("ERROR EN IF LA CONDICION DEBE SER BOOLEANA.")
             print("ERROR EN IF LA CONDICION DEBE SER BOOLEANA.")
             return None
-        if comparacion.value:
+        if comparacion.value is True:
             tmp_if: SymbolTable = SymbolTable(self.symbol_table)
             self.symbol_table = tmp_if
             if i.bloque_verdadero is not None:
@@ -473,9 +503,7 @@ class Runner(Visitor):
             else:
                 self.symbol_table= self.symbol_table.parent
                 return None
-        else:
-            tmp_else_if: SymbolTable = SymbolTable(self.symbol_table)
-            self.symbol_table = tmp_else_if
+        elif comparacion.value is False:
             if i.bloque_falso is not None:
                 result_else = i.bloque_falso.accept(self)
                 if result_else is not None:
@@ -528,7 +556,20 @@ class Runner(Visitor):
         pass
 
     def visit_return(self, i: Return):
-        pass
+        if self.symbol_table.parent is None:
+            self.errors.append("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
+            print("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
+            return None
+        if i.value is None:
+            self.errors.append("ERROR EN RETURN NO TIENE VALOR.")
+            print("ERROR EN RETURN NO TIENE VALOR.")
+            return None
+        if i.expression is None:
+            self.errors.append("ERROR EN RETURN NO TIENE EXPRESION.")
+            print("ERROR EN RETURN NO TIENE EXPRESION.")
+            return None
+        else:
+            return i
 
     def visit_unary_op(self, i: UnaryOperation):
         right = i.right_operator.accept(self)
@@ -586,7 +627,12 @@ class Runner(Visitor):
             return result
 
     def visit_while(self, i: WhileState):
-        pass
+        isBreak = False;
+        vr: Variable = i.condition.accept(self)
+        if vr is not bool:
+            self.errors.append("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
+            print("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
+            return None
 
     def visit_value(self, i: Value):
         variable = Variable()
