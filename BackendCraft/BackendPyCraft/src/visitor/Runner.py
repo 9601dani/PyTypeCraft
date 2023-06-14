@@ -68,12 +68,12 @@ class Runner(Visitor):
                 elif i.type == VariableType.lista_variables["NULL"]:
                     variable.data_type = VariableType().buscar_type("NULL")
                     variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = ''
+                    variable.value = None
                     return variable
                 elif i.type == VariableType.lista_variables["ANY"]:
                     variable.data_type = VariableType().buscar_type("ANY")
                     variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = None
+                    variable.value = ''
                     return variable
                 elif i.type is None:
                     variable.data_type = VariableType().buscar_type("STRING")
@@ -95,6 +95,13 @@ class Runner(Visitor):
                         variable.data_type = value.data_type
                         variable.symbol_type = SymbolType().VARIABLE
                         variable.value = value.value
+                        return variable
+                    elif i.type == VariableType.lista_variables["ANY"]:
+                        variable.id = i.id
+                        variable.data_type = value.data_type
+                        variable.symbol_type = SymbolType().VARIABLE
+                        variable.value = value.value
+                        variable.isAny = True
                         return variable
                     else:
                         self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
@@ -431,7 +438,62 @@ class Runner(Visitor):
         pass
 
     def visit_if(self, i: IfState):
-        pass
+        if i.condition is None:
+            self.errors.append("ERROR EN IF NO TIENE CONDICION.")
+            print("ERROR EN IF NO TIENE CONDICION.")
+            return None
+        comparacion: Variable = i.condition.accept(self)
+        if comparacion is None:
+            self.errors.append("ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION. line: "+i.condition.line+" column: "+i.condition.column)
+            print("ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION.")
+            return None
+        if comparacion.data_type != VariableType.lista_variables["BOOLEAN"]:
+            self.errors.append("ERROR EN IF LA CONDICION DEBE SER BOOLEANA.")
+            print("ERROR EN IF LA CONDICION DEBE SER BOOLEANA.")
+            return None
+        if comparacion.value:
+            tmp_if: SymbolTable = SymbolTable(self.symbol_table)
+            self.symbol_table = tmp_if
+            if i.bloque_verdadero is not None:
+                for instruction in i.bloque_verdadero:
+                 result=instruction.accept(self)
+                if result is not None:
+                    if isinstance(result, Return):
+                          return_element: Return = Return(i.line, i.column)
+                          self.symbol_table = self.symbol_table.parent
+                          return return_element
+                    elif isinstance(result, Continue):
+                          continue_element: Continue = Continue(i.line, i.column)
+                          self.symbol_table = self.symbol_table.parent
+                          return continue_element
+                    elif isinstance(result, Break):
+                          break_element: Break = Break(i.line, i.column)
+                          self.symbol_table = self.symbol_table.parent
+                          return break_element
+            else:
+                self.symbol_table= self.symbol_table.parent
+                return None
+        else:
+            tmp_else_if: SymbolTable = SymbolTable(self.symbol_table)
+            self.symbol_table = tmp_else_if
+            if i.bloque_falso is not None:
+                result_else = i.bloque_falso.accept(self)
+                if result_else is not None:
+                    if isinstance(result_else, Return):
+                        return_element: Return = Return(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return return_element
+                    elif isinstance(result_else, Continue):
+                        continue_element: Continue = Continue(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return continue_element
+                    elif isinstance(result_else, Break):
+                        break_element: Break = Break(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return break_element
+            else:
+                self.symbol_table = self.symbol_table.parent
+                return None
 
     def visit_interface(self, i: InterfaceState):
         pass
@@ -440,8 +502,28 @@ class Runner(Visitor):
         pass
 
     def visit_only_assign(self, i: OnlyAssignment):
-        pass
+        variable: Variable = self.symbol_table.find_var_by_id(i.id)
+        if variable is None:
+            self.errors.append("ERROR EN ASIGNACION DE VARIABLE NO EXISTE LA VARIABLE.")
+            print("ERROR EN ASIGNACION DE VARIABLE NO EXISTE LA VARIABLE.")
+            return None
+        tmp: Variable = i.value.accept(self)
+        if tmp is None:
+            self.errors.append("ERROR EN ASIGNACION DE VARIABLE NO SE PUDO ASIGNAR VALOR.")
+            print("ERROR EN ASIGNACION DE VARIABLE NO SE PUDO ASIGNAR VALOR.")
+            return None
+        if variable.data_type != tmp.data_type:
+            if variable.isAny:
+                variable.data_type = tmp.data_type
+                variable.value = tmp.value
+                return None
+            else:
+                self.errors.append("ERROR EN ASIGNACION DE VARIABLE TIPOS DE DATOS DIFERENTES.")
+                print("ERROR EN ASIGNACION DE VARIABLE TIPOS DE DATOS DIFERENTES.")
+                return None
 
+        variable.value = tmp.value
+        return None
     def visit_parameter(self, i: Parameter):
         pass
 
