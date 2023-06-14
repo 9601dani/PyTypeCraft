@@ -1,4 +1,3 @@
-import copy
 
 from .Visitor import Visitor
 from ..models import Assignment, Parameter
@@ -26,7 +25,9 @@ from ..symbolTable.SymbolTable import SymbolTable
 from ..models.VariableType import VariableType
 from ..models.ValueType import ValueType
 from ..models.OperationType import OperationType
+from ..models.NativeFunType import NativeFunType
 import copy
+from decimal import Decimal
 
 
 class Runner(Visitor):
@@ -38,7 +39,7 @@ class Runner(Visitor):
 
     def visit_assignment(self, i: Assignment):
         variable = Variable()
-        if(self.symbol_table.var_in_table(i.id)):
+        if (self.symbol_table.var_in_table(i.id)):
             self.errors.append("LA VARIABLE YA ESTA DECLARADA")
             print("LA VARIABLE YA ESTA DECLARADA")
             return None
@@ -112,7 +113,6 @@ class Runner(Visitor):
                     self.errors.append("NO EXISTE VALOR")
                     return None
 
-
     def visit_binary_op(self, i: BinaryOperation):
         left = i.left_operator.accept(self)
         right = i.right_operator.accept(self)
@@ -132,7 +132,9 @@ class Runner(Visitor):
 
                 result.symbol_type = SymbolType.VARIABLE
                 result.data_type = VariableType().buscar_type("NUMBER")
-                result.value = left.value + right.value
+                a=Decimal(left.value)
+                b=Decimal(right.value)
+                result.value = a + b
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -425,20 +427,19 @@ class Runner(Visitor):
                     vr1.data_type = asigment.data_type
                     vr1.symbol_type = SymbolType().VARIABLE
                     self.symbol_table.add_variable(vr1)
-                    print("DECLARACION DE VARIABLE EXITOSA.")
-                    print(self.symbol_table.__str__())
+                    #print("DECLARACION DE VARIABLE EXITOSA.")
+                    #print(self.symbol_table.__str__())
                 else:
                     self.errors.append("ERROR EN DECLARACION DE VARIABLE NO SE PUDO ASIGNAR VALOR.")
                     print("ERROR EN DECLARACION DE VARIABLE NO SE PUDO ASIGNAR VALOR.")
                     return None
-
 
     def visit_else(self, i: ElseState):
         if i.bloque is not None:
             tmp_if: SymbolTable = SymbolTable(self.symbol_table)
             self.symbol_table = tmp_if
             for elemento in i.bloque:
-                result=elemento.accept(self)
+                result = elemento.accept(self)
                 if result is not None:
                     if isinstance(result, Return):
                         return_element: Return = result
@@ -460,62 +461,9 @@ class Runner(Visitor):
 
     def visit_foreach(self, i: ForEachState):
         pass
+
     def visit_for(self, i: ForState):
-        tmp_for: SymbolTable = SymbolTable(self.symbol_table)
-        self.symbol_table = tmp_for
-        isBreak: bool = False
-        #for asignaciones_for in i.declaration:
-        i.declaration.accept(self)
-
-        vr: Variable = i.condition.accept(self)
-        if vr is None:
-            print("ERROR EN FOR EACH NO SE PUDO REALIZAR LA COMPARACION.")
-            self.errors.append("ERROR EN FOR EACH NO SE PUDO REALIZAR LA COMPARACION.")
-            self.symbol_table = self.symbol_table.parent
-            return None
-        if vr.data_type != VariableType.lista_variables["BOOLEAN"]:
-            print("ERROR EN FOR EACH LA CONDICION DEBE SER BOOLEANA.")
-            self.errors.append("ERROR EN FOR EACH LA CONDICION DEBE SER BOOLEANA.")
-            self.symbol_table = self.symbol_table.parent
-            return None
-        while vr.value:
-            isContinue: bool = False
-            if i.instructions is not None:
-                tmp_inst_for: SymbolTable = SymbolTable(self.symbol_table)
-                self.symbol_table = tmp_inst_for
-                for elemento in i.instructions:
-                    result = elemento.accept(self)
-                    if result is not None:
-                        if isinstance(elemento, Return):
-                            return_element: Return = elemento
-                            self.symbol_table = self.symbol_table.parent
-                            self.symbol_table = self.symbol_table.parent
-                            return return_element
-                        elif isinstance(elemento, Continue):
-                            isContinue = True
-                            break
-                        elif isinstance(elemento, Break):
-                            isBreak = True
-                            break
-
-                self.symbol_table = self.symbol_table.parent
-                if isBreak is False:
-                    i.increment.accept(self)
-                    vr: Variable = i.condition.accept(self)
-                else:
-                    self.symbol_table = self.symbol_table.parent
-                    return None
-                if isContinue is True:
-                    continue
-            else:
-                break
-            if isBreak:
-                vr.value = False
-            else:
-                vr= i.condition.accept(self)
-            if vr.value is None:
-                vr.value = False
-        self.symbol_table = self.symbol_table.parent
+        pass
 
     def visit_function(self, i: FunctionState):
         pass
@@ -527,7 +475,8 @@ class Runner(Visitor):
             return None
         comparacion: Variable = i.condition.accept(self)
         if comparacion is None:
-            self.errors.append("ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION. line: "+i.condition.line+" column: "+i.condition.column)
+            self.errors.append(
+                "ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION. line: " + i.condition.line + " column: " + i.condition.column)
             print("ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION.")
             return None
         if comparacion.data_type != VariableType.lista_variables["BOOLEAN"]:
@@ -539,22 +488,22 @@ class Runner(Visitor):
             self.symbol_table = tmp_if
             if i.bloque_verdadero is not None:
                 for instruction in i.bloque_verdadero:
-                 result=instruction.accept(self)
+                    result = instruction.accept(self)
                 if result is not None:
                     if isinstance(result, Return):
-                          return_element: Return = result
-                          self.symbol_table = self.symbol_table.parent
-                          return return_element
+                        return_element: Return = result
+                        self.symbol_table = self.symbol_table.parent
+                        return return_element
                     elif isinstance(result, Continue):
-                          continue_element: Continue = Continue(i.line, i.column)
-                          self.symbol_table = self.symbol_table.parent
-                          return continue_element
+                        continue_element: Continue = Continue(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return continue_element
                     elif isinstance(result, Break):
-                          break_element: Break = Break(i.line, i.column)
-                          self.symbol_table = self.symbol_table.parent
-                          return break_element
+                        break_element: Break = Break(i.line, i.column)
+                        self.symbol_table = self.symbol_table.parent
+                        return break_element
             else:
-                self.symbol_table= self.symbol_table.parent
+                self.symbol_table = self.symbol_table.parent
                 return None
         elif comparacion.value is False:
             if i.bloque_falso is not None:
@@ -580,7 +529,120 @@ class Runner(Visitor):
         pass
 
     def visit_native(self, i: NativeFunction):
-        pass
+        if i.type == NativeFunType.TOFIXED:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = self.toFixed(variable.value, nume.accept(self).value)
+            return var_n
+        elif i.type == NativeFunType.TOEXPONENTIAL:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = self.toExponential(variable.value, nume.accept(self).value)
+            return var_n
+        elif i.type == NativeFunType.TOSTRING:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = str(variable.value)
+            var_n.data_type = VariableType.lista_variables["STRING"]
+            return var_n
+        elif i.type == NativeFunType.TOLOWERCASE:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.lower()
+            return var_n
+        elif i.type == NativeFunType.TOUPPERCASE:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.upper()
+            return var_n
+        elif i.type == NativeFunType.SPLIT:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.split(nume.accept(self).value)
+            #var_n.data_type = VariableType.lista_variables["ARRAY"]
+            return var_n
+        elif i.type == NativeFunType.CONCAT:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"] and variable.data_type != VariableType.lista_variables["ARRAY"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            if variable.data_type == VariableType.lista_variables["STRING"]:
+                nume = i.parameter[0]
+                var_n = copy.deepcopy(variable)
+                var_n.value = variable.value + nume.accept(self).value
+                return var_n
+            elif variable.data_type == VariableType.lista_variables["ARRAY"]:
+                pass
+                #TODO: CONCATENAR ARRAYS
+
 
     def visit_only_assign(self, i: OnlyAssignment):
         variable: Variable = self.symbol_table.find_var_by_id(i.id)
@@ -605,6 +667,7 @@ class Runner(Visitor):
 
         variable.value = tmp.value
         return None
+
     def visit_parameter(self, i: Parameter):
         pass
 
@@ -680,40 +743,7 @@ class Runner(Visitor):
             return result
 
     def visit_while(self, i: WhileState):
-        isBreak = False
-        vr: Variable = i.condition.accept(self)
-        print("----"+vr.data_type)
-        if vr.data_type != VariableType.lista_variables["BOOLEAN"]:
-            self.errors.append("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
-            print("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
-            return None
-        while vr.value:
-            tmp_while: SymbolTable = SymbolTable(self.symbol_table)
-            self.symbol_table = tmp_while
-            for elemento in i.instructions:
-                    if isinstance(elemento, type(Break)):
-                        isBreak = True
-                        break
-                    elif isinstance(elemento, type(Continue)):
-                        isContinue = True
-                        break
-                    elif isinstance(elemento,type(Return)):
-                        self.symbol_table = self.symbol_table.parent
-                        return elemento
-                    else:
-                        elemento.accept(self)
-            self.symbol_table = self.symbol_table.parent
-            if isBreak:
-                isBreak = False
-                vr.value = False
-                return Break(i.line, i.column)
-            else:
-                vr = i.condition.accept(self)
-
-            if vr is None:
-                vr = Variable()
-                vr.value = False
-        return None
+        pass
 
     def visit_value(self, i: Value):
         variable = Variable()
@@ -741,3 +771,14 @@ class Runner(Visitor):
 
             variable = copy.deepcopy(var_in_table)
             return variable
+
+    ######################################## METODOS NATIVOS ########################################
+    def toFixed(self, num, decimales=0):
+        formato = "{:." + str(decimales) + "f}"
+        numero_redondeado = round(num, decimales)
+        return formato.format(numero_redondeado)
+
+    def toExponential(self,num, decimales=0):
+        signo = '+' if num >= 0 else '-'  # Determinar el signo del número
+        formato = "{:.{}e}".format(abs(num), decimales)  # Obtener la representación exponencial del valor absoluto del número
+        return formato
