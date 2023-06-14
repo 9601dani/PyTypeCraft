@@ -29,6 +29,9 @@ from ..models.VariableType import VariableType
 from ..models.ValueType import ValueType
 from ..models.OperationType import OperationType
 from ..models.NativeFunType import NativeFunType
+from ..models.InterfaceState import InterfaceState
+from ..symbolModel.InterfaceModel import InterfaceModel
+from ..symbolTable.ScopeType import ScopeType
 import copy
 from decimal import Decimal
 
@@ -41,80 +44,131 @@ class Runner(Visitor):
         self.errors = errors
 
     def visit_assignment(self, i: Assignment):
-        variable = Variable()
-        if (self.symbol_table.var_in_table(i.id)):
-            self.errors.append("LA VARIABLE YA ESTA DECLARADA")
-            print("LA VARIABLE YA ESTA DECLARADA")
-            return None
-        else:
-            if i.isAny is True:
-                variable.isAny = True
-            else:
-                variable.isAny = False
+        result = Variable()
+        # print("isAny:" + str(i.isAny))
+        result.id = i.id
+        # print("VARIABLE EN ASSIGNMENT: ",i.id)
 
-            if i.value is None:
-                variable.id = i.id
-                if i.type == VariableType.lista_variables["NUMBER"]:
-                    variable.data_type = VariableType().buscar_type("NUMBER")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = 0
-                    return variable
-                elif i.type == VariableType.lista_variables["STRING"]:
-                    variable.data_type = VariableType().buscar_type("STRING")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = ""
-                    return variable
-                elif i.type == VariableType.lista_variables["BOOLEAN"]:
-                    variable.data_type = VariableType().buscar_type("BOOLEAN")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = True
-                    return variable
-                elif i.type == VariableType.lista_variables["NULL"]:
-                    variable.data_type = VariableType().buscar_type("NULL")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = None
-                    return variable
-                elif i.type == VariableType.lista_variables["ANY"]:
-                    variable.data_type = VariableType().buscar_type("ANY")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = ''
-                    return variable
-                elif i.type is None:
-                    variable.data_type = VariableType().buscar_type("STRING")
-                    variable.symbol_type = SymbolType().VARIABLE
-                    variable.value = ''
-                    return variable
+        if i.value is None:
+            if i.type == VariableType().buscar_type("NUMBER"):
+                result.data_type = VariableType().buscar_type("NUMBER")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = 0
+                return result
+            elif i.type == VariableType().buscar_type("STRING"):
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = ""
+                return result
+            elif i.type == VariableType().buscar_type("BOOLEAN"):
+                result.data_type = VariableType().buscar_type("BOOLEAN")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = True
+                return result
+            elif i.type == VariableType().buscar_type("NULL"):
+                result.data_type = VariableType().buscar_type("NULL")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = None
+                return result
+            elif i.type == VariableType().buscar_type("STRING"):
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = ''
+                return result
+            elif i.type is None or i.type == VariableType().buscar_type("ANY"):
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = ''
+                return result
+
             else:
-                value = Variable()
-                value: Variable = i.value.accept(self)
-                if value is not None:
-                    if i.type == value.data_type:
-                        variable.id = i.id
-                        variable.data_type = value.data_type
-                        variable.symbol_type = SymbolType().VARIABLE
-                        variable.value = value.value
-                        return variable
-                    elif i.isAny:
-                        variable.id = i.id
-                        variable.data_type = value.data_type
-                        variable.symbol_type = SymbolType().VARIABLE
-                        variable.value = value.value
-                        return variable
-                    elif i.type == VariableType.lista_variables["ANY"]:
-                        variable.id = i.id
-                        variable.data_type = value.data_type
-                        variable.symbol_type = SymbolType().VARIABLE
-                        variable.value = value.value
-                        variable.isAny = True
-                        return variable
-                    else:
-                        self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
-                        print("LA VARIABLE NO ES DEL MISMO TIPO")
-                        return None
-                else:
-                    print("NO EXISTE VALOR")
-                    self.errors.append("NO EXISTE VALOR")
+                # print("ENTRANDO EN", i.id)
+                result.data_type = VariableType().buscar_type(i.id)
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = None
+                return result
+
+        else:
+            value: Variable = i.value.accept(self)
+            # print(i.type)
+            if value is None:
+                self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                return None
+
+            if i.type is None or i.type == VariableType().buscar_type("ANY"):
+                # print("VALUE ASSIG: "+value.data_type)
+                result.data_type = value.data_type
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = value.value
+                result.isAny = True
+                return result
+
+            if value.data_type == VariableType().buscar_type("DEFINIRLA"):
+                if not VariableType().type_declared(i.type):
+                    self.errors.append("NO SE ENCONTRÓ EL TIPO")
                     return None
+
+                interface = self.symbol_table.find_interface_by_id(i.type)
+
+                if interface is None:
+                    self.errors.append("NO SE ENCONTRÓ LA INTERFAZ")
+                    return None
+
+                model: InterfaceModel = interface.value
+                valueModel: InterfaceModel = value.value
+
+                if len(model.attributes) != len(valueModel.attributes):
+                    self.errors.append("EL NÚMERO DE ATRIBUTOS NO COINCIDE")
+                    return None
+
+                for attr in model.attributes:
+                    attrInValue = None
+                    for valueAttr in valueModel.attributes:
+                        if attr.id == valueAttr.id:
+                            attrInValue = valueAttr
+                            break
+
+                    if attrInValue is None:
+                        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + attr.id)
+                        return None
+
+                    if attr.data_type != attrInValue.data_type:
+                        self.errors.append("LOS TIPOS DE ATRIBUTOS NO COINCIDEN")
+                        return None
+
+                result.data_type = i.type
+                result.symbol_type = SymbolType().VARIABLE
+                result.value = valueModel
+                result.isAny = False
+
+                return result
+
+            if i.type != value.data_type:
+                # print(str(value.data_type))
+                self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
+                # print("LA VARIABLE NO ES DEL MISMO TIPO")
+                return None
+
+            result.data_type = value.data_type
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
+            result.value = value.value
+            return result
 
     def visit_binary_op(self, i: BinaryOperation):
         left = i.left_operator.accept(self)
@@ -385,7 +439,24 @@ class Runner(Visitor):
             return i
 
     def visit_call_attr(self, i: CallAttribute):
-        pass
+        value: Variable = i.id.accept(self)
+
+        if value is None:
+            self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
+            return None
+
+        if not isinstance(value.value, InterfaceModel):
+            self.errors.append("LA VARIABLE NO ES DE TIPO INTERFACE")
+            return None
+
+        model: InterfaceModel = value.value
+
+        for attribute in model.attributes:
+            if attribute.id == i.attr:
+                return attribute
+
+        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + i.attr)
+        return None
 
     def visit_call_fun(self, i: CallFunction):
         pass
@@ -442,7 +513,7 @@ class Runner(Visitor):
 
     def visit_else(self, i: ElseState):
         if i.bloque is not None:
-            tmp_if: SymbolTable = SymbolTable(self.symbol_table)
+            tmp_if: SymbolTable = SymbolTable(self.symbol_table, ScopeType.ELSE_SCOPE)
             self.symbol_table = tmp_if
             for elemento in i.bloque:
                 result = elemento.accept(self)
@@ -490,24 +561,26 @@ class Runner(Visitor):
             print("ERROR EN IF LA CONDICION DEBE SER BOOLEANA.")
             return None
         if comparacion.value is True:
-            tmp_if: SymbolTable = SymbolTable(self.symbol_table)
+            tmp_if: SymbolTable = SymbolTable(self.symbol_table, ScopeType.IF_SCOPE)
             self.symbol_table = tmp_if
             if i.bloque_verdadero is not None:
                 for instruction in i.bloque_verdadero:
                     result = instruction.accept(self)
-                if result is not None:
-                    if isinstance(result, Return):
-                        return_element: Return = result
-                        self.symbol_table = self.symbol_table.parent
-                        return return_element
-                    elif isinstance(result, Continue):
-                        continue_element: Continue = Continue(i.line, i.column)
-                        self.symbol_table = self.symbol_table.parent
-                        return continue_element
-                    elif isinstance(result, Break):
-                        break_element: Break = Break(i.line, i.column)
-                        self.symbol_table = self.symbol_table.parent
-                        return break_element
+                    if result is not None:
+                        if isinstance(result, Return):
+                            return_element: Return = result
+                            self.symbol_table = self.symbol_table.parent
+                            return return_element
+                        elif isinstance(result, Continue):
+                            continue_element: Continue = Continue(i.line, i.column)
+                            self.symbol_table = self.symbol_table.parent
+                            return continue_element
+                        elif isinstance(result, Break):
+                            break_element: Break = Break(i.line, i.column)
+                            self.symbol_table = self.symbol_table.parent
+                            return break_element
+                self.symbol_table = self.symbol_table.parent
+                return None
             else:
                 self.symbol_table = self.symbol_table.parent
                 return None
@@ -528,17 +601,107 @@ class Runner(Visitor):
                         self.symbol_table = self.symbol_table.parent
                         return break_element
             else:
-                self.symbol_table = self.symbol_table.parent
+                #self.symbol_table = self.symbol_table.parent
                 return None
 
     def visit_interface_assign(self, i: InterfaceAssign):
-        pass
+        attributes: [Variable] = []
+
+        for attr in i.attributes:
+            result: Variable = attr.accept(self)
+
+            if result is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            else:
+                is_duplicate = False
+                for a in attributes:
+                    if a.id == result.id:
+                        is_duplicate = True
+                        break
+
+                if is_duplicate:
+                    self.errors.append("ATRIBUTO YA DECLARADO")
+
+                else:
+                    attributes.append(result)
+
+        model = InterfaceModel('', attributes)
+        variable = Variable()
+        variable.data_type = VariableType().buscar_type("DEFINIRLA")
+        variable.value = model
+        variable.symbol_type = SymbolType().VARIABLE
+        variable.isAny = False
+
+        return variable
+
 
     def visit_inter_attr_assign(self, i: InterAttributeAssign):
-        pass
+        attribute:Variable = i.interAttribute.accept(self)
+
+        if attribute is None:
+            self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO")
+            return None
+
+        value = i.value.accept(self)
+
+        if value is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            return None
+
+        if attribute.data_type != value.data_type:
+            self.errors.append("LOS TIPOS NO COINCIDEN")
+            return None
+
+        attribute.value = value.value
+
+        return attribute
+
+
 
     def visit_interface(self, i: InterfaceState):
-        pass
+        if VariableType().type_declared(i.id):
+            self.errors.append("YA SE HA DECLARADO LA INTERFAZ.")
+
+        else:
+            VariableType().add_type(i.id)
+
+            attributes: [Variable] = []
+
+            for attribute in i.attributes:
+
+                attr: Variable = attribute.accept(self)
+
+                if attr is None:
+                    self.errors.append("NO  SE PUDO REALIZAR LA ASIGNACIÓN")
+
+                else:
+                    is_duplicate = False
+                    for a in attributes:
+                        if attr.id == a.id:
+                            is_duplicate = True
+                            break
+
+                    if is_duplicate:
+                        self.errors.append("ATRIBUTO YA DECLARADO")
+                        return None
+                    else:
+                        attributes.append(attr)
+                        # print("AGREGANDO ATRIBUTO: " + attr.id)
+
+            interfaceModel = InterfaceModel(i.id, attributes)
+
+            result = Variable()
+            result.id = i.id
+            result.symbol_type = SymbolType().INTERFACE
+            result.isAny = False
+            result.data_type = i.id
+            result.value = interfaceModel
+
+            self.symbol_table.add_variable(result)
+            # print("AGREGANDO VARIABLE: " + result.__str__())
+
+            return result
+
 
     def visit_native(self, i: NativeFunction):
         if i.type == NativeFunType.TOFIXED:
