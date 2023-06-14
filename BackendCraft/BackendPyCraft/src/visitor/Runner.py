@@ -441,7 +441,7 @@ class Runner(Visitor):
                 result=elemento.accept(self)
                 if result is not None:
                     if isinstance(result, Return):
-                        return_element: Return = Return(i.line, i.column)
+                        return_element: Return = result
                         self.symbol_table = self.symbol_table.parent
                         return return_element
                     elif isinstance(result, Continue):
@@ -460,9 +460,62 @@ class Runner(Visitor):
 
     def visit_foreach(self, i: ForEachState):
         pass
-
     def visit_for(self, i: ForState):
-        pass
+        tmp_for: SymbolTable = SymbolTable(self.symbol_table)
+        self.symbol_table = tmp_for
+        isBreak: bool = False
+        #for asignaciones_for in i.declaration:
+        i.declaration.accept(self)
+
+        vr: Variable = i.condition.accept(self)
+        if vr is None:
+            print("ERROR EN FOR EACH NO SE PUDO REALIZAR LA COMPARACION.")
+            self.errors.append("ERROR EN FOR EACH NO SE PUDO REALIZAR LA COMPARACION.")
+            self.symbol_table = self.symbol_table.parent
+            return None
+        if vr.data_type != VariableType.lista_variables["BOOLEAN"]:
+            print("ERROR EN FOR EACH LA CONDICION DEBE SER BOOLEANA.")
+            self.errors.append("ERROR EN FOR EACH LA CONDICION DEBE SER BOOLEANA.")
+            self.symbol_table = self.symbol_table.parent
+            return None
+        while vr.value:
+            isContinue: bool = False
+            if i.instructions is not None:
+                tmp_inst_for: SymbolTable = SymbolTable(self.symbol_table)
+                self.symbol_table = tmp_inst_for
+                for elemento in i.instructions:
+                    result = elemento.accept(self)
+                    if result is not None:
+                        if isinstance(elemento, Return):
+                            return_element: Return = elemento
+                            self.symbol_table = self.symbol_table.parent
+                            self.symbol_table = self.symbol_table.parent
+                            return return_element
+                        elif isinstance(elemento, Continue):
+                            isContinue = True
+                            break
+                        elif isinstance(elemento, Break):
+                            isBreak = True
+                            break
+
+                self.symbol_table = self.symbol_table.parent
+                if isBreak is False:
+                    i.increment.accept(self)
+                    vr: Variable = i.condition.accept(self)
+                else:
+                    self.symbol_table = self.symbol_table.parent
+                    return None
+                if isContinue is True:
+                    continue
+            else:
+                break
+            if isBreak:
+                vr.value = False
+            else:
+                vr= i.condition.accept(self)
+            if vr.value is None:
+                vr.value = False
+        self.symbol_table = self.symbol_table.parent
 
     def visit_function(self, i: FunctionState):
         pass
@@ -489,7 +542,7 @@ class Runner(Visitor):
                  result=instruction.accept(self)
                 if result is not None:
                     if isinstance(result, Return):
-                          return_element: Return = Return(i.line, i.column)
+                          return_element: Return = result
                           self.symbol_table = self.symbol_table.parent
                           return return_element
                     elif isinstance(result, Continue):
@@ -508,7 +561,7 @@ class Runner(Visitor):
                 result_else = i.bloque_falso.accept(self)
                 if result_else is not None:
                     if isinstance(result_else, Return):
-                        return_element: Return = Return(i.line, i.column)
+                        return_element: Return = result_else
                         self.symbol_table = self.symbol_table.parent
                         return return_element
                     elif isinstance(result_else, Continue):
@@ -627,12 +680,40 @@ class Runner(Visitor):
             return result
 
     def visit_while(self, i: WhileState):
-        isBreak = False;
+        isBreak = False
         vr: Variable = i.condition.accept(self)
-        if vr is not bool:
+        print("----"+vr.data_type)
+        if vr.data_type != VariableType.lista_variables["BOOLEAN"]:
             self.errors.append("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
             print("ERROR EN WHILE LA CONDICION NO ES BOOLEANA.")
             return None
+        while vr.value:
+            tmp_while: SymbolTable = SymbolTable(self.symbol_table)
+            self.symbol_table = tmp_while
+            for elemento in i.instructions:
+                    if isinstance(elemento, type(Break)):
+                        isBreak = True
+                        break
+                    elif isinstance(elemento, type(Continue)):
+                        isContinue = True
+                        break
+                    elif isinstance(elemento,type(Return)):
+                        self.symbol_table = self.symbol_table.parent
+                        return elemento
+                    else:
+                        elemento.accept(self)
+            self.symbol_table = self.symbol_table.parent
+            if isBreak:
+                isBreak = False
+                vr.value = False
+                return Break(i.line, i.column)
+            else:
+                vr = i.condition.accept(self)
+
+            if vr is None:
+                vr = Variable()
+                vr.value = False
+        return None
 
     def visit_value(self, i: Value):
         variable = Variable()

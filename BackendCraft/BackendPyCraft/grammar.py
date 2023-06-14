@@ -727,21 +727,11 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-// Ejemplo de if-else anidados
-let calificacion = 75;
-
-if (calificacion >= 90) {
-  console.log("Aprobado con una A");
-} else {
-  if (calificacion >= 80) {
-    console.log("Aprobado con una B");
-  } else {
-    if (calificacion >= 70) {
-      console.log("Aprobado con una C porque");
-    } else {
-      console.log("Reprobado");
-    }
+for (let i = 1; i <= 5; i++) {
+  if (i === 3) {
+    break;
   }
+  console.log(i);
 }
 """)
 
@@ -754,6 +744,7 @@ for i in instruccion:
     if isinstance(i, Instruction):
         i.accept(debugger)
 
+print(debugger.symbol_table.__str__())
 # if len(errors) > 0:
 #     for i in errors:
 #         print(str(i))
