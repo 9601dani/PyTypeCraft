@@ -13,6 +13,7 @@ from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
 from ..models import InterfaceAssign
+from ..models import InterAttributeAssign
 from ..models import InterfaceState
 from ..models import NativeFunction
 from ..models import OnlyAssignment
@@ -82,6 +83,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_interface_assign(self, i: InterfaceAssign):
+        pass
+
+    @abstractmethod
+    def visit_inter_attr_assign(self, i: InterAttributeAssign):
         pass
 
     @abstractmethod

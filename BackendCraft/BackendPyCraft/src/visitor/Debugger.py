@@ -13,6 +13,7 @@ from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
 from ..models import InterfaceAssign
+from ..models import InterAttributeAssign
 from ..models import InterfaceState
 from ..models import Instruction
 from ..models import NativeFunction
@@ -23,6 +24,7 @@ from ..models import UnaryOperation
 from ..models import WhileState
 from ..models import Value
 from ..models.Variable import Variable
+from ..models.NativeFunType import NativeFunType
 from ..models.SymbolType import SymbolType
 from ..symbolTable.SymbolTable import SymbolTable
 from ..models.ValueType import ValueType
@@ -43,7 +45,7 @@ class Debugger(Visitor):
 
     def visit_assignment(self, i: Assignment):
         result = Variable()
-        print("isAny:" + str(i.isAny))
+        # print("isAny:" + str(i.isAny))
         result.id = i.id
         # print("VARIABLE EN ASSIGNMENT: ",i.id)
 
@@ -91,6 +93,15 @@ class Debugger(Visitor):
                 result.value = ''
                 return result
 
+            else:
+                # print("ENTRANDO EN", i.id)
+                result.data_type = VariableType().buscar_type(i.id)
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+
+                result.value = None
+                return result
+
         else:
             value: Variable = i.value.accept(self)
             # print(i.type)
@@ -128,12 +139,12 @@ class Debugger(Visitor):
                 for attr in model.attributes:
                     attrInValue = None
                     for valueAttr in valueModel.attributes:
-                            if attr.id == valueAttr.id:
-                                attrInValue = valueAttr
-                                break
+                        if attr.id == valueAttr.id:
+                            attrInValue = valueAttr
+                            break
 
                     if attrInValue is None:
-                        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: "+attr.id)
+                        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + attr.id)
                         return None
 
                     if attr.data_type != attrInValue.data_type:
@@ -148,9 +159,9 @@ class Debugger(Visitor):
                 return result
 
             if i.type != value.data_type:
-                print(str(value.data_type))
+                # print(str(value.data_type))
                 self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
-                print("LA VARIABLE NO ES DEL MISMO TIPO")
+                # print("LA VARIABLE NO ES DEL MISMO TIPO")
                 return None
 
             result.data_type = value.data_type
@@ -230,7 +241,7 @@ class Debugger(Visitor):
                 return None
 
             if right.value == 0:
-                print("NO PUEDE DIVIDIR ENTRE CERO.")
+                # print("NO PUEDE DIVIDIR ENTRE CERO.")
                 self.errors.append("NO PUEDE DIVIDIR ENTRE CERO.")
                 return None
 
@@ -278,7 +289,7 @@ class Debugger(Visitor):
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
 
@@ -308,7 +319,7 @@ class Debugger(Visitor):
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
 
@@ -338,7 +349,7 @@ class Debugger(Visitor):
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
 
@@ -368,7 +379,7 @@ class Debugger(Visitor):
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
-                    print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(
                         "SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
 
@@ -398,7 +409,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.OR:
             if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
                     VariableType.lista_variables["BOOLEAN"]:
-                print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
+                # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 return None
 
@@ -409,7 +420,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.AND:
             if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
                     VariableType.lista_variables["BOOLEAN"]:
-                print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
+                # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 return None
 
@@ -422,10 +433,14 @@ class Debugger(Visitor):
         print("break debug")
 
     def visit_call_attr(self, i: CallAttribute):
-        value:Variable = i.id.accept(self)
+        value: Variable = i.id.accept(self)
 
         if value is None:
             self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
+            return None
+
+        if not isinstance(value.value, InterfaceModel):
+            self.errors.append("LA VARIABLE NO ES DE TIPO INTERFACE")
             return None
 
         model: InterfaceModel = value.value
@@ -434,7 +449,7 @@ class Debugger(Visitor):
             if attribute.id == i.attr:
                 return attribute
 
-        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: "+i.attr)
+        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + i.attr)
         return None
 
     def visit_call_fun(self, i: CallFunction):
@@ -442,7 +457,9 @@ class Debugger(Visitor):
 
     def visit_console(self, i: ConsoleLog):
         if i.value is None:
-            print("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+            # print("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+            self.errors.append("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+
             return None
 
         content = ""
@@ -478,7 +495,7 @@ class Debugger(Visitor):
             self.symbol_table.add_variable(variable)
             # print(variable.data_type)
             # print("DECLARACION DE VARIABLE EXITOSA.")
-            print(self.symbol_table.__str__())
+            # print(self.symbol_table.__str__())
 
     def visit_else(self, i: ElseState):
         temporal_table = SymbolTable(self.symbol_table, ScopeType.ELSE_SCOPE)
@@ -544,7 +561,7 @@ class Debugger(Visitor):
         attributes: [Variable] = []
 
         for attr in i.attributes:
-            result:Variable = attr.accept(self)
+            result: Variable = attr.accept(self)
 
             if result is None:
                 self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
@@ -570,23 +587,45 @@ class Debugger(Visitor):
 
         return variable
 
+    def visit_inter_attr_assign(self, i: InterAttributeAssign):
+        attribute:Variable = i.interAttribute.accept(self)
+
+        if attribute is None:
+            self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO")
+            return None
+
+        value = i.value.accept(self)
+
+        if value is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            return None
+
+        if attribute.data_type != value.data_type:
+            self.errors.append("LOS TIPOS NO COINCIDEN")
+            return None
+
+        attribute.value = value.value
+
+        return attribute
+
+
     def visit_interface(self, i: InterfaceState):
         if VariableType().type_declared(i.id):
             self.errors.append("YA SE HA DECLARADO LA INTERFAZ.")
 
-        else :
+        else:
             VariableType().add_type(i.id)
 
             attributes: [Variable] = []
 
             for attribute in i.attributes:
 
-                attr:Variable = attribute.accept(self)
+                attr: Variable = attribute.accept(self)
 
                 if attr is None:
                     self.errors.append("NO  SE PUDO REALIZAR LA ASIGNACIÓN")
 
-                else :
+                else:
                     is_duplicate = False
                     for a in attributes:
                         if attr.id == a.id:
@@ -596,9 +635,9 @@ class Debugger(Visitor):
                     if is_duplicate:
                         self.errors.append("ATRIBUTO YA DECLARADO")
                         return None
-                    else :
+                    else:
                         attributes.append(attr)
-                        print("AGREGANDO ATRIBUTO: "+attr.id)
+                        # print("AGREGANDO ATRIBUTO: " + attr.id)
 
             interfaceModel = InterfaceModel(i.id, attributes)
 
@@ -610,14 +649,125 @@ class Debugger(Visitor):
             result.value = interfaceModel
 
             self.symbol_table.add_variable(result)
-            print("AGREGANDO VARIABLE: "+result.__str__())
+            # print("AGREGANDO VARIABLE: " + result.__str__())
 
             return result
 
-
-
     def visit_native(self, i: NativeFunction):
-        print("native debug")
+        if i.type == NativeFunType.TOFIXED:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = self.toFixed(variable.value, nume.accept(self).value)
+            return var_n
+        elif i.type == NativeFunType.TOEXPONENTIAL:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["NUMBER"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = self.toExponential(variable.value, nume.accept(self).value)
+            return var_n
+        elif i.type == NativeFunType.TOSTRING:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = str(variable.value)
+            var_n.data_type = VariableType.lista_variables["STRING"]
+            return var_n
+        elif i.type == NativeFunType.TOLOWERCASE:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.lower()
+            return var_n
+        elif i.type == NativeFunType.TOUPPERCASE:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.upper()
+            return var_n
+        elif i.type == NativeFunType.SPLIT:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            nume = i.parameter[0]
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.value.split(nume.accept(self).value)
+            # var_n.data_type = VariableType.lista_variables["ARRAY"]
+            return var_n
+        elif i.type == NativeFunType.CONCAT:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            if variable.data_type != VariableType.lista_variables["STRING"] and variable.data_type != \
+                    VariableType.lista_variables["ARRAY"]:
+                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                return None
+            if i.parameter is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                return None
+            if variable.data_type == VariableType.lista_variables["STRING"]:
+                nume = i.parameter[0]
+                var_n = copy.deepcopy(variable)
+                var_n.value = variable.value + nume.accept(self).value
+                return var_n
+            elif variable.data_type == VariableType.lista_variables["ARRAY"]:
+                pass
+                # TODO: CONCATENAR ARRAYS
 
     def visit_only_assign(self, i: OnlyAssignment):
         variable: Variable = self.symbol_table.find_var_by_id(i.id)
@@ -662,7 +812,6 @@ class Debugger(Visitor):
             return None
 
         return result
-
 
     def visit_unary_op(self, i: UnaryOperation):
         right = i.right_operator.accept(self)
@@ -765,5 +914,21 @@ class Debugger(Visitor):
                 self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
                 return None
 
-            result = copy.deepcopy(var_in_table)
-            return result
+            if VariableType().is_primitive(var_in_table.data_type):
+                print("ENCONTRANDO VALOR PRIMITIVO, HACIENDO COPIA")
+                result = copy.deepcopy(var_in_table)
+                return result
+
+            return var_in_table
+
+    ######################################## METODOS NATIVOS ########################################
+    def toFixed(self, num, decimales=0):
+        formato = "{:." + str(decimales) + "f}"
+        numero_redondeado = round(num, decimales)
+        return formato.format(numero_redondeado)
+
+    def toExponential(self, num, decimales=0):
+        signo = '+' if num >= 0 else '-'  # Determinar el signo del número
+        formato = "{:.{}e}".format(abs(num),
+                                   decimales)  # Obtener la representación exponencial del valor absoluto del número
+        return formato

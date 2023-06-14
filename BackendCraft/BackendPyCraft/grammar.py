@@ -222,6 +222,7 @@ from src.models.ForState import ForState
 from src.models.NativeFunType import NativeFunType
 from src.models.FunctionState import FunctionState
 from src.models.Parameter import Parameter
+from src.models.InterAttributeAssign import InterAttributeAssign
 from src.models.InterfaceState import InterfaceState
 from src.models.Break import Break
 from src.models.Return import Return
@@ -306,6 +307,7 @@ def p_instruccion(t):
     '''instruccion      : console_pro sc
                         | declaration_instruction sc
                         | assig_pro sc
+                        | interface_assign_pro sc
                         | if_pro sc
                         | while_pro sc
                         | for_pro sc
@@ -414,12 +416,20 @@ def p_instruccion_interfaceAtributos2(t):
 
 def p_intruccion_interfaceAtributo(t):
     '''interface_atributo   : LITERAL COLON type'''
-    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],VariableType().buscar_type(t[3]),None,False)
+    t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],t[3],None,False)
 
 
 def p_instruccion_interfaceAtributo2(t):
     '''interface_atributo   : LITERAL'''
     t[0] = Assignment(t.lineno(1),find_column(input, t.slice[1]),t[1],None,None, True)
+
+
+############################################## ASIGNACIÓN A ATRIBUTOS DE INTERFAZ ##############################################
+
+def p_instruccion_interface_assign_pro(t):
+    '''interface_assign_pro : a PUNTO LITERAL IGUAL a'''
+    attrVal = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3])
+    t[0] = InterAttributeAssign(t.lineno(1),find_column(input, t.slice[2]), attrVal, t[5])
 
 
 ############################################## DECLARACION DE VARIABLE ##############################################
@@ -609,15 +619,15 @@ def p_instruccion_expresion16(t):
     ''' g     : h '''
     t[0] = t[1]
 
-def p_instruccion_expresion17(t):
-    '''g    : h PUNTO nativeFun L_PAREN expresion R_PAREN
-            | h PUNTO nativeFun L_PAREN R_PAREN'''
-    # print("EVALUANDO NATIVAS")
-    # print(t[3])
-    if(t[5] == ")"):
-        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
-    else:
-        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
+# def p_instruccion_expresion17(t):
+#     '''g    : h PUNTO nativeFun L_PAREN expresion R_PAREN
+#             | h PUNTO nativeFun L_PAREN R_PAREN'''
+#     # print("EVALUANDO NATIVAS")
+#     # print(t[3])
+#     if(t[5] == ")"):
+#         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
+#     else:
+#         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
 
 def p_instruccion_expresion18(t):
     ''' h     : ENTERO'''
@@ -652,10 +662,19 @@ def p_instruccion_expresion24(t):
 def p_instruccion_expresion25(t):
     '''h    : array_val_pro'''
 
-# def p_instruccion_expresion26(t):
-#     '''h    : LITERAL PUNTO LITERAL'''
-#     value = Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL)
-#     t[0] = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),value, t[3])
+def p_instruccion_expresion26(t):
+    '''h    : a PUNTO LITERAL'''
+    t[0] = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3])
+
+def p_instruccion_expresion27(t):
+    '''h    : a PUNTO nativeFun L_PAREN expresion R_PAREN
+            | a PUNTO nativeFun L_PAREN R_PAREN'''
+    # print("EVALUANDO NATIVAS")
+    # print(t[3])
+    if(t[5] == ")"):
+        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
+    else:
+        t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
 
 def p_instruccion_array_val_pro(t):
     '''array_val_pro    : LITERAL dimensions'''
@@ -742,41 +761,36 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-let val1:number = 1;
-let val2:number = 10;
-let val3:number = 2021.2020;
+interface Carro {
+    nombre: string;
+    placa: string;
+};
 
-console.log("Probando declaracion de variables \n");
-console.log(val1, " ", val2, " ", val3);
-console.log("---------------------------------");
-// COMENTARIO DE UNA LINEA
-val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
-val2 = 11 * (11 % (12 + -10)) + 22 / 2;
-val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
-console.log("Probando asignación de variables y aritmeticas");
-console.log(val1, " ", val2, " ", val3);
-console.log("---------------------------------");
+interface Persona {
+    nombre: string;
+    carro: Carro;
+}
 
-let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
-let rel2 = (7*7) <= (15+555) && 1 < 2;
-let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
-console.log("Probando relacionales y logicas");
-console.log(rel1, " ", rel2, " ", rel3);
-console.log("---------------------------------");
+let c1: Carro = {
+    nombre: "bmw",
+    placa: "12Q"
+};
 
-console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
-let despedida = "Adios mundo :c";
-let saludo:string = "Hola Mundo! ";
-console.log(saludo.toLowerCase(), despedida.toUpperCase());
+let p1: Persona = {
+    nombre: "juan",
+    carro: c1
+}
 
-console.log("Probando algunas funciones nativas de PyTypeCraft");
-console.log("Funciones relacionadas a conversiones");
-let aprox_1 = 3.141516;
-console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
-let carnet:string = "201903865";
-//console.log("Hola " + String(carnet));
-//console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
-console.log("---------------------------------");
+let p2: Persona = {
+    nombre: "pepito",
+    carro: c1
+}
+
+p1.carro.nombre = p1.carro.nombre.toUpperCase().concat(" modelo 2021");
+
+console.log("Hola, soy:", p1.nombre, " y tengo un carro:",p1.carro.nombre);
+console.log("Hola, soy:", p2.nombre, " y tengo un carro:",p2.carro.nombre);
+
 """)
 
 
@@ -790,6 +804,6 @@ for i in instruccion:
 
 # print(debugger.symbol_table.__str__())
 
-if len(errors) > 0:
-    for i in errors:
-        print(str(i))
+# if len(errors) > 0:
+#     for i in errors:
+#         print(str(i))

@@ -35,3 +35,6 @@ class VariableType:
             if key == type.upper():
                 return True
         return False
+
+    def is_primitive(self, type):
+        return type.upper() == "NUMBER" or type.upper() == "STRING" or type.upper() == "BOOLEAN" or type.upper() == "ANY" or type.upper() == "NULL"

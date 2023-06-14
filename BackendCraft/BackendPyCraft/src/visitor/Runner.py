@@ -14,6 +14,7 @@ from ..models import ForState
 from ..models import FunctionState
 from ..models import IfState
 from ..models import InterfaceAssign
+from ..models import InterAttributeAssign
 from ..models import InterfaceState
 from ..models import NativeFunction
 from ..models import OnlyAssignment
@@ -531,6 +532,9 @@ class Runner(Visitor):
                 return None
 
     def visit_interface_assign(self, i: InterfaceAssign):
+        pass
+
+    def visit_inter_attr_assign(self, i: InterAttributeAssign):
         pass
 
     def visit_interface(self, i: InterfaceState):
