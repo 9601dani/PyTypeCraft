@@ -374,7 +374,7 @@ def p_instruccion_parameters2(t):
 
 def p_instruccion_parameter(t):
     '''parameter_pro    : LITERAL COLON type'''
-    t[0] = Parameter(t.lineno(1), find_column(input, t.slice[1]), t[1], None, False)
+    t[0] = Parameter(t.lineno(1), find_column(input, t.slice[1]), t[1], t[3], False)
 
 
 
@@ -761,35 +761,15 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-interface Carro {
-    nombre: string;
-    placa: string;
-};
-
-interface Persona {
-    nombre: string;
-    carro: Carro;
+function sum(){
+  return a + b;
 }
-
-let c1: Carro = {
-    nombre: "bmw",
-    placa: "12Q"
-};
-
-let p1: Persona = {
-    nombre: "juan",
-    carro: c1
+function sum(a: number, a: number) {
+  return a - b;
 }
-
-let p2: Persona = {
-    nombre: "pepito",
-    carro: c1
+function por(a: number, b: number) {
+  return a * b;
 }
-
-p1.carro.nombre = p1.carro.nombre.toUpperCase().concat(" modelo 2021");
-
-console.log("Hola, soy:", p1.nombre, " y tengo un carro:",p1.carro.nombre);
-console.log("Hola, soy:", p2.nombre, " y tengo un carro:",p2.carro.nombre);
 
 """)
 
@@ -798,11 +778,12 @@ errors = []
 table = SymbolTable()
 debugger = Debugger(table, errors)
 
-for i in instruccion:
-    if isinstance(i, Instruction):
-        i.accept(debugger)
-
-# print(debugger.symbol_table.__str__())
+if instruccion is not None:
+    for i in instruccion:
+        if isinstance(i, Instruction):
+            i.accept(debugger)
+for i in debugger.symbol_table.getAllFunctions():
+    print(str(i))
 
 # if len(errors) > 0:
 #     for i in errors:

@@ -32,6 +32,7 @@ from ..models.VariableType import VariableType
 from ..models.OperationType import OperationType
 from ..symbolTable.ScopeType import ScopeType
 from ..symbolModel.InterfaceModel import InterfaceModel
+from ..symbolModel.FunctionModel import FunctionModel
 import copy
 from decimal import Decimal
 
@@ -534,6 +535,42 @@ class Debugger(Visitor):
 
     def visit_function(self, i: FunctionState):
         print("function debug")
+        if i.parameters is not None:
+            param = []
+            for parameter in i.parameters:
+                n_variable: Variable = parameter.accept(self)
+                n_variable.value = self.assignDefaultValue(n_variable.data_type)
+                if n_variable is None:
+                    self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
+                    return None
+                else:
+                    isDuplicate=False
+                    for a in param:
+                        if n_variable.id == a.id:
+                            isDuplicate=True
+                            break
+
+                    if isDuplicate:
+                        self.errors.append("VARIABLE YA DECLARADA.")
+                        print("VARIABLE YA DECLARADA.")
+                        return None
+                    else:
+                        param.append(n_variable)
+
+            self.symbol_table.add_variable(n_variable)
+        if i.instructions is not None:
+            for instruction in i.instructions:
+                instruction.accept(self)
+
+            functionModel= FunctionModel(i.id, i.parameters, i.instructions)
+
+            result = Variable()
+            result.id= i.id
+            result.symbol_type = SymbolType.FUNCTION
+            result.isAny = False
+            result.value= functionModel
+
+            self.symbol_table.add_variable(result)
 
     def visit_if(self, i: IfState):
         condition: Variable = i.condition.accept(self)
@@ -795,7 +832,11 @@ class Debugger(Visitor):
         return None
 
     def visit_parameter(self, i: Parameter):
-        print("parameter debug")
+        vr: Variable= Variable()
+        vr.id= i.id
+        vr.data_type= i.type
+        vr.value= self.assignDefaultValue(i.type)
+        return vr
 
     def visit_return(self, i: Return):
         if not self.symbol_table.is_in_fun_scope():
@@ -932,3 +973,16 @@ class Debugger(Visitor):
         formato = "{:.{}e}".format(abs(num),
                                    decimales)  # Obtener la representación exponencial del valor absoluto del número
         return formato
+    def assignDefaultValue(self, vr:VariableType):
+        if vr == VariableType().buscar_type("NUMBER"):
+            return 1
+        elif vr == VariableType().buscar_type("STRING"):
+            return "hola"
+        elif vr == VariableType().buscar_type("BOOLEAN"):
+            return True
+        elif vr == VariableType().buscar_type("ARRAY"):
+            return [1, 2, 3]
+        elif vr == VariableType().buscar_type("NULL"):
+            return None
+        else:
+            return None

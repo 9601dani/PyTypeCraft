@@ -96,6 +96,18 @@ class SymbolTable:
 
         return False
 
+    def getAllFunctions(self):
+        current_table = self
+        functions = []
+
+        while current_table is not None:
+            for symbol in current_table.symbols:
+                if symbol.symbol_type == SymbolType.FUNCTION:
+                    functions.append(symbol)
+
+            current_table = current_table.parent
+
+        return functions
     def __str__(self):
         data = ""
         for symbol in self.symbols:
