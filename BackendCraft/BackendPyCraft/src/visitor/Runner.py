@@ -462,7 +462,7 @@ class Runner(Visitor):
     def visit_call_fun(self, i: CallFunction):
         print("CALL FUN")
         print(i.assignments)
-        self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
         # vr: Variable = Variable()
         # variables_nuevas = []
         # if i.assignments is not None:
@@ -563,7 +563,8 @@ class Runner(Visitor):
 
         print("FUNCIÓN: "+match_fun.id)
         # CREANDO NUEVO SCOPE PARA LA FUNCIÓN
-        self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        temp_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        self.symbol_table = temp_table
         # AGREGANDO LOS ARGUMENTOS CON SUS PARÁMETROS A LA TABLA DE SIMBOLOS
         for i in range(len(match_fun.parameters)):
             match_fun.parameters[i].value = arguments[i].value
@@ -571,7 +572,16 @@ class Runner(Visitor):
 
         for instruction in match_fun.instructions:
             print("EJECUTANDO INSTRUCCIONES EN CALLFUNCTION")
-            instruction.accept(self)
+            result=instruction.accept(self)
+            if result is not None:
+                if result.__class__.__name__ == "Return":
+                    vr_return = result.expression.accept(self)
+                    self.symbol_table = self.symbol_table.parent
+                    print("RETORNANDO VALOR: "+vr_return.__str__() )
+                    return vr_return
+                elif result.__class__.__name__ == "Variable":
+                    self.symbol_table = self.symbol_table.parent
+                    return result
 
         self.symbol_table = self.symbol_table.parent
         return None
@@ -730,15 +740,15 @@ class Runner(Visitor):
                 if result_else is not None:
                     if result_else.__class__.__name__ == "Return":
                         return_element: Return = result_else
-                        self.symbol_table = self.symbol_table.parent
+                        # self.symbol_table = self.symbol_table.parent
                         return return_element
                     elif result_else.__class__.__name__ == "Continue":
                         continue_element: Continue = Continue(i.line, i.column)
-                        self.symbol_table = self.symbol_table.parent
+                        # self.symbol_table = self.symbol_table.parent
                         return continue_element
                     elif result_else.__class__.__name__ == "Break":
                         break_element: Break = Break(i.line, i.column)
-                        self.symbol_table = self.symbol_table.parent
+                        # self.symbol_table = self.symbol_table.parent
                         return break_element
             else:
                 #self.symbol_table = self.symbol_table.parent
@@ -1186,6 +1196,6 @@ class Runner(Visitor):
                     break
 
             if same_params:
-                return functionModel
+                return copy.deepcopy(functionModel)
 
         return None

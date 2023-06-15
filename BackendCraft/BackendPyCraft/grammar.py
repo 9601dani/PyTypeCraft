@@ -765,10 +765,27 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-function factorial(n: number) {
-   console.log(n + 1);
+function towerOfHanoi(n:number, from_rod:string,  to_rod:string,  aux_rod:string){
+    if (n === 0){
+        return 0;
+    }
+    towerOfHanoi(n - 1, from_rod, aux_rod, to_rod);
+    console.log("Move disk " , n , " from rod ", from_rod ," to rod " , to_rod);
+    towerOfHanoi(n - 1, aux_rod, to_rod, from_rod);
 }
-console.log(factorial(6));
+
+towerOfHanoi(30, "A", "C", "B");
+
+function fibonacci(n: number) {
+  if (n <= 1) {
+    return n;
+  } else {
+
+    return fibonacci(n - 1) + fibonacci(n - 2);
+  }
+}
+
+console.log(fibonacci(4));
 """)
 
 
@@ -794,6 +811,6 @@ if instruccion is not None:
 for i in debugger.symbol_table.symbols:
     print(str(i))
 
-if len(errors) > 0:
-    for i in errors:
-        print(str(i))
+# if len(errors) > 0:
+#     for i in errors:
+#         print(str(i))
