@@ -342,7 +342,7 @@ def p_instruccion_call_function(t):
 
 def p_instruccion_call_function2(t):
     '''call_function_pro    : LITERAL L_PAREN R_PAREN'''
-    t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], None)
+    t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], [])
 
 
 ############################################## VALUES ##############################################
@@ -766,11 +766,7 @@ test_lexer(lexer)
 
 instruccion : [Instruction] =parse("""
 function factorial(n: number) {
-   if (n <= 0) {         // termination case
-      return 1; 
-   } else {     
-      return (n * factorial(n - 1));     // function invokes itself
-   } 
+   console.log(n + 1);
 }
 console.log(factorial(6));
 """)

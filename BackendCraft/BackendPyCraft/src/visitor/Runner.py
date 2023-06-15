@@ -463,83 +463,118 @@ class Runner(Visitor):
         print("CALL FUN")
         print(i.assignments)
         self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
-        vr: Variable = Variable()
-        variables_nuevas = []
-        if i.assignments is not None:
-            if self.symbol_table.fun_in_table(i.name) is not None:
-                for assignment in i.assignments:
-                    result = assignment.accept(self)
-                    if result.__class__.__name__ == "Variable":
-                        vr = result
-                        variables_nuevas.append(vr)
-                    else:
-                        print("ERROR EN ASIGNACIÓN DE VALORES EN FUNCIÓN.")
-                        self.symbol_table = self.symbol_table.parent
-                        return None
+        # vr: Variable = Variable()
+        # variables_nuevas = []
+        # if i.assignments is not None:
+        #     if self.symbol_table.fun_in_table(i.name) is not None:
+        #         for assignment in i.assignments:
+        #             result = assignment.accept(self)
+        #             if result.__class__.__name__ == "Variable":
+        #                 vr = result
+        #                 variables_nuevas.append(vr)
+        #             else:
+        #                 print("ERROR EN ASIGNACIÓN DE VALORES EN FUNCIÓN.")
+        #                 self.symbol_table = self.symbol_table.parent
+        #                 return None
+        #
+        #         fun_match: Variable = Variable()
+        #         find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
+        #         for parametro in find_fun:
+        #             if len(parametro.value.parameters) == len(i.assignments):
+        #                 fun_match = parametro
+        #                 break
+        #
+        #         fun_ejecutar_value: FunctionModel = fun_match.value
+        #         fun_ejecutar: FunctionState = fun_ejecutar_value
+        #         if len(fun_ejecutar.parameters) != len(variables_nuevas):
+        #             self.errors.append("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
+        #             print("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
+        #             self.symbol_table = self.symbol_table.parent
+        #             return None
+        #         for p in range(len(fun_ejecutar.parameters)):
+        #             fun_ejecutar.parameters[p].value = variables_nuevas[p].value
+        #             nv_parametro = Variable()
+        #             nv_parametro.id = fun_ejecutar.parameters[p].id
+        #             nv_parametro.data_type = fun_ejecutar.parameters[p].data_type
+        #             nv_parametro.value = fun_ejecutar.parameters[p].value
+        #             nv_parametro.symbol_type = SymbolType.VARIABLE
+        #             self.symbol_table.add_variable(nv_parametro)
+        #         for fs in fun_ejecutar.instructions:
+        #             result_fs = fs.accept(self)
+        #             if result_fs is not None:
+        #                 if result_fs.__class__.__name__ == "Return":
+        #                     vr_return = result_fs.expression.accept(self)
+        #                     self.symbol_table = self.symbol_table.parent
+        #                     return vr_return
+        #                 elif result_fs.__class__.__name__ == "Variable":
+        #                     self.symbol_table = self.symbol_table.parent
+        #                     return result_fs
+        #
+        #     else:
+        #                 self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+        #                 self.symbol_table = self.symbol_table.parent
+        #                 return None
+        # else:
+        #     #self.symbol_table= SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        #     find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
+        #     fun_match: Variable = Variable()
+        #     if find_fun is None or len(find_fun) == 0:
+        #         self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+        #         print("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+        #         self.symbol_table = self.symbol_table.parent
+        #         return None
+        #
+        #     for parametro in find_fun:
+        #         if len(parametro.value.parameters) == 0:
+        #             fun_match = parametro
+        #             break
+        #     fun_ejecutar_value: FunctionModel = fun_match.value
+        #     fun_ejecutar: FunctionState = fun_ejecutar_value
+        #     for fs in fun_ejecutar.instructions:
+        #         result_fs = fs.accept(self)
+        #         if result_fs is not None:
+        #             if result_fs.__class__.__name__ == "Return":
+        #                 vr_return = result_fs.expression.accept(self)
+        #                 self.symbol_table = self.symbol_table.parent
+        #                 return vr_return
+        #             elif result_fs.__class__.__name__ == "Variable":
+        #                 self.symbol_table = self.symbol_table.parent
+        #                 return result_fs
 
-                fun_match: Variable = Variable()
-                find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
-                for parametro in find_fun:
-                    if len(parametro.value.parameters) == len(i.assignments):
-                        fun_match = parametro
-                        break
+        #TODO: PRUEBA DE MODIFICACIÓN EN CALL_FUN
 
-                fun_ejecutar_value: FunctionModel = fun_match.value
-                fun_ejecutar: FunctionState = fun_ejecutar_value
-                if len(fun_ejecutar.parameters) != len(variables_nuevas):
-                    self.errors.append("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
-                    print("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
-                    self.symbol_table = self.symbol_table.parent
-                    return None
-                for p in range(len(fun_ejecutar.parameters)):
-                    fun_ejecutar.parameters[p].value = variables_nuevas[p].value
-                    nv_parametro = Variable()
-                    nv_parametro.id = fun_ejecutar.parameters[p].id
-                    nv_parametro.data_type = fun_ejecutar.parameters[p].data_type
-                    nv_parametro.value = fun_ejecutar.parameters[p].value
-                    nv_parametro.symbol_type = SymbolType.VARIABLE
-                    self.symbol_table.add_variable(nv_parametro)
-                for fs in fun_ejecutar.instructions:
-                    result_fs = fs.accept(self)
-                    if result_fs is not None:
-                        if result_fs.__class__.__name__ == "Return":
-                            vr_return = result_fs.expression.accept(self)
-                            self.symbol_table = self.symbol_table.parent
-                            return vr_return
-                        elif result_fs.__class__.__name__ == "Variable":
-                            self.symbol_table = self.symbol_table.parent
-                            return result_fs
+        arguments = []
 
-            else:
-                        self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-                        self.symbol_table = self.symbol_table.parent
-                        return None
-        else:
-            #self.symbol_table= SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
-            find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
-            fun_match: Variable = Variable()
-            if find_fun is None or len(find_fun) == 0:
-                self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-                print("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-                self.symbol_table = self.symbol_table.parent
+        for argument in i.assignments:
+            value = argument.accept(self)
+
+            if value is None:
+                print("NO SE PUDO REALIZAR LA OPERACIÓN")
                 return None
 
-            for parametro in find_fun:
-                if len(parametro.value.parameters) == 0:
-                    fun_match = parametro
-                    break
-            fun_ejecutar_value: FunctionModel = fun_match.value
-            fun_ejecutar: FunctionState = fun_ejecutar_value
-            for fs in fun_ejecutar.instructions:
-                result_fs = fs.accept(self)
-                if result_fs is not None:
-                    if result_fs.__class__.__name__ == "Return":
-                        vr_return = result_fs.expression.accept(self)
-                        self.symbol_table = self.symbol_table.parent
-                        return vr_return
-                    elif result_fs.__class__.__name__ == "Variable":
-                        self.symbol_table = self.symbol_table.parent
-                        return result_fs
+            arguments.append(value)
+            # print("AGREGANDO ARGUMENTO: "+value.__str__())
+
+        match_fun:FunctionModel = self.get_fun(i.name, arguments)
+
+        if match_fun is None:
+            print("NO SE ENCONTRÓ LA FUNCIÓN")
+            return None
+
+        print("FUNCIÓN: "+match_fun.id)
+        # CREANDO NUEVO SCOPE PARA LA FUNCIÓN
+        self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        # AGREGANDO LOS ARGUMENTOS CON SUS PARÁMETROS A LA TABLA DE SIMBOLOS
+        for i in range(len(match_fun.parameters)):
+            match_fun.parameters[i].value = arguments[i].value
+            self.symbol_table.add_variable(match_fun.parameters[i])
+
+        for instruction in match_fun.instructions:
+            print("EJECUTANDO INSTRUCCIONES EN CALLFUNCTION")
+            instruction.accept(self)
+
+        self.symbol_table = self.symbol_table.parent
+        return None
 
     def visit_console(self, i: ConsoleLog):
         if i.value is None:
@@ -658,7 +693,7 @@ class Runner(Visitor):
         comparacion: Variable = i.condition.accept(self)
         if comparacion is None:
             self.errors.append(
-                "ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION. line: " + i.condition.line + " column: " + i.condition.column)
+                "ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION. line: " + str(i.condition.line) + " column: " + str(i.condition.column))
             print("ERROR EN IF NO SE PUDO REALIZAR LA COMPARACION.")
             return None
         if comparacion.data_type != VariableType.lista_variables["BOOLEAN"]:
@@ -1129,3 +1164,28 @@ class Runner(Visitor):
                 return True
 
         return False
+
+    def get_fun(self, id: str, arguments: [Variable]):
+        functions:[Variable] = self.symbol_table.find_fun_by_id(id)
+
+        if len(functions) == 0:
+            return None
+
+        for function in functions:
+
+            functionModel: FunctionModel = function.value
+
+            if len(functionModel.parameters) != len(arguments):
+                continue
+
+            same_params = True
+
+            for i in range(len(functionModel.parameters)):
+                if functionModel.parameters[i].data_type != arguments[i].data_type:
+                    same_params = False
+                    break
+
+            if same_params:
+                return functionModel
+
+        return None
