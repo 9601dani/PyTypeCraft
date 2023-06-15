@@ -534,16 +534,16 @@ class Debugger(Visitor):
         self.symbol_table = temporal_table.parent
 
     def visit_function(self, i: FunctionState):
-        print("function debug")
+        # print("function debug")
+        param = []
         if i.parameters is not None:
-            param = []
             for parameter in i.parameters:
                 n_variable: Variable = parameter.accept(self)
-                n_variable.value = self.assignDefaultValue(n_variable.data_type)
                 if n_variable is None:
                     self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
                     return None
                 else:
+                    n_variable.value = self.assignDefaultValue(n_variable.data_type)
                     isDuplicate=False
                     for a in param:
                         if n_variable.id == a.id:
@@ -552,17 +552,32 @@ class Debugger(Visitor):
 
                     if isDuplicate:
                         self.errors.append("VARIABLE YA DECLARADA.")
-                        print("VARIABLE YA DECLARADA.")
+                        # print("VARIABLE YA DECLARADA.")
                         return None
                     else:
                         param.append(n_variable)
 
-            self.symbol_table.add_variable(n_variable)
+            # self.symbol_table.add_variable(n_variable)
+
+        # TODO: VERIFICAR QUE NO EXISTA YA UNA FUNCIÓN CON EL MISMO NOMBRE Y TIPO DE PARÁMETROS
+        duplicate_fun = self.is_duplicated_fun(i.id, param)
+        if duplicate_fun:
+            self.errors.append("FUNCIÓN YA DECLARADA.")
+            return None
+
         if i.instructions is not None:
+            temp_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+            self.symbol_table = temp_table
+
+            for p in param:
+                self.symbol_table.add_variable(p)
+
             for instruction in i.instructions:
                 instruction.accept(self)
 
-            functionModel= FunctionModel(i.id, i.parameters, i.instructions)
+            self.symbol_table = self.symbol_table.parent
+
+            functionModel= FunctionModel(i.id, param, i.instructions)
 
             result = Variable()
             result.id= i.id
@@ -644,7 +659,6 @@ class Debugger(Visitor):
         attribute.value = value.value
 
         return attribute
-
 
     def visit_interface(self, i: InterfaceState):
         if VariableType().type_declared(i.id):
@@ -854,8 +868,20 @@ class Debugger(Visitor):
     def visit_parameter(self, i: Parameter):
         vr: Variable= Variable()
         vr.id= i.id
-        vr.data_type= i.type
+        vr.symbol_type = SymbolType.VARIABLE
+        if i.type is None or i.type == VariableType().buscar_type("ANY"):
+            vr.data_type= VariableType().buscar_type("STRING")
+            vr.value= self.assignDefaultValue(vr.data_type)
+            vr.isAny = True
+            return vr
+
+        if not VariableType().type_declared(i.type):
+            self.errors.append("NO SE ENCONTRÓ EL TIPO: "+i.type)
+            return None
+
+        vr.data_type= VariableType().buscar_type(i.type)
         vr.value= self.assignDefaultValue(i.type)
+        vr.isAny = False
         return vr
 
     def visit_return(self, i: Return):
@@ -976,7 +1002,7 @@ class Debugger(Visitor):
                 return None
 
             if VariableType().is_primitive(var_in_table.data_type):
-                print("ENCONTRANDO VALOR PRIMITIVO, HACIENDO COPIA")
+                # print("ENCONTRANDO VALOR PRIMITIVO, HACIENDO COPIA")
                 result = copy.deepcopy(var_in_table)
                 return result
 
@@ -1005,4 +1031,34 @@ class Debugger(Visitor):
         elif vr == VariableType().buscar_type("NULL"):
             return None
         else:
-            return None
+            interface = self.symbol_table.find_interface_by_id(vr)
+
+            interfaceModel: InterfaceModel = interface.value
+            return copy.deepcopy(interfaceModel)
+
+    ######################################## METODOS PARA SOBRECARGA DE FUNCIONES ########################################
+
+    def is_duplicated_fun(self, id: str, parameters: [Variable]):
+        functions:[Variable] = self.symbol_table.find_fun_by_id(id)
+
+        if len(functions) == 0:
+            return False
+
+        for function in functions:
+
+            functionModel: FunctionModel = function.value
+
+            if len(functionModel.parameters) != len(parameters):
+                continue
+
+            same_params = True
+
+            for i in range(len(functionModel.parameters)):
+                if functionModel.parameters[i].data_type != parameters[i].data_type:
+                    same_params = False
+                    break
+
+            if same_params:
+                return True
+
+        return False

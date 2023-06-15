@@ -40,16 +40,16 @@ class SymbolTable:
     # IF IS DECLARED THEN RETURN IT.
     def find_fun_by_id(self, id: str):
         current_table = self
-
+        functions: [Variable] = []
         while current_table is not None:
             for symbol in current_table.symbols:
                 if symbol.symbol_type == SymbolType.FUNCTION and symbol.id == id:
                     # print("Variable encontrada: "+symbol.__str__())
-                    return symbol
+                    functions.append(symbol)
 
             current_table = current_table.parent
 
-        return None
+        return functions
 
     def find_interface_by_id(self, id: str):
         current_table = self

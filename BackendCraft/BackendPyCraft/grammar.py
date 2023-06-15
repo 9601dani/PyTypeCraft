@@ -761,13 +761,22 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-function sum(){
-  return a + b;
+
+interface Carro {
+    color: string;
 }
-function sum(a: number, a: number) {
-  return a - b;
+
+function sum(a: number, c: Carro) {
+    c.color = "amarillo";
+    console.log(c.color);
+    return a - 1;
 }
-function por(a: number, b: number) {
+
+function sum(a: number, b: number) {
+  return sum(1,2);
+}
+
+function sum(a: number, b: number, c:boolean) {
   return a * b;
 }
 
@@ -782,9 +791,10 @@ if instruccion is not None:
     for i in instruccion:
         if isinstance(i, Instruction):
             i.accept(debugger)
+
 for i in debugger.symbol_table.getAllFunctions():
     print(str(i))
 
-# if len(errors) > 0:
-#     for i in errors:
-#         print(str(i))
+if len(errors) > 0:
+    for i in errors:
+        print(str(i))
