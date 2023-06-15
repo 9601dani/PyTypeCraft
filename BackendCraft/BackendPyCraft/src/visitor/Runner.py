@@ -460,7 +460,86 @@ class Runner(Visitor):
         return None
 
     def visit_call_fun(self, i: CallFunction):
-        pass
+        print("CALL FUN")
+        print(i.assignments)
+        self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+        vr: Variable = Variable()
+        variables_nuevas = []
+        if i.assignments is not None:
+            if self.symbol_table.fun_in_table(i.name) is not None:
+                for assignment in i.assignments:
+                    result = assignment.accept(self)
+                    if result.__class__.__name__ == "Variable":
+                        vr = result
+                        variables_nuevas.append(vr)
+                    else:
+                        print("ERROR EN ASIGNACIÓN DE VALORES EN FUNCIÓN.")
+                        self.symbol_table = self.symbol_table.parent
+                        return None
+
+                fun_match: Variable = Variable()
+                find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
+                for parametro in find_fun:
+                    if len(parametro.value.parameters) == len(i.assignments):
+                        fun_match = parametro
+                        break
+
+                fun_ejecutar_value: FunctionModel = fun_match.value
+                fun_ejecutar: FunctionState = fun_ejecutar_value
+                if len(fun_ejecutar.parameters) != len(variables_nuevas):
+                    self.errors.append("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
+                    print("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
+                    self.symbol_table = self.symbol_table.parent
+                    return None
+                for p in range(len(fun_ejecutar.parameters)):
+                    fun_ejecutar.parameters[p].value = variables_nuevas[p].value
+                    nv_parametro = Variable()
+                    nv_parametro.id = fun_ejecutar.parameters[p].id
+                    nv_parametro.data_type = fun_ejecutar.parameters[p].data_type
+                    nv_parametro.value = fun_ejecutar.parameters[p].value
+                    nv_parametro.symbol_type = SymbolType.VARIABLE
+                    self.symbol_table.add_variable(nv_parametro)
+                for fs in fun_ejecutar.instructions:
+                    result_fs = fs.accept(self)
+                    if result_fs is not None:
+                        if result_fs.__class__.__name__ == "Return":
+                            vr_return = result_fs.expression.accept(self)
+                            self.symbol_table = self.symbol_table.parent
+                            return vr_return
+                        elif result_fs.__class__.__name__ == "Variable":
+                            self.symbol_table = self.symbol_table.parent
+                            return result_fs
+
+            else:
+                        self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+                        self.symbol_table = self.symbol_table.parent
+                        return None
+        else:
+            #self.symbol_table= SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+            find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
+            fun_match: Variable = Variable()
+            if find_fun is None or len(find_fun) == 0:
+                self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+                print("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
+                self.symbol_table = self.symbol_table.parent
+                return None
+
+            for parametro in find_fun:
+                if len(parametro.value.parameters) == 0:
+                    fun_match = parametro
+                    break
+            fun_ejecutar_value: FunctionModel = fun_match.value
+            fun_ejecutar: FunctionState = fun_ejecutar_value
+            for fs in fun_ejecutar.instructions:
+                result_fs = fs.accept(self)
+                if result_fs is not None:
+                    if result_fs.__class__.__name__ == "Return":
+                        vr_return = result_fs.expression.accept(self)
+                        self.symbol_table = self.symbol_table.parent
+                        return vr_return
+                    elif result_fs.__class__.__name__ == "Variable":
+                        self.symbol_table = self.symbol_table.parent
+                        return result_fs
 
     def visit_console(self, i: ConsoleLog):
         if i.value is None:
@@ -519,15 +598,15 @@ class Runner(Visitor):
             for elemento in i.bloque:
                 result = elemento.accept(self)
                 if result is not None:
-                    if isinstance(result, Return):
+                    if result.__class__.__name__ == "Return":
                         return_element: Return = result
                         self.symbol_table = self.symbol_table.parent
                         return return_element
-                    elif isinstance(result, Continue):
+                    elif result.__class__.__name__ == "Continue":
                         continue_element: Continue = Continue(i.line, i.column)
                         self.symbol_table = self.symbol_table.parent
                         return continue_element
-                    elif isinstance(result, Break):
+                    elif result.__class__.__name__ == "Break":
                         break_element: Break = Break(i.line, i.column)
                         self.symbol_table = self.symbol_table.parent
                         return break_element
@@ -545,57 +624,31 @@ class Runner(Visitor):
 
     def visit_function(self, i: FunctionState):
         # print("function debug")
-        param = []
-        if i.parameters is not None:
-            for parameter in i.parameters:
-                n_variable: Variable = parameter.accept(self)
-                if n_variable is None:
-                    self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
-                    return None
-                else:
-                    n_variable.value = self.assignDefaultValue(n_variable.data_type)
-                    isDuplicate=False
-                    for a in param:
-                        if n_variable.id == a.id:
-                            isDuplicate=True
-                            break
+        if i.isInTable is True:
+            print("VISITOR FUNCTION")
+            #tmp_table= SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
+            #self.symbol_table = tmp_table
+            if i.parameters is not None:
+                for param in i.parameters:
+                    param.accept(self)
 
-                    if isDuplicate:
-                        self.errors.append("VARIABLE YA DECLARADA.")
-                        # print("VARIABLE YA DECLARADA.")
-                        return None
-                    else:
-                        param.append(n_variable)
+            if i.instructions is not None:
+                for instruction in i.instructions:
+                    result = instruction.accept(self)
+                    if result is not None:
+                        if isinstance(result, Return):
+                           if result is not None:
+                               return_element: Variable = result.accept(self)
+                               #self.symbol_table = self.symbol_table.parent
+                               return return_element
 
-            # self.symbol_table.add_variable(n_variable)
+                #self.symbol_table = self.symbol_table.parent
+                return None
+            else:
+                #self.symbol_table = self.symbol_table.parent
+                return None
 
-        # TODO: VERIFICAR QUE NO EXISTA YA UNA FUNCIÓN CON EL MISMO NOMBRE Y TIPO DE PARÁMETROS
-        duplicate_fun = self.is_duplicated_fun(i.id, param)
-        if duplicate_fun:
-            self.errors.append("FUNCIÓN YA DECLARADA.")
-            return None
 
-        if i.instructions is not None:
-            temp_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
-            self.symbol_table = temp_table
-
-            for p in param:
-                self.symbol_table.add_variable(p)
-
-            for instruction in i.instructions:
-                instruction.accept(self)
-
-            self.symbol_table = self.symbol_table.parent
-
-            functionModel= FunctionModel(i.id, param, i.instructions)
-
-            result = Variable()
-            result.id= i.id
-            result.symbol_type = SymbolType.FUNCTION
-            result.isAny = False
-            result.value= functionModel
-
-            self.symbol_table.add_variable(result)
 
     def visit_if(self, i: IfState):
         if i.condition is None:
@@ -619,15 +672,15 @@ class Runner(Visitor):
                 for instruction in i.bloque_verdadero:
                     result = instruction.accept(self)
                     if result is not None:
-                        if isinstance(result, Return):
+                        if result.__class__.__name__ == "Return":
                             return_element: Return = result
                             self.symbol_table = self.symbol_table.parent
                             return return_element
-                        elif isinstance(result, Continue):
+                        elif result.__class__.__name__ == "Continue":
                             continue_element: Continue = Continue(i.line, i.column)
                             self.symbol_table = self.symbol_table.parent
                             return continue_element
-                        elif isinstance(result, Break):
+                        elif result.__class__.__name__ == "Break":
                             break_element: Break = Break(i.line, i.column)
                             self.symbol_table = self.symbol_table.parent
                             return break_element
@@ -640,15 +693,15 @@ class Runner(Visitor):
             if i.bloque_falso is not None:
                 result_else = i.bloque_falso.accept(self)
                 if result_else is not None:
-                    if isinstance(result_else, Return):
+                    if result_else.__class__.__name__ == "Return":
                         return_element: Return = result_else
                         self.symbol_table = self.symbol_table.parent
                         return return_element
-                    elif isinstance(result_else, Continue):
+                    elif result_else.__class__.__name__ == "Continue":
                         continue_element: Continue = Continue(i.line, i.column)
                         self.symbol_table = self.symbol_table.parent
                         return continue_element
-                    elif isinstance(result_else, Break):
+                    elif result_else.__class__.__name__ == "Break":
                         break_element: Break = Break(i.line, i.column)
                         self.symbol_table = self.symbol_table.parent
                         return break_element
@@ -916,14 +969,17 @@ class Runner(Visitor):
         return None
 
     def visit_parameter(self, i: Parameter):
-        pass
+        vr:Variable= Variable()
+        vr.id= i.id
+        vr.data_type= i.data_type
+        return vr
 
     def visit_return(self, i: Return):
         if self.symbol_table.parent is None:
             self.errors.append("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
             print("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
             return None
-        if i.value is None:
+        if i.expression is None:
             self.errors.append("ERROR EN RETURN NO TIENE VALOR.")
             print("ERROR EN RETURN NO TIENE VALOR.")
             return None

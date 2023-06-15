@@ -352,9 +352,13 @@ def p_instruccion_call_function2(t):
 ###################################################################################################
 def p_instruccion_values(t):
     '''values   : values COMA a'''
+    t[0] = t[1]
+    t[0].append(t[3])
 
 def p_instruccion_values2(t):
     '''values   : a'''
+    t[0] = []
+    t[0].append(t[1])
 
 ############################################## PARAMETROS ##############################################
 
@@ -761,25 +765,14 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-
-interface Carro {
-    color: string;
+function factorial(n: number) {
+   if (n <= 0) {         // termination case
+      return 1; 
+   } else {     
+      return (n * factorial(n - 1));     // function invokes itself
+   } 
 }
-
-function sum(a: number, c: Carro) {
-    c.color = "amarillo";
-    console.log(c.color);
-    return a - 1;
-}
-
-function sum(a: number, b: number) {
-  return sum(1,2);
-}
-
-function sum(a: number, b: number, c:boolean) {
-  return a * b;
-}
-
+console.log(factorial(6));
 """)
 
 
@@ -792,7 +785,17 @@ if instruccion is not None:
         if isinstance(i, Instruction):
             i.accept(debugger)
 
-for i in debugger.symbol_table.getAllFunctions():
+errorsR = []
+tableR = SymbolTable()
+
+tableR.symbols = debugger.symbol_table.getAllFunctions()
+
+debuggerR = Runner(tableR, errorsR)
+if instruccion is not None:
+    for i in instruccion:
+        if isinstance(i, Instruction):
+            i.accept(debuggerR)
+for i in debugger.symbol_table.symbols:
     print(str(i))
 
 if len(errors) > 0:

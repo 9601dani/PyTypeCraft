@@ -8,3 +8,4 @@ class FunctionModel:
         self.id = id
         self.parameters = parameters
         self.instructions = instructions
+        self.isInTable = True
