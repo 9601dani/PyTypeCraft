@@ -817,6 +817,26 @@ class Runner(Visitor):
             elif variable.data_type == VariableType.lista_variables["ARRAY"]:
                 pass
                 #TODO: CONCATENAR ARRAYS
+        elif i.type == NativeFunType.TYPE_OF:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = variable.data_type
+            var_n.data_type = VariableType.lista_variables["STRING"]
+            return var_n
+        elif i.type == NativeFunType.STRING_CAST:
+            variable: Variable = i.variable.accept(self)
+            if variable is None:
+                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                return None
+            var_n = copy.deepcopy(variable)
+            var_n.value = str(variable.value)
+            var_n.data_type = VariableType.lista_variables["STRING"]
+            return var_n
 
 
     def visit_only_assign(self, i: OnlyAssignment):

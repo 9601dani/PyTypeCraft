@@ -6,3 +6,5 @@ class NativeFunType:
     TOUPPERCASE = "TOUPPERCASE"
     SPLIT = "SPLIT"
     CONCAT = "CONCAT"
+    TYPE_OF = "TYPEOF"
+    STRING_CAST = "STRING_CAST"
