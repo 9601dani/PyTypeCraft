@@ -38,3 +38,14 @@ class VariableType:
 
     def is_primitive(self, type):
         return type.upper() == "NUMBER" or type.upper() == "STRING" or type.upper() == "BOOLEAN" or type.upper() == "ANY" or type.upper() == "NULL"
+
+    def clean_types(self):
+        self.lista_variables = {
+            "NUMBER": "number",
+            "STRING": "string",
+            "BOOLEAN": "boolean",
+            "ANY": "any",
+            "NULL": "null",
+            "ARRAY": "array",
+            "DEFINIRLA": "definirla"
+        }

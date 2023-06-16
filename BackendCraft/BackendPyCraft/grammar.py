@@ -773,6 +773,25 @@ test_lexer(lexer)
 
 instruccion : [Instruction] =parse("""
 
+interface Dog {
+    name: string;
+    age: number;
+};
+
+let p1: Dog = {name: "dog1", age: 3};
+let p2: Dog = {name: "dog2", age: 4};
+let p3: Dog = {name: "dog3", age: 6};
+
+let dogs: Dog = [p1,p2,p3];
+
+console.log("dog name:",dogs[0].name,"age:",dogs[0].age);
+console.log("dog name:",dogs[1].name,"age:",dogs[1].age);
+console.log("dog name:",dogs[2].name,"age:",dogs[2].age);
+
+dogs[0].name = "dog10";
+
+console.log("dog name:",dogs[0].name,"age:",dogs[0].age);
+
 """)
 
 
@@ -787,8 +806,9 @@ if instruccion is not None:
 
 errorsR = []
 tableR = SymbolTable()
-
+VariableType().clean_types()
 tableR.symbols = debugger.symbol_table.getAllFunctions()
+
 
 debuggerR = Runner(tableR, errorsR)
 if instruccion is not None:
