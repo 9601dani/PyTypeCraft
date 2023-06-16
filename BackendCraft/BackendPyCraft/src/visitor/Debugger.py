@@ -1,7 +1,9 @@
 from .Visitor import Visitor
 from ..models import Assignment
+from ..models import ArrayState
 from ..models import BinaryOperation
 from ..models import Break
+from ..models import CallArray
 from ..models import CallAttribute
 from ..models import CallFunction
 from ..models import ConsoleLog
@@ -33,6 +35,7 @@ from ..models.OperationType import OperationType
 from ..symbolTable.ScopeType import ScopeType
 from ..symbolModel.InterfaceModel import InterfaceModel
 from ..symbolModel.FunctionModel import FunctionModel
+from ..symbolModel.ArrayModel import ArrayModel
 import copy
 from decimal import Decimal
 
@@ -111,6 +114,25 @@ class Debugger(Visitor):
                 # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
                 return None
 
+            if value.symbol_type == SymbolType().ARRAY:
+                # print("DECLARANDO UN ARREGLO",value.data_type)
+                if i.type is None or i.type == VariableType().buscar_type("ANY"):
+                    result.data_type = value.data_type
+                    result.symbol_type = SymbolType().ARRAY
+                    result.isAny = True
+                    result.value = value.value
+                    return result
+
+                if value.isAny:
+                    self.errors.append("NO SE PUEDE ASIGNAR UN ARREGLO ANY A UNA VARIABLE QUE NO LO ES")
+                    return None
+
+                result.data_type = value.data_type
+                result.symbol_type = SymbolType().ARRAY
+                result.isAny = False
+                result.value = value.value
+                return result
+
             if i.type is None or i.type == VariableType().buscar_type("ANY"):
                 # print("VALUE ASSIG: "+value.data_type)
                 result.data_type = value.data_type
@@ -170,6 +192,41 @@ class Debugger(Visitor):
             result.isAny = False
             result.value = value.value
             return result
+
+    def visit_array_state(self, i: ArrayState):
+        first_node = None
+        result = Variable()
+        result.symbol_type = SymbolType.ARRAY
+        result.isAny = False
+
+        for value in i.values:
+            var:Variable = value.accept(self)
+
+            if var is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                return None
+
+            current_node = ArrayModel(var)
+
+            if first_node is None:
+                first_node = current_node
+                result.data_type = var.data_type
+                print("AGREGANDO PRIMER NODO")
+            else:
+                next_node: ArrayModel = first_node
+
+                while next_node.next is not None:
+                    next_node = next_node.next
+
+                next_node.next = current_node
+                first_node.len = first_node.len + 1
+                print("AGREGANDO OTRO NODO")
+
+                if result.data_type != var.data_type:
+                    first_node.isAny = True
+
+        result.value = first_node
+        return result
 
     def visit_binary_op(self, i: BinaryOperation):
         left = i.left_operator.accept(self)
@@ -432,6 +489,47 @@ class Debugger(Visitor):
 
     def visit_break(self, i: Break):
         print("break debug")
+
+    def visit_call_arr(self, i: CallArray):
+        variable: Variable = self.symbol_table.find_var_by_id(i.id)
+
+        if variable is None:
+            self.errors.append("NO SE ENCONTRÓ EL ARRAY: "+i.id)
+            return None
+
+        if variable.symbol_type != SymbolType().ARRAY:
+            self.errors.append("LA VARIABLE NO ES UN ARRAY")
+            return None
+
+        current_var = variable
+
+        for dimension in i.dimensions:
+            index: Variable = dimension.accept(self)
+
+            if index is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN DEBUG")
+                return None
+
+            if index.data_type != VariableType().buscar_type("NUMBER"):
+                self.errors.append("EL ÍNDICE DEBE SER TIPO NUMBER")
+                return None
+
+            if current_var.symbol_type != SymbolType().ARRAY:
+                self.errors.append("DIMENSIÓN NO ENCONTRADA")
+                return None
+
+            current_model: ArrayModel = current_var.value
+
+            if int(index.value) > current_model.len:
+                self.errors.append("INDICE FUERA DE LOS LÍMITES SE ESPERABA:"+str(current_model.len)+" PERO SE OBTUVO:"+str(index.value))
+                return None
+
+            for i in range(int(index.value)):
+                current_model = current_model.next
+
+            current_var = current_model.var
+
+        return current_var
 
     def visit_call_attr(self, i: CallAttribute):
         value: Variable = i.id.accept(self)
@@ -1010,7 +1108,7 @@ class Debugger(Visitor):
         elif i.value_type == ValueType.LITERAL:
             var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
+                self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS, DEBUG")
                 return None
 
             if VariableType().is_primitive(var_in_table.data_type):

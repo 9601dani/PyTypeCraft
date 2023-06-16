@@ -24,7 +24,7 @@ class SymbolTable:
         while current_table is not None:
 
             for symbol in current_table.symbols:
-                if symbol.symbol_type == SymbolType.VARIABLE and symbol.id == id:
+                if symbol.id == id and (symbol.symbol_type == SymbolType().VARIABLE or symbol.symbol_type == SymbolType().ARRAY):
                     # print("Variable encontrada: "+symbol.__str__())
                     return symbol
 
@@ -34,7 +34,7 @@ class SymbolTable:
 
     # BOOLEAN METHOD, RETURN TRUE IF VARIABLE IS IN TABLE, IF NOT RETURN FALSE
     def var_in_table(self, id: str):
-        return any((var.id == id and var.symbol_type == SymbolType.VARIABLE) for var in self.symbols)
+        return any((var.id == id and (var.symbol_type == SymbolType().VARIABLE or var.symbol_type == SymbolType().ARRAY)) for var in self.symbols)
 
     # THIS METHOD CHECKS IF THE ID FUNCTION IS ALREADY DECLARED
     # IF IS DECLARED THEN RETURN IT.
@@ -43,7 +43,7 @@ class SymbolTable:
         functions: [Variable] = []
         while current_table is not None:
             for symbol in current_table.symbols:
-                if symbol.symbol_type == SymbolType.FUNCTION and symbol.id == id:
+                if symbol.symbol_type == SymbolType().FUNCTION and symbol.id == id:
                     # print("Variable encontrada: "+symbol.__str__())
                     functions.append(symbol)
 
@@ -56,7 +56,7 @@ class SymbolTable:
 
         while current_table is not None:
             for symbol in current_table.symbols:
-                if symbol.symbol_type == SymbolType.INTERFACE and symbol.id == id:
+                if symbol.symbol_type == SymbolType().INTERFACE and symbol.id == id:
                     # print("Variable encontrada: "+symbol.__str__())
                     return symbol
 
@@ -66,7 +66,7 @@ class SymbolTable:
 
     # BOOLEAN METHOD, RETURN TRUE IF FUNCTION IS IN TABLE, IF NOT RETURN FALSE
     def fun_in_table(self, id: str):
-        return any((var.id == id and var.symbol_type == SymbolType.FUNCTION) for var in self.symbols)
+        return any((var.id == id and var.symbol_type == SymbolType().FUNCTION) for var in self.symbols)
 
     def is_in_fun_scope(self):
         current_table = self

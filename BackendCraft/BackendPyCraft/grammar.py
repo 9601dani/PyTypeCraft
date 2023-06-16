@@ -237,6 +237,8 @@ from src.visitor.Runner import Runner
 from src.symbolTable.SymbolTable import SymbolTable
 from src.models.InterfaceAssign import InterfaceAssign
 from src.models.CallAttribute import CallAttribute
+from src.models.ArrayState import ArrayState
+from src.models.CallArray import CallArray
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
@@ -662,6 +664,7 @@ def p_instruccion_expresion24(t):
 
 def p_instruccion_expresion25(t):
     '''h    : array_val_pro'''
+    t[0] = t[1]
 
 def p_instruccion_expresion26(t):
     '''h    : a PUNTO LITERAL'''
@@ -679,12 +682,17 @@ def p_instruccion_expresion27(t):
 
 def p_instruccion_array_val_pro(t):
     '''array_val_pro    : LITERAL dimensions'''
+    t[0] = CallArray(t.lineno(1), find_column(input, t.slice[1]), t[1], t[2])
 
 def p_instruccion_dimensions(t):
     '''dimensions   : dimensions L_CORCHETE a R_CORCHETE'''
+    t[0] = t[1]
+    t[0].append(t[3])
 
 def p_instruccion_dimensions2(t):
     '''dimensions   : L_CORCHETE a R_CORCHETE'''
+    t[0] = []
+    t[0].append(t[2])
 
 def p_instruccion_sumadores(t):
         ''' sumadores     : LITERAL MAS MAS
@@ -718,6 +726,7 @@ def p_instruccion_inter_atributesAssi2(t):
 ############################################## ASIGNACION DE ARREGLOS ##############################################
 def p_instruccion_array_pro(t):
     '''array_pro    : L_CORCHETE values R_CORCHETE'''
+    t[0] = ArrayState(t.lineno(1), find_column(input, t.slice[1]), t[2])
 
 
 
@@ -764,10 +773,6 @@ test_lexer(lexer)
 
 instruccion : [Instruction] =parse("""
 
-let cadena: string = "12345";
-
-console.log("tipo",typeof("hola".length()));
-
 """)
 
 
@@ -790,6 +795,7 @@ if instruccion is not None:
     for i in instruccion:
         if isinstance(i, Instruction):
             i.accept(debuggerR)
+
 for i in debugger.symbol_table.symbols:
     print(str(i))
 

@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from ..models import Assignment
+from ..models import ArrayState
 from ..models import BinaryOperation
 from ..models import Break
+from ..models import CallArray
 from ..models import CallAttribute
 from ..models import CallFunction
 from ..models import ConsoleLog
@@ -34,11 +36,19 @@ class Visitor(ABC):
         pass
 
     @abstractmethod
+    def visit_array_state(self, i: ArrayState):
+        pass
+
+    @abstractmethod
     def visit_binary_op(self, i: BinaryOperation):
         pass
 
     @abstractmethod
     def visit_break(self, i: Break):
+        pass
+
+    @abstractmethod
+    def visit_call_arr(self, i: CallArray):
         pass
 
     @abstractmethod
