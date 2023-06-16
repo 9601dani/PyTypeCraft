@@ -460,7 +460,7 @@ class Runner(Visitor):
         return None
 
     def visit_call_fun(self, i: CallFunction):
-        print("CALL FUN")
+        # print("CALL FUN")
         print(i.assignments)
         # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
         # vr: Variable = Variable()
@@ -554,6 +554,30 @@ class Runner(Visitor):
 
             arguments.append(value)
             # print("AGREGANDO ARGUMENTO: "+value.__str__())
+
+        if i.name == "typeof":
+            if len(arguments) != 1:
+                print("LA FUNCIÓN TYPEOF ESPERABA SOLO UN ARGUMENTO")
+                return None
+
+            result = Variable()
+            result.symbol_type = SymbolType().VARIABLE
+            result.value = arguments[0].data_type
+            result.data_type = VariableType().buscar_type("STRING")
+            result.isAny = False
+            return result
+
+        elif i.name == "toString":
+            if len(arguments) != 1:
+                print("LA FUNCIÓN STRING ESPERABA SOLO UN ARGUMENTO")
+                return None
+
+            result = Variable()
+            result.symbol_type = SymbolType().VARIABLE
+            result.value = str(arguments[0].value)
+            result.data_type = VariableType().buscar_type("STRING")
+            result.isAny = False
+            return result
 
         match_fun:FunctionModel = self.get_fun(i.name, arguments)
 
@@ -967,26 +991,27 @@ class Runner(Visitor):
             elif variable.data_type == VariableType.lista_variables["ARRAY"]:
                 pass
                 #TODO: CONCATENAR ARRAYS
-        elif i.type == NativeFunType.TYPE_OF:
+        elif i.type == NativeFunType.LENGTH:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append("ERROR EN FUNCIÓN NATIVA NO SE PUDO REALIZAR LA OPERACIÓN")
                 return None
-            var_n = copy.deepcopy(variable)
-            var_n.value = variable.data_type
-            var_n.data_type = VariableType.lista_variables["STRING"]
-            return var_n
-        elif i.type == NativeFunType.STRING_CAST:
-            variable: Variable = i.variable.accept(self)
-            if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                return None
-            var_n = copy.deepcopy(variable)
-            var_n.value = str(variable.value)
-            var_n.data_type = VariableType.lista_variables["STRING"]
-            return var_n
+
+            if variable.symbol_type == SymbolType().VARIABLE:
+                if variable.data_type != VariableType().buscar_type("STRING"):
+                    self.errors.append("SOLO PUEDE USAR LA FUNCIÓN LENGTH EN VARIABLES TIPO STRING")
+                    return None
+
+                result = Variable()
+                result.data_type = VariableType().buscar_type("NUMBER")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = False
+                result.value = int(len(variable.value))
+                return result
+
+            elif variable.symbol_type == SymbolType().ARRAY:
+                #TODO: AGREGAR FUNCIONALIDAD PARA OBTENER EL  LEN DE UN ARRAY
+                print("PRINT PARA QUE NO DE ERROR")
 
 
     def visit_only_assign(self, i: OnlyAssignment):
@@ -1097,19 +1122,30 @@ class Runner(Visitor):
         variable = Variable()
         if i.value_type == ValueType.CADENA:
             variable.data_type = VariableType().buscar_type("STRING")
+            variable.symbol_type = SymbolType().VARIABLE
+            variable.isAny = False
             variable.value = str(i.value)
             return variable
         elif i.value_type == ValueType.ENTERO:
             variable.data_type = VariableType().buscar_type("NUMBER")
+            variable.symbol_type = SymbolType().VARIABLE
+            variable.isAny = False
+
             variable.value = int(i.value)
             return variable
         elif i.value_type == ValueType.DECIMAL:
             variable.data_type = VariableType().buscar_type("NUMBER")
+            variable.symbol_type = SymbolType().VARIABLE
+            variable.isAny = False
+
             variable.value = float(i.value)
             return variable
         elif i.value_type == ValueType.BOOLEANO:
             variable.data_type = VariableType().buscar_type("BOOLEAN")
             variable.value = True if i.value == "true" else False
+            variable.symbol_type = SymbolType().VARIABLE
+            variable.isAny = False
+
             return variable
         elif i.value_type == ValueType.LITERAL:
             var_in_table: Variable = self.symbol_table.find_var_by_id(str(i.value))

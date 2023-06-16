@@ -33,6 +33,7 @@ reservadas ={
     'toUpperCase' : 'TOUPPERCASE',
     'split' : 'SPLIT',
     'concat' : 'CONCAT',
+    'length' : 'LENGTH',
     # Print Console
     'console' : 'CONSOLE',
     'log' : 'LOG',
@@ -284,6 +285,8 @@ def return_native_fun_type(native_type):
         return NativeFunType.SPLIT
     elif(native_type == "concat"):
         return NativeFunType.CONCAT
+    elif(native_type == "length"):
+        return NativeFunType.LENGTH
 
 def p_init(t):
     'init            : instrucciones'
@@ -343,6 +346,10 @@ def p_instruccion_call_function(t):
 def p_instruccion_call_function2(t):
     '''call_function_pro    : LITERAL L_PAREN R_PAREN'''
     t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], [])
+
+def p_instruccion_call_function3(t):
+    '''call_function_pro    : TOSTRING L_PAREN values R_PAREN'''
+    t[0]= CallFunction(t.lineno(1),find_column(input, t.slice[1]), t[1], t[3])
 
 
 ############################################## VALUES ##############################################
@@ -623,16 +630,6 @@ def p_instruccion_expresion16(t):
     ''' g     : h '''
     t[0] = t[1]
 
-# def p_instruccion_expresion17(t):
-#     '''g    : h PUNTO nativeFun L_PAREN expresion R_PAREN
-#             | h PUNTO nativeFun L_PAREN R_PAREN'''
-#     # print("EVALUANDO NATIVAS")
-#     # print(t[3])
-#     if(t[5] == ")"):
-#         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], [])
-#     else:
-#         t[0] = NativeFunction(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], t[5])
-
 def p_instruccion_expresion18(t):
     ''' h     : ENTERO'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.ENTERO)
@@ -733,7 +730,8 @@ def p_instruccion_nativas(t):
                     | TOLOWERCASE
                     | TOUPPERCASE
                     | SPLIT
-                    | CONCAT'''
+                    | CONCAT
+                    | LENGTH'''
 
     t[0] = return_native_fun_type(t[1])
     # print("EVALUANDO NATIVAS EN RETURN")
@@ -765,27 +763,11 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-function towerOfHanoi(n:number, from_rod:string,  to_rod:string,  aux_rod:string){
-    if (n === 0){
-        return 0;
-    }
-    towerOfHanoi(n - 1, from_rod, aux_rod, to_rod);
-    console.log("Move disk " , n , " from rod ", from_rod ," to rod " , to_rod);
-    towerOfHanoi(n - 1, aux_rod, to_rod, from_rod);
-}
 
-towerOfHanoi(30, "A", "C", "B");
+let cadena: string = "12345";
 
-function fibonacci(n: number) {
-  if (n <= 1) {
-    return n;
-  } else {
+console.log("tipo",typeof("hola".length()));
 
-    return fibonacci(n - 1) + fibonacci(n - 2);
-  }
-}
-
-console.log(fibonacci(4));
 """)
 
 
