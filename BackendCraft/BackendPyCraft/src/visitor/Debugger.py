@@ -552,7 +552,47 @@ class Debugger(Visitor):
         return None
 
     def visit_call_fun(self, i: CallFunction):
-        print("callFun debug")
+        arguments = []
+
+        for argument in i.assignments:
+            value = argument.accept(self)
+
+            if value is None:
+                print("NO SE PUDO REALIZAR LA OPERACIÓN")
+                return None
+
+            arguments.append(value)
+            # print("AGREGANDO ARGUMENTO: "+value.__str__())
+
+        if i.name == "typeof":
+            if len(arguments) != 1:
+                print("LA FUNCIÓN TYPEOF ESPERABA SOLO UN ARGUMENTO")
+                return None
+
+            result = Variable()
+            result.symbol_type = SymbolType().VARIABLE
+            result.value = arguments[0].data_type
+            result.data_type = VariableType().buscar_type("STRING")
+            result.isAny = False
+            return result
+
+        elif i.name == "toString":
+            if len(arguments) != 1:
+                print("LA FUNCIÓN STRING ESPERABA SOLO UN ARGUMENTO")
+                return None
+
+            result = Variable()
+            result.symbol_type = SymbolType().VARIABLE
+            result.value = str(arguments[0].value)
+            result.data_type = VariableType().buscar_type("STRING")
+            result.isAny = False
+            return result
+
+        match_fun:FunctionModel = self.get_fun(i.name, arguments)
+
+        if match_fun is None:
+            print("NO SE ENCONTRÓ LA FUNCIÓN")
+            return None
 
     def visit_console(self, i: ConsoleLog):
         if i.value is None:

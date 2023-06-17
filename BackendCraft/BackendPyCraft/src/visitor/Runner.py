@@ -35,6 +35,10 @@ from ..symbolModel.InterfaceModel import InterfaceModel
 from ..symbolModel.FunctionModel import FunctionModel
 from ..symbolTable.ScopeType import ScopeType
 from ..symbolModel.ArrayModel import ArrayModel
+from ..models.Continue import Continue
+from ..models.Break import Break
+from ..models.Return import Return
+from ..models.Value import Value
 
 import copy
 from decimal import Decimal
@@ -58,8 +62,13 @@ class Runner(Visitor):
                 result.data_type = VariableType().buscar_type("NUMBER")
                 result.symbol_type = SymbolType().VARIABLE
                 result.isAny = False
-
                 result.value = 0
+                return result
+            elif i.isAny:
+                result.data_type = VariableType().buscar_type("STRING")
+                result.symbol_type = SymbolType().VARIABLE
+                result.isAny = True
+                result.value = ""
                 return result
             elif i.type == VariableType().buscar_type("STRING"):
                 result.data_type = VariableType().buscar_type("STRING")
@@ -72,21 +81,18 @@ class Runner(Visitor):
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.symbol_type = SymbolType().VARIABLE
                 result.isAny = False
-
                 result.value = True
                 return result
             elif i.type == VariableType().buscar_type("NULL"):
                 result.data_type = VariableType().buscar_type("NULL")
                 result.symbol_type = SymbolType().VARIABLE
                 result.isAny = False
-
                 result.value = None
                 return result
             elif i.type == VariableType().buscar_type("STRING"):
                 result.data_type = VariableType().buscar_type("STRING")
                 result.symbol_type = SymbolType().VARIABLE
                 result.isAny = False
-
                 result.value = ''
                 return result
             elif i.type is None or i.type == VariableType().buscar_type("ANY"):
@@ -559,7 +565,7 @@ class Runner(Visitor):
 
     def visit_call_fun(self, i: CallFunction):
         # print("CALL FUN")
-        print(i.assignments)
+        #print(i.assignments)
         # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
         # vr: Variable = Variable()
         # variables_nuevas = []
@@ -683,7 +689,7 @@ class Runner(Visitor):
             print("NO SE ENCONTRÓ LA FUNCIÓN")
             return None
 
-        print("FUNCIÓN: "+match_fun.id)
+        #print("FUNCIÓN: "+match_fun.id)
         # CREANDO NUEVO SCOPE PARA LA FUNCIÓN
         temp_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
         self.symbol_table = temp_table
@@ -693,17 +699,16 @@ class Runner(Visitor):
             self.symbol_table.add_variable(match_fun.parameters[i])
 
         for instruction in match_fun.instructions:
-            print("EJECUTANDO INSTRUCCIONES EN CALLFUNCTION")
-            result=instruction.accept(self)
+            #print("EJECUTANDO INSTRUCCIONES EN CALLFUNCTION")
+            result = instruction.accept(self)
             if result is not None:
                 if result.__class__.__name__ == "Return":
                     vr_return = result.expression.accept(self)
                     self.symbol_table = self.symbol_table.parent
-                    print("RETORNANDO VALOR: "+vr_return.__str__() )
+                    vr_return.isAny = True
+                    #print("RETORNANDO VALOR: "+vr_return.__str__() )
                     return vr_return
-                elif result.__class__.__name__ == "Variable":
-                    self.symbol_table = self.symbol_table.parent
-                    return result
+
 
         self.symbol_table = self.symbol_table.parent
         return None
@@ -738,6 +743,7 @@ class Runner(Visitor):
             return None
         for instruction in i.instructions:
             variable: Variable = instruction.accept(self)
+            variable.type_modifier = i.type
 
             if variable is None:
                 self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
@@ -745,9 +751,11 @@ class Runner(Visitor):
 
             if self.symbol_table.var_in_table(variable.id):
                 self.errors.append("VARIABLE YA DECLARADA.")
+                print("VARIABLE YA DECLARADA.")
                 return None
 
             self.symbol_table.add_variable(variable)
+            #print("DECLARANDO VARIABLE: "+variable.id+ "valor "+variable.value.__str__())
             # print(variable.data_type)
             # print("DECLARACION DE VARIABLE EXITOSA.")
             # print(self.symbol_table.__str__())
@@ -781,7 +789,49 @@ class Runner(Visitor):
         pass
 
     def visit_for(self, i: ForState):
-        pass
+        if i.declaration is None:
+            self.errors.append("ERROR EN FOR NO TIENE DECLARACION.")
+            return None
+        if i.condition is None:
+            self.errors.append("ERROR EN FOR NO TIENE CONDICION.")
+            return None
+        if i.increment is None:
+            self.errors.append("ERROR EN FOR NO TIENE INCREMENTO.")
+            return None
+        self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+        i.declaration.accept(self)
+        result_comparacion: Variable = i.condition.accept(self)
+        isBreak=False
+        while result_comparacion.value is True:
+            self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+            for instruction in i.instructions:
+                result = instruction.accept(self)
+                if result is not None:
+                    if result.__class__.__name__ == "Return":
+                        if self.symbol_table.is_in_loop_scope():
+                            self.symbol_table = self.symbol_table.parent
+                            return result
+                        else:
+                            print("ERROR EN RETURN NO ESTA DENTRO DE UN CICLO.")
+                            self.errors.append("ERROR EN RETURN NO ESTA DENTRO DE UN CICLO.")
+                            self.symbol_table = self.symbol_table.parent
+                            return None
+                    elif result.__class__.__name__ == "Continue":
+                        break
+                    elif result.__class__.__name__ == "Break":
+                        isBreak=True
+                        break
+            self.symbol_table = self.symbol_table.parent
+            if isBreak:
+                isBreak=False
+                break
+            result_comparacion = i.condition.accept(self)
+            if(result_comparacion is False):
+                break
+            i.increment.accept(self)
+
+        self.symbol_table = self.symbol_table.parent
+        return None
 
     def visit_function(self, i: FunctionState):
         # print("function debug")
@@ -832,11 +882,19 @@ class Runner(Visitor):
             if i.bloque_verdadero is not None:
                 for instruction in i.bloque_verdadero:
                     result = instruction.accept(self)
+                    #print("RESULTSSSSSS")
+                    #print(result)
                     if result is not None:
                         if result.__class__.__name__ == "Return":
-                            return_element: Return = result
-                            self.symbol_table = self.symbol_table.parent
-                            return return_element
+                           if self.symbol_table.is_in_fun_scope():
+                                 return_element: Return = result
+                                 self.symbol_table = self.symbol_table.parent
+                                 return return_element
+                           else:
+                                 print("ERROR EN RETURN NO ESTA DENTRO DE UNA FUNCION.")
+                                 self.errors.append("ERROR EN RETURN NO ESTA DENTRO DE UNA FUNCION.")
+                                 self.symbol_table = self.symbol_table.parent
+                                 return None
                         elif result.__class__.__name__ == "Continue":
                             continue_element: Continue = Continue(i.line, i.column)
                             self.symbol_table = self.symbol_table.parent
@@ -845,8 +903,8 @@ class Runner(Visitor):
                             break_element: Break = Break(i.line, i.column)
                             self.symbol_table = self.symbol_table.parent
                             return break_element
+
                 self.symbol_table = self.symbol_table.parent
-                return None
             else:
                 self.symbol_table = self.symbol_table.parent
                 return None
@@ -1142,9 +1200,8 @@ class Runner(Visitor):
             print("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
             return None
         if i.expression is None:
-            self.errors.append("ERROR EN RETURN NO TIENE VALOR.")
-            print("ERROR EN RETURN NO TIENE VALOR.")
-            return None
+            vr_rrr= Return(i.line, i.column, Value(i.line, i.column, 0,ValueType().ENTERO))
+            return vr_rrr
         if i.expression is None:
             self.errors.append("ERROR EN RETURN NO TIENE EXPRESION.")
             print("ERROR EN RETURN NO TIENE EXPRESION.")
@@ -1208,7 +1265,46 @@ class Runner(Visitor):
             return result
 
     def visit_while(self, i: WhileState):
-        pass
+        if i.condition.accept is None:
+            self.errors.append("ERROR EN WHILE NO TIENE CONDICION.")
+            print("ERROR EN WHILE NO TIENE CONDICION.")
+            return None
+        result = i.condition.accept(self)
+        if result is None:
+            self.errors.append("ERROR EN WHILE NO SE PUDO EVALUAR CONDICION.")
+            print("ERROR EN WHILE NO SE PUDO EVALUAR CONDICION.")
+            return None
+        isBreak = False
+        while result.value:
+            self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+            if i.instructions is not None:
+                for instruccion in i.instructions:
+                    result=instruccion.accept(self)
+                    if result is not None:
+                        if result.__class__.__name__ == "Return":
+                            if self.symbol_table.is_in_loop_scope():
+                                self.symbol_table = self.symbol_table.parent
+                                return result
+                            else:
+                                self.errors.append("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
+                                print("ERROR EN RETURN NO ESTA EN UNA FUNCION.")
+                                self.symbol_table = self.symbol_table.parent
+                                return None
+                        elif result.__class__.__name__ == "Break":
+                            isBreak = True
+                            break
+                        elif result.__class__.__name__ == "Continue":
+                            break
+                self.symbol_table = self.symbol_table.parent
+                if isBreak:
+                    break
+
+                result = i.condition.accept(self)
+                if result is None:
+                    self.errors.append("ERROR EN WHILE NO SE PUDO EVALUAR CONDICION.")
+                    print("ERROR EN WHILE NO SE PUDO EVALUAR CONDICION.")
+                    return None
+        return None
 
     def visit_value(self, i: Value):
         variable = Variable()

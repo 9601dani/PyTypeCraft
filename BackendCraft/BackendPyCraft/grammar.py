@@ -132,18 +132,7 @@ def t_CADENA(t):
     t.value = t.value.replace('\\\\','\\')
     return t
 
-def t_CARACTER(t):
-    r'\'(\\\'|\\"|\\t|\\n|\\\\|[^\'\\\"])?\''
-    t.value = t.value[1:-1] # remuevo las comillas
 
-    print(str(t.value))
-    t.value = t.value.replace('\\n','\n')
-    t.value = t.value.replace('\\r','\r')
-    t.value = t.value.replace('\\t','\t')
-    t.value = t.value.replace('\\"','\"')
-    t.value = t.value.replace("\\'",'\'')
-    t.value = t.value.replace('\\\\','\\')
-    return t
 # Expersion Regular para decimal
 def t_DECIMAL(t):
     r'\d+\.\d+'
@@ -772,25 +761,41 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
+let val1:number = 1;
+let val2:number = 10;
+let val3:number = 2021.2020;
 
-interface Dog {
-    name: string;
-    age: number;
-};
+console.log("Probando declaracion de variables \n");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
+// COMENTARIO DE UNA LINEA
+val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
+val2 = 11 * (11 % (12 + -10)) + 22 / 2;
+val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
+console.log("Probando asignación de variables y aritmeticas");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
 
-let p1: Dog = {name: "dog1", age: 3};
-let p2: Dog = {name: "dog2", age: 4};
-let p3: Dog = {name: "dog3", age: 6};
+let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
+let rel2 = (7*7) <= (15+555) && 1 < 2;
+let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
+console.log("Probando relacionales y logicas");
+console.log(rel1, " ", rel2, " ", rel3);
+console.log("---------------------------------");
 
-let dogs: Dog = [p1,p2,p3];
+console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
+let despedida = "Adios mundo :c";
+let saludo:string = "Hola Mundo! ";
+console.log(saludo.toLowerCase(), despedida.toUpperCase());
 
-console.log("dog name:",dogs[0].name,"age:",dogs[0].age);
-console.log("dog name:",dogs[1].name,"age:",dogs[1].age);
-console.log("dog name:",dogs[2].name,"age:",dogs[2].age);
+console.log("Probando algunas funciones nativas de PyTypeCraft");
+console.log("Funciones relacionadas a conversiones");
+let aprox_1 = 3.141516;
+console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
+let carnet:string = "201903865";
+console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
+console.log("---------------------------------");
 
-dogs[0].name = "dog10";
-
-console.log("dog name:",dogs[0].name,"age:",dogs[0].age);
 
 """)
 
@@ -809,16 +814,20 @@ tableR = SymbolTable()
 VariableType().clean_types()
 tableR.symbols = debugger.symbol_table.getAllFunctions()
 
-
+print("==================================RUNNER=====================================")
 debuggerR = Runner(tableR, errorsR)
 if instruccion is not None:
     for i in instruccion:
         if isinstance(i, Instruction):
             i.accept(debuggerR)
 
-for i in debugger.symbol_table.symbols:
+for i in debuggerR.symbol_table.symbols:
     print(str(i))
 
-# if len(errors) > 0:
-#     for i in errors:
-#         print(str(i))
+if len(errors) > 0:
+     for i in errors:
+        print(str(i))
+print("==================================ERRORES=====================================")
+if len(errorsR) > 0:
+     for p in errorsR:
+        print(str(p))
