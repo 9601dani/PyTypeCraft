@@ -232,12 +232,21 @@ class Debugger(Visitor):
         left = i.left_operator.accept(self)
         right = i.right_operator.accept(self)
 
+        if left.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().ARRAY or left.symbol_type == SymbolType().INTERFACE or right.symbol_type == SymbolType().INTERFACE:
+            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            return None
+
         if left is None or right is None:
             self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
             return None
 
         result = Variable()
 
+        if left.symbol_type == SymbolType().FUNCTION:
+            return self.assignDefaultValue(right.data_type)
+        elif right.symbol_type == SymbolType().FUNCTION:
+            return self.assignDefaultValue(left.data_type)
         if i.operator == OperationType.MAS:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
@@ -552,47 +561,13 @@ class Debugger(Visitor):
         return None
 
     def visit_call_fun(self, i: CallFunction):
-        arguments = []
 
-        for argument in i.assignments:
-            value = argument.accept(self)
-
-            if value is None:
-                print("NO SE PUDO REALIZAR LA OPERACIÓN")
-                return None
-
-            arguments.append(value)
-            # print("AGREGANDO ARGUMENTO: "+value.__str__())
-
-        if i.name == "typeof":
-            if len(arguments) != 1:
-                print("LA FUNCIÓN TYPEOF ESPERABA SOLO UN ARGUMENTO")
-                return None
-
-            result = Variable()
-            result.symbol_type = SymbolType().VARIABLE
-            result.value = arguments[0].data_type
-            result.data_type = VariableType().buscar_type("STRING")
-            result.isAny = False
-            return result
-
-        elif i.name == "toString":
-            if len(arguments) != 1:
-                print("LA FUNCIÓN STRING ESPERABA SOLO UN ARGUMENTO")
-                return None
-
-            result = Variable()
-            result.symbol_type = SymbolType().VARIABLE
-            result.value = str(arguments[0].value)
-            result.data_type = VariableType().buscar_type("STRING")
-            result.isAny = False
-            return result
-
-        match_fun:FunctionModel = self.get_fun(i.name, arguments)
-
-        if match_fun is None:
-            print("NO SE ENCONTRÓ LA FUNCIÓN")
-            return None
+        vr: Variable = Variable()
+        vr.value = ""
+        vr.data_type = VariableType().buscar_type("STRING")
+        vr.symbol_type = SymbolType().FUNCTION
+        vr.id = "return"
+        return vr
 
     def visit_console(self, i: ConsoleLog):
         if i.value is None:
@@ -608,7 +583,11 @@ class Debugger(Visitor):
                 self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN.")
                 continue
 
-            content = content + " " + str(result.value)
+            try:
+                content = content + " " + str(result.value)
+            except:
+                content = content + " " + str(result)
+                continue
 
         print(content)
 
@@ -1046,6 +1025,12 @@ class Debugger(Visitor):
         if right is None:
             self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA.")
             return None
+        if right.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().INTERFACE:
+            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            return None
+        if right.symbol_type == SymbolType().FUNCTION:
+            return self.assignDefaultValue(VariableType().buscar_type("NUMBER"))
 
         result = Variable()
 

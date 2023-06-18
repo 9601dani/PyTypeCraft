@@ -217,7 +217,7 @@ class Runner(Visitor):
             if first_node is None:
                 first_node = current_node
                 result.data_type = var.data_type
-                print("AGREGANDO PRIMER NODO")
+                #print("AGREGANDO PRIMER NODO")
             else:
                 next_node: ArrayModel = first_node
 
@@ -226,7 +226,7 @@ class Runner(Visitor):
 
                 next_node.next = current_node
                 first_node.len = first_node.len + 1
-                print("AGREGANDO OTRO NODO RUN")
+                #print("AGREGANDO OTRO NODO RUN")
 
                 if result.data_type != var.data_type:
                     first_node.isAny = True
@@ -235,8 +235,14 @@ class Runner(Visitor):
         return result
 
     def visit_binary_op(self, i: BinaryOperation):
+
         left = i.left_operator.accept(self)
         right = i.right_operator.accept(self)
+
+        if(left.symbol_type != SymbolType().VARIABLE or right.symbol_type != SymbolType().VARIABLE):
+            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            return None
 
         if left is None or right is None:
             self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
@@ -1213,6 +1219,10 @@ class Runner(Visitor):
         right = i.right_operator.accept(self)
         if right is None:
             self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA.")
+            return None
+        if right.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().INTERFACE:
+            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
             return None
         result = Variable()
         if i.operator == OperationType.NEGATIVE:
