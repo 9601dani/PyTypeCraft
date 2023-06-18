@@ -4,12 +4,13 @@ from .Instruction import Instruction
 class ForEachState(Instruction):
 
     def accept(self, visitor):
-       return visitor.visit_foreach(self)
+        return visitor.visit_foreach(self)
 
-    def __init__(self, line: int, column: int, declaration: Instruction, instructions: [Instruction]):
+    def __init__(self, line: int, column: int, id: str, assignment: Instruction, instructions: [Instruction]):
         super().__init__(line, column)
-        self.declaration = declaration
+        self.id = id
+        self.assignment = assignment
         self.instructions = instructions
 
     def __str__(self):
-        return f"""{{"ForEachState": {self.declaration} {self.instructions}}}"""
+        return f"""{{"ForEachState": {self.id} {self.assignment}  {self.instructions}}}"""

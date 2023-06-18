@@ -211,7 +211,7 @@ class Debugger(Visitor):
             if first_node is None:
                 first_node = current_node
                 result.data_type = var.data_type
-                print("AGREGANDO PRIMER NODO")
+                # print("AGREGANDO PRIMER NODO")
             else:
                 next_node: ArrayModel = first_node
 
@@ -220,7 +220,7 @@ class Debugger(Visitor):
 
                 next_node.next = current_node
                 first_node.len = first_node.len + 1
-                print("AGREGANDO OTRO NODO")
+                # print("AGREGANDO OTRO NODO")
 
                 if result.data_type != var.data_type:
                     first_node.isAny = True
@@ -232,14 +232,16 @@ class Debugger(Visitor):
         left = i.left_operator.accept(self)
         right = i.right_operator.accept(self)
 
+        if left is None or right is None:
+            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            return None
+
         if left.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().ARRAY or left.symbol_type == SymbolType().INTERFACE or right.symbol_type == SymbolType().INTERFACE:
             self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
             print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
             return None
 
-        if left is None or right is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
-            return None
+
 
         result = Variable()
 
@@ -247,6 +249,7 @@ class Debugger(Visitor):
             return self.assignDefaultValue(right.data_type)
         elif right.symbol_type == SymbolType().FUNCTION:
             return self.assignDefaultValue(left.data_type)
+
         if i.operator == OperationType.MAS:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
@@ -257,6 +260,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("NUMBER")
                 result.value = Decimal(left.value) + Decimal(right.value)
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -268,13 +273,13 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("STRING")
                 result.value = left.value + right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
 
             else:
                 self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER Y STRING.")
-
-
 
 
         elif i.operator == OperationType.MENOS:
@@ -286,6 +291,7 @@ class Debugger(Visitor):
             result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value - right.value
+            result.isAny = False
             # result.type_modifier = False
             return result
 
@@ -298,6 +304,8 @@ class Debugger(Visitor):
             result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value * right.value
+            result.isAny = False
+
             # result.type_modifier = False
             return result
 
@@ -315,6 +323,7 @@ class Debugger(Visitor):
             result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value / right.value
+            result.isAny = False
             # result.type_modifier = False
             return result
 
@@ -327,6 +336,8 @@ class Debugger(Visitor):
             result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value % right.value
+            result.isAny = False
+
             # result.type_modifier = False
             return result
 
@@ -339,6 +350,8 @@ class Debugger(Visitor):
             result.symbol_type = SymbolType().VARIABLE
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = left.value ** right.value
+            result.isAny = False
+
             # result.type_modifier = False
             return result
 
@@ -352,6 +365,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value > right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -365,6 +380,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value > right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
 
@@ -382,6 +399,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value < right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -395,6 +414,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value < right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
 
@@ -412,6 +433,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value >= right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -425,6 +448,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value >= right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
 
@@ -442,6 +467,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value <= right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
             elif left.data_type == VariableType.lista_variables["STRING"]:
@@ -455,6 +482,8 @@ class Debugger(Visitor):
                 result.symbol_type = SymbolType().VARIABLE
                 result.data_type = VariableType().buscar_type("BOOLEAN")
                 result.value = left.value <= right.value
+                result.isAny = False
+
                 # result.type_modifier = False
                 return result
 
@@ -466,11 +495,15 @@ class Debugger(Visitor):
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
             result.value = left.data_type == right.data_type and left.value == right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.DISTINTO_QUE:
             result.data_type = VariableType().buscar_type("BOOLEAN")
-            result.value = left.data_type != right.data_type and left.value != right.value
+            result.value = left.value != right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.OR:
@@ -482,6 +515,8 @@ class Debugger(Visitor):
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
             result.value = left.value or right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.AND:
@@ -493,6 +528,8 @@ class Debugger(Visitor):
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
             result.value = left.value and right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
 
             return result
 
@@ -529,7 +566,7 @@ class Debugger(Visitor):
 
             current_model: ArrayModel = current_var.value
 
-            if int(index.value) > current_model.len:
+            if int(index.value) > current_model.len-1:
                 self.errors.append("INDICE FUERA DE LOS LÍMITES SE ESPERABA:"+str(current_model.len)+" PERO SE OBTUVO:"+str(index.value))
                 return None
 
@@ -625,7 +662,72 @@ class Debugger(Visitor):
         return None
 
     def visit_foreach(self, i: ForEachState):
-        print("foreach debug")
+        assignment: Variable = i.assignment.accept(self)
+
+        if assignment is None:
+            self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+            return None
+
+        # TODO: FOR EACH PARA LAS VARIABLES
+        if assignment.symbol_type == SymbolType().VARIABLE:
+            var = Variable()
+            var.id = i.id
+            var.data_type = assignment.data_type
+            var.isAny = assignment.isAny
+            var.symbol_type = SymbolType().VARIABLE
+
+            # TODO: FOR EACH PARA STRING
+            if assignment.data_type == VariableType().buscar_type("STRING"):
+                self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+                self.symbol_table.add_variable(var)
+                for value in assignment.value:
+                    var.value = value
+                    for instruction in i.instructions:
+                        instruction.accept(self)
+
+                self.symbol_table = self.symbol_table.parent
+
+            # TODO: FOR EACH PARA NUMBER
+            elif assignment.data_type == VariableType().buscar_type("NUMBER"):
+                self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+                self.symbol_table.add_variable(var)
+
+                for value in range(assignment.value):
+                    var.value = value
+                    for instruction in i.instructions:
+                        instruction.accept(self)
+
+                self.symbol_table = self.symbol_table.parent
+            else:
+                self.errors.append("SOLO PUEDE ITERAR VARIABLES TIPO STRING O NUMBER")
+                return None
+
+            return None
+
+        # TODO: FOR EACH PARA LOS ARREGLOS
+        elif assignment.symbol_type == SymbolType().ARRAY:
+            arrayModel = assignment.value
+
+            variable = Variable()
+            variable.id = i.id
+
+            self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+            self.symbol_table.add_variable(variable)
+
+            while arrayModel is not None:
+                current_var: Variable = arrayModel.var
+                variable.data_type = current_var.data_type
+                variable.symbol_type = current_var.symbol_type
+                variable.isAny = current_var.isAny
+                variable.value = current_var.value
+
+                for instruction in i.instructions:
+                    instruction.accept(self)
+
+                arrayModel = arrayModel.next
+
+            self.symbol_table = self.symbol_table.parent
+            return None
 
     def visit_for(self, i: ForState):
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
