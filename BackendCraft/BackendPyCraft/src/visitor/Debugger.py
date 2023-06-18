@@ -1149,11 +1149,15 @@ class Debugger(Visitor):
         numero_redondeado = round(num, decimales)
         return formato.format(numero_redondeado)
 
-    def toExponential(self, num, decimales=0):
+    def toExponential(self,num, decimales=0):
         signo = '+' if num >= 0 else '-'  # Determinar el signo del número
-        formato = "{:.{}e}".format(abs(num),
-                                   decimales)  # Obtener la representación exponencial del valor absoluto del número
-        return formato
+        if signo == '-':
+            formato = signo+"{:.{}e}".format(abs(num), decimales)  # Obtener la representación exponencial del valor absoluto del número
+            return formato
+        else:
+            formato ="{:.{}e}".format(abs(num), decimales)  # Obtener la representación exponencial del valor absoluto del número
+            return formato
+
     def assignDefaultValue(self, vr:VariableType):
         if vr == VariableType().buscar_type("NUMBER"):
             return 1

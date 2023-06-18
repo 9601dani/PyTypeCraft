@@ -761,14 +761,8 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
-function hola(){
-    let  a = 5;
-    let b = 6;
-    let c = 7;
-    return a+b+c;
-}
-let daniel=5;
-console.log(-hola());
+let var1= 3000;
+console.log(var1.toExponential(3));
 
 
 
