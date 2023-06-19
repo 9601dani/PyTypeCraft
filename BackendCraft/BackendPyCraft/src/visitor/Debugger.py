@@ -38,6 +38,7 @@ from ..symbolModel.FunctionModel import FunctionModel
 from ..symbolModel.ArrayModel import ArrayModel
 import copy
 from decimal import Decimal
+from ..ObjectError.ExceptionPyType import ExceptionPyType
 
 
 class Debugger(Visitor):
@@ -110,7 +111,7 @@ class Debugger(Visitor):
             value: Variable = i.value.accept(self)
             # print(i.type)
             if value is None:
-                self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGANCION ", i.line, i.column))
                 # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
                 return None
 
@@ -124,7 +125,7 @@ class Debugger(Visitor):
                     return result
 
                 if value.isAny:
-                    self.errors.append("NO SE PUEDE ASIGNAR UN ARREGLO ANY A UNA VARIABLE QUE NO LO ES")
+                    self.errors.append(ExceptionPyType("NO SE PUEDE ASIGNAR UN ARREGLO ANY A UNA VARIABLE QUE NO LO ES", i.line, i.column))
                     return None
 
                 result.data_type = value.data_type
@@ -143,20 +144,20 @@ class Debugger(Visitor):
 
             if value.data_type == VariableType().buscar_type("DEFINIRLA"):
                 if not VariableType().type_declared(i.type):
-                    self.errors.append("NO SE ENCONTRÓ EL TIPO")
+                    self.errors.append(ExceptionPyType("NO SE ENCONTRO EL TIPO", i.line, i.column))
                     return None
 
                 interface = self.symbol_table.find_interface_by_id(i.type)
 
                 if interface is None:
-                    self.errors.append("NO SE ENCONTRÓ LA INTERFAZ")
+                    self.errors.append(ExceptionPyType("NO SE ENCONTRO LA INTERFAZ", i.line, i.column))
                     return None
 
                 model: InterfaceModel = interface.value
                 valueModel: InterfaceModel = value.value
 
                 if len(model.attributes) != len(valueModel.attributes):
-                    self.errors.append("EL NÚMERO DE ATRIBUTOS NO COINCIDE")
+                    self.errors.append(ExceptionPyType("EL NÚMERO DE ATRIBUTOS NO COINCIDE", i.line, i.column))
                     return None
 
                 for attr in model.attributes:
@@ -167,11 +168,11 @@ class Debugger(Visitor):
                             break
 
                     if attrInValue is None:
-                        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + attr.id)
+                        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + attr.id, i.line, i.column))
                         return None
 
                     if attr.data_type != attrInValue.data_type:
-                        self.errors.append("LOS TIPOS DE ATRIBUTOS NO COINCIDEN")
+                        self.errors.append(ExceptionPyType("LOS TIPOS DE ATRIBUTOS NO COINCIDEN", i.line, i.column))
                         return None
 
                 result.data_type = i.type
@@ -183,7 +184,7 @@ class Debugger(Visitor):
 
             if i.type != value.data_type:
                 # print(str(value.data_type))
-                self.errors.append("LA VARIABLE NO ES DEL MISMO TIPO")
+                self.errors.append(ExceptionPyType("LA VARIABLE NO ES DEL MISMO TIPO", i.line, i.column))
                 # print("LA VARIABLE NO ES DEL MISMO TIPO")
                 return None
 
@@ -203,7 +204,7 @@ class Debugger(Visitor):
             var:Variable = value.accept(self)
 
             if var is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                 return None
 
             current_node = ArrayModel(var)
@@ -233,12 +234,11 @@ class Debugger(Visitor):
         right = i.right_operator.accept(self)
 
         if left is None or right is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
             return None
 
         if left.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().ARRAY or left.symbol_type == SymbolType().INTERFACE or right.symbol_type == SymbolType().INTERFACE:
-            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
-            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            self.errors.append(ExceptionPyType("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES", i.line, i.column))
             return None
 
 
@@ -254,7 +254,7 @@ class Debugger(Visitor):
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
-                    self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -267,7 +267,7 @@ class Debugger(Visitor):
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
-                    self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -279,13 +279,13 @@ class Debugger(Visitor):
                 return result
 
             else:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER Y STRING.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER Y STRING.", i.line, i.column))
 
 
         elif i.operator == OperationType.MENOS:
             if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
                     VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE NUMBER.", i.line, i.column))
                 return None
 
             result.symbol_type = SymbolType().VARIABLE
@@ -298,7 +298,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.TIMES:
             if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
                     VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (*) ENTRE NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (*) ENTRE NUMBER.", i.line, i.column))
                 return None
 
             result.symbol_type = SymbolType().VARIABLE
@@ -312,12 +312,12 @@ class Debugger(Visitor):
         elif i.operator == OperationType.DIVIDE:
             if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
                     VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (/) ENTRE NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (/) ENTRE NUMBER.", i.line, i.column))
                 return None
 
             if right.value == 0:
                 # print("NO PUEDE DIVIDIR ENTRE CERO.")
-                self.errors.append("NO PUEDE DIVIDIR ENTRE CERO.")
+                self.errors.append(ExceptionPyType("NO PUEDE DIVIDIR ENTRE CERO.", i.line, i.column))
                 return None
 
             result.symbol_type = SymbolType().VARIABLE
@@ -330,7 +330,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.MOD:
             if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
                     VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (%) ENTRE NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (%) ENTRE NUMBER.", i.line, i.column))
                 return None
 
             result.symbol_type = SymbolType().VARIABLE
@@ -344,7 +344,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.POTENCIA:
             if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
                     VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (^) ENTRE NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (^) ENTRE NUMBER.", i.line, i.column))
                 return None
 
             result.symbol_type = SymbolType().VARIABLE
@@ -358,8 +358,7 @@ class Debugger(Visitor):
         elif i.operator == OperationType.MAYOR_QUE:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -372,9 +371,7 @@ class Debugger(Visitor):
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -386,14 +383,13 @@ class Debugger(Visitor):
                 return result
 
             else:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLES DE TIPO NUMBER O STRING.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
 
 
         elif i.operator == OperationType.MENOR_QUE:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -406,9 +402,7 @@ class Debugger(Visitor):
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -420,14 +414,13 @@ class Debugger(Visitor):
                 return result
 
             else:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLES DE TIPO NUMBER O STRING.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
 
 
         elif i.operator == OperationType.MAYOR_IGUAL_QUE:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -440,9 +433,7 @@ class Debugger(Visitor):
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -454,14 +445,13 @@ class Debugger(Visitor):
                 return result
 
             else:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLES DE TIPO NUMBER O STRING.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
 
 
         elif i.operator == OperationType.MENOR_IGUAL_QUE:
             if left.data_type == VariableType.lista_variables["NUMBER"]:
                 if right.data_type != VariableType.lista_variables["NUMBER"]:
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -474,8 +464,7 @@ class Debugger(Visitor):
             elif left.data_type == VariableType.lista_variables["STRING"]:
                 if right.data_type != VariableType.lista_variables["STRING"]:
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
-                    self.errors.append(
-                        "SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
 
                     return None
 
@@ -488,7 +477,7 @@ class Debugger(Visitor):
                 return result
 
             else:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLES DE TIPO NUMBER O STRING.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
 
 
         elif i.operator == OperationType.TRIPLE_IGUAL:
@@ -510,7 +499,7 @@ class Debugger(Visitor):
             if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
                     VariableType.lista_variables["BOOLEAN"]:
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -523,7 +512,7 @@ class Debugger(Visitor):
             if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
                     VariableType.lista_variables["BOOLEAN"]:
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -540,11 +529,11 @@ class Debugger(Visitor):
         variable: Variable = self.symbol_table.find_var_by_id(i.id)
 
         if variable is None:
-            self.errors.append("NO SE ENCONTRÓ EL ARRAY: "+i.id)
+            self.errors.append(ExceptionPyType("NO SE ENCONTRO EL ARRAY"+i.id,i.line,i.column))
             return None
 
         if variable.symbol_type != SymbolType().ARRAY:
-            self.errors.append("LA VARIABLE NO ES UN ARRAY")
+            self.errors.append(ExceptionPyType("LA VARIABLE NO ES UN ARRAY",i.line,i.column))
             return None
 
         current_var = variable
@@ -553,21 +542,21 @@ class Debugger(Visitor):
             index: Variable = dimension.accept(self)
 
             if index is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN DEBUG")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN, EL INDICE ES NULO",i.line,i.column))
                 return None
 
             if index.data_type != VariableType().buscar_type("NUMBER"):
-                self.errors.append("EL ÍNDICE DEBE SER TIPO NUMBER")
+                self.errors.append(ExceptionPyType("EL ÍNDICE DEBE SER TIPO NUMBER",i.line,i.column))
                 return None
 
             if current_var.symbol_type != SymbolType().ARRAY:
-                self.errors.append("DIMENSIÓN NO ENCONTRADA")
+                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",i.line,i.column))
                 return None
 
             current_model: ArrayModel = current_var.value
 
             if int(index.value) > current_model.len-1:
-                self.errors.append("INDICE FUERA DE LOS LÍMITES SE ESPERABA: "+str(current_model.len-1)+" PERO SE OBTUVO:"+str(index.value))
+                self.errors.append(ExceptionPyType("INDICE FUERA DE LOS LÍMITES SE ESPERABA: "+str(current_model.len-1)+" PERO SE OBTUVO:"+str(index.value),i.line,i.column))
                 return None
 
             for i in range(int(index.value)):
@@ -581,11 +570,12 @@ class Debugger(Visitor):
         value: Variable = i.id.accept(self)
 
         if value is None:
+            self.errors.append(ExceptionPyType("NO SE ENCONTRO LA VARIABLE",i.line,i.column))
             self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
             return None
 
         if not isinstance(value.value, InterfaceModel):
-            self.errors.append("LA VARIABLE NO ES DE TIPO INTERFACE")
+            self.errors.append(ExceptionPyType("LA VARIABLE NO ES DE TIPO INTERFACE",i.line,i.column))
             return None
 
         model: InterfaceModel = value.value
@@ -593,8 +583,7 @@ class Debugger(Visitor):
         for attribute in model.attributes:
             if attribute.id == i.attr:
                 return attribute
-
-        self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO: " + i.attr)
+        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + i.attr,i.line,i.column))
         return None
 
     def visit_call_fun(self, i: CallFunction):
@@ -609,7 +598,7 @@ class Debugger(Visitor):
     def visit_console(self, i: ConsoleLog):
         if i.value is None:
             # print("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
-            self.errors.append("ERROR EN CONSOLE LOG NO TIENE VALORES PARA IMPRIMIR.")
+            self.errors.append(ExceptionPyType("CONSOLE LOG, NO TIENE VALORES PARA IMPRIMIR.",i.line,i.column))
 
             return None
 
@@ -617,7 +606,7 @@ class Debugger(Visitor):
         for value in i.value:
             result = value.accept(self)
             if result is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN.")
+                self.errors.append(ExceptionPyType("CONSOLE LOG NULO, NO SE PUDO REALIZAR LA OPERACIÓN.",i.line,i.column))
                 continue
 
             try:
@@ -633,18 +622,18 @@ class Debugger(Visitor):
 
     def visit_declaration(self, i: Declaration):
         if i.type is None:
-            self.errors.append("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.")
+            self.errors.append(ExceptionPyType("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.",i.line,i.column))
 
             return None
         for instruction in i.instructions:
             variable: Variable = instruction.accept(self)
 
             if variable is None:
-                self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
+                self.errors.append(ExceptionPyType("NO SE PUDO DECLARAR LA VARIABLE.",i.line,i.column))
                 return None
 
             if self.symbol_table.var_in_table(variable.id):
-                self.errors.append("VARIABLE YA DECLARADA.")
+                self.errors.append(ExceptionPyType("VARIABLE YA DECLARADA.",i.line,i.column))
                 return None
 
             self.symbol_table.add_variable(variable)
@@ -665,7 +654,7 @@ class Debugger(Visitor):
         assignment: Variable = i.assignment.accept(self)
 
         if assignment is None:
-            self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGNACIÓN",i.line,i.column))
             return None
 
         # TODO: FOR EACH PARA LAS VARIABLES
@@ -699,7 +688,7 @@ class Debugger(Visitor):
 
                 self.symbol_table = self.symbol_table.parent
             else:
-                self.errors.append("SOLO PUEDE ITERAR VARIABLES TIPO STRING O NUMBER")
+                self.errors.append(ExceptionPyType("SOLO PUEDE ITERAR VARIABLES TIPO STRING O NUMBER", i.line, i.column))
                 return None
 
             return None
@@ -736,11 +725,11 @@ class Debugger(Visitor):
 
         condition = i.condition.accept(self)
         if condition is None:
-            self.errors.append("NO SE PUDO REALIZAR LA COMPARACIÓN")
+            self.errors.append(ExceptionPyType("FOR, NO SE PUDO REALIZAR LA COMPARACIÓN.", i.line, i.column))
 
         else:
             if condition.data_type is not VariableType().buscar_type("BOOLEAN"):
-                self.errors.append("LA OPERACIÓN DEBE SER DE TIPO BOOLEAN")
+                self.errors.append(ExceptionPyType("FOR, LA OPERACIÓN DEBE SER DE TIPO BOOLEAN.", i.line, i.column))
 
         for instruction in i.instructions:
             instruction.accept(self)
@@ -748,7 +737,7 @@ class Debugger(Visitor):
         increment = i.increment.accept(self)
 
         if increment is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            self.errors.append(ExceptionPyType("FOR, NO SE PUDO REALIZAR LA OPERACIÓN PARA INCREMENTAR VARIABLE.", i.line, i.column))
 
         self.symbol_table = temporal_table.parent
 
@@ -759,7 +748,7 @@ class Debugger(Visitor):
             for parameter in i.parameters:
                 n_variable: Variable = parameter.accept(self)
                 if n_variable is None:
-                    self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
+                    self.errors.append(ExceptionPyType("NO SE PUDO DECLARAR LA VARIABLE.", i.line, i.column))
                     return None
                 else:
                     n_variable.value = self.assignDefaultValue(n_variable.data_type)
@@ -770,7 +759,7 @@ class Debugger(Visitor):
                             break
 
                     if isDuplicate:
-                        self.errors.append("VARIABLE YA DECLARADA.")
+                        self.errors.append(ExceptionPyType("VARIABLE YA DECLARADA.", i.line, i.column))
                         # print("VARIABLE YA DECLARADA.")
                         return None
                     else:
@@ -781,7 +770,7 @@ class Debugger(Visitor):
         # TODO: VERIFICAR QUE NO EXISTA YA UNA FUNCIÓN CON EL MISMO NOMBRE Y TIPO DE PARÁMETROS
         duplicate_fun = self.is_duplicated_fun(i.id, param)
         if duplicate_fun:
-            self.errors.append("FUNCIÓN YA DECLARADA.")
+            self.errors.append(ExceptionPyType("FUNCIÓN YA DECLARADA.", i.line, i.column))
             return None
 
         if i.instructions is not None:
@@ -810,12 +799,13 @@ class Debugger(Visitor):
         condition: Variable = i.condition.accept(self)
 
         if condition is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            self.errors.append(ExceptionPyType("IF, NO SE PUDO REALIZAR LA OPERACION CONDICIONAL", i.line, i.column))
 
         else:
 
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
-                self.errors.append("LA CONDICIÓN DEBE SER TIPO BOOLEAN")
+                self.errors.append(ExceptionPyType("IF, LA CONDICIÓN DEBE SER TIPO BOOLEAN", i.line, i.column))
+
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.IF_SCOPE)
         self.symbol_table = temporal_table
@@ -835,7 +825,7 @@ class Debugger(Visitor):
             result: Variable = attr.accept(self)
 
             if result is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
             else:
                 is_duplicate = False
                 for a in attributes:
@@ -844,7 +834,7 @@ class Debugger(Visitor):
                         break
 
                 if is_duplicate:
-                    self.errors.append("ATRIBUTO YA DECLARADO")
+                    self.errors.append(ExceptionPyType("ATRIBUTO YA DECLARADO", i.line, i.column))
 
                 else:
                     attributes.append(result)
@@ -862,17 +852,17 @@ class Debugger(Visitor):
         attribute:Variable = i.interAttribute.accept(self)
 
         if attribute is None:
-            self.errors.append("NO SE ENCONTRÓ EL ATRIBUTO")
+            self.errors.append(ExceptionPyType("NO SE ENCONTRO EL ATRIBUTO", i.line, i.column))
             return None
 
         value = i.value.accept(self)
 
         if value is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
             return None
 
         if attribute.data_type != value.data_type:
-            self.errors.append("LOS TIPOS NO COINCIDEN")
+            self.errors.append(ExceptionPyType("LOS TIPOS NO COINCIDEN", i.line, i.column))
             return None
 
         attribute.value = value.value
@@ -881,7 +871,7 @@ class Debugger(Visitor):
 
     def visit_interface(self, i: InterfaceState):
         if VariableType().type_declared(i.id):
-            self.errors.append("YA SE HA DECLARADO LA INTERFAZ.")
+            self.errors.append(ExceptionPyType("YA SE HA DECLARADO LA INTERFAZ.", i.line, i.column))
 
         else:
             VariableType().add_type(i.id)
@@ -893,7 +883,7 @@ class Debugger(Visitor):
                 attr: Variable = attribute.accept(self)
 
                 if attr is None:
-                    self.errors.append("NO  SE PUDO REALIZAR LA ASIGNACIÓN")
+                    self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGNACION", i.line, i.column))
 
                 else:
                     is_duplicate = False
@@ -903,7 +893,7 @@ class Debugger(Visitor):
                             break
 
                     if is_duplicate:
-                        self.errors.append("ATRIBUTO YA DECLARADO")
+                        self.errors.append(ExceptionPyType("ATRIBUTO YA DECLARADO.", i.line, i.column))
                         return None
                     else:
                         attributes.append(attr)
@@ -927,16 +917,13 @@ class Debugger(Visitor):
         if i.type == NativeFunType.TOFIXED:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOFIXED, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if variable.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOFIXED, LA VARIABLE NO ES DE TIPO NUMBER.", i.line, i.column))
                 return None
             if i.parameter is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
-                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOFIXED, NO TIENE PARAMETROS.", i.line, i.column))
                 return None
             nume = i.parameter[0]
             var_n = copy.deepcopy(variable)
@@ -945,16 +932,13 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.TOEXPONENTIAL:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOEXPONENTIAL, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if variable.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO NUMBER.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOEXPONENTIAL, LA VARIABLE NO ES DE TIPO NUMBER.", i.line, i.column))
                 return None
             if i.parameter is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
-                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOEXPONENTIAL, NO TIENE PARAMETROS.", i.line, i.column))
                 return None
             nume = i.parameter[0]
             var_n = copy.deepcopy(variable)
@@ -963,8 +947,7 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.TOSTRING:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOSTRING, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             var_n = copy.deepcopy(variable)
             var_n.value = str(variable.value)
@@ -973,12 +956,10 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.TOLOWERCASE:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOLOWERCASE, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if variable.data_type != VariableType.lista_variables["STRING"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOLOWERCASE, NO ES DE TIPO STRING", i.line, i.column))
                 return None
             var_n = copy.deepcopy(variable)
             var_n.value = variable.value.lower()
@@ -986,12 +967,10 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.TOUPPERCASE:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOUPPERCASE, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if variable.data_type != VariableType.lista_variables["STRING"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA TOUPPERCASE, NO ES DE TIPO STRING", i.line, i.column))
                 return None
             var_n = copy.deepcopy(variable)
             var_n.value = variable.value.upper()
@@ -999,25 +978,22 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.SPLIT:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA SPLIT, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if variable.data_type != VariableType.lista_variables["STRING"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA SPLIT, NO ES DE TIPO STRING", i.line, i.column))
                 return None
             if len(i.parameter) == 0:
-                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
-                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA SPLIT, NO TIENE PARAMETROS", i.line, i.column))
                 return None
             parameter = i.parameter[0].accept(self)
 
             if parameter is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                 return None
 
             if parameter.data_type != VariableType().buscar_type("STRING"):
-                self.errors.append("SE ESPERABA UN VALOR TIPO STRING")
+                self.errors.append(ExceptionPyType("SE ESPERABA UN VALOR TIPO STRING", i.line, i.column))
                 return None
 
             values = variable.value.split(parameter.value)
@@ -1054,17 +1030,15 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.CONCAT:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
-                print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA CONCAT, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
             if i.parameter is None:
-                self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
-                print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
+                self.errors.append(ExceptionPyType("FUNCION NATIVA CONCAT, NO TIENE PARAMETROS", i.line, i.column))
                 return None
 
             if variable.symbol_type == SymbolType().VARIABLE:
                 if variable.data_type != VariableType().buscar_type("STRING"):
-                    self.errors.append("SOLO PUEDE CONCATENAR VARIABLES TIPO STRING")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE CONCATENAR VARIABLES TIPO STRING/ ARRAY", i.line, i.column))
                     return None
 
                 nume = i.parameter[0]
@@ -1077,11 +1051,11 @@ class Debugger(Visitor):
                 arr_result:Variable = arr.accept(self)
 
                 if arr_result is None:
-                    self.errors.append("NO SE PUDO EJECUTAR LA OPERACIÓN")
+                    self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                     return None
 
                 if arr_result.symbol_type != SymbolType().ARRAY:
-                    self.errors.append("SE ESPERABA UN ARRAY")
+                    self.errors.append(ExceptionPyType("SE ESPERABA UN ARRAY", i.line, i.column))
                     return None
 
                 arrayModel = variable.value
@@ -1098,12 +1072,12 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.LENGTH:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append("ERROR EN FUNCIÓN NATIVA NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("FUNCIÓN NATIVA, NO EXISTE LA VARIABLE.", i.line, i.column))
                 return None
 
             if variable.symbol_type == SymbolType().VARIABLE:
                 if variable.data_type != VariableType().buscar_type("STRING"):
-                    self.errors.append("SOLO PUEDE USAR LA FUNCIÓN LENGTH EN VARIABLES TIPO STRING")
+                    self.errors.append(ExceptionPyType("SOLO PUEDE USAR LA FUNCIÓN LENGTH EN VARIABLES TIPO STRING", i.line, i.column))
                     return None
 
                 result = Variable()
@@ -1126,21 +1100,21 @@ class Debugger(Visitor):
             variable: Variable = i.variable.accept(self)
 
             if variable is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                 return None
 
             if variable.symbol_type != SymbolType().ARRAY:
-                self.errors.append("SE ESPERABA UNA VARIABLE TIPO ARRAY")
+                self.errors.append(ExceptionPyType("SE ESPERABA UNA VARIABLE TIPO ARRAY", i.line, i.column))
                 return None
 
             parameter: Variable = i.parameter[0].accept(self)
 
             if parameter is None:
-                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                 return None
 
             if parameter.symbol_type != SymbolType().VARIABLE:
-                self.errors.append("SE ESPERABA UNA VARIABLE PERO SE OBTUVO:"+parameter.symbol_type)
+                self.errors.append(ExceptionPyType("SE ESPERABA UNA VARIABLE PERO SE OBTUVO: "+parameter.symbol_type, i.line, i.column))
                 return None
 
             if variable.isAny:
@@ -1156,7 +1130,7 @@ class Debugger(Visitor):
                 return variable
 
             if variable.data_type != parameter.data_type:
-                self.errors.append("INCOMPATIBILIDAD DE TIPOS")
+                self.errors.append(ExceptionPyType("INCOMPATIBILIDAD DE TIPOS", i.line, i.column))
                 return None
 
             arrayModel = variable.value
@@ -1177,13 +1151,13 @@ class Debugger(Visitor):
         variable: Variable = self.symbol_table.find_var_by_id(i.id)
 
         if variable is None:
-            self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
+            self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE", i.line, i.column))
             return None
 
         value: Variable = i.value.accept(self)
 
         if value is None:
-            self.errors.append("NO SE PUDO REALIZAR LA ASIGNACIÓN")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGNACIÓN", i.line, i.column))
             return None
 
         if variable.isAny:
@@ -1192,7 +1166,7 @@ class Debugger(Visitor):
             return None
 
         if variable.data_type != value.data_type:
-            self.errors.append("LOS TIPOS NO COINCIDEN")
+            self.errors.append(ExceptionPyType("LOS TIPOS NO COINCIDEN", i.line, i.column))
             return None
 
         variable.value = value.value
@@ -1209,7 +1183,7 @@ class Debugger(Visitor):
             return vr
 
         if not VariableType().type_declared(i.type):
-            self.errors.append("NO SE ENCONTRÓ EL TIPO: "+i.type)
+            self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL TIPO: "+i.type, i.line, i.column))
             return None
 
         vr.data_type= VariableType().buscar_type(i.type)
@@ -1219,7 +1193,7 @@ class Debugger(Visitor):
 
     def visit_return(self, i: Return):
         if not self.symbol_table.is_in_fun_scope():
-            self.errors.append("SOLO PUEDE UTILIZAR LA INSTRUCCIÓN RETURN DENTRO DE UNA FUNCIÓN")
+            self.errors.append(ExceptionPyType("RETURN, SOLO PUEDE UTILIZAR LA INSTRUCCIÓN RETURN DENTRO DE UNA FUNCIÓN", i.line, i.column))
             return None
 
         if i.expression is None:
@@ -1228,7 +1202,7 @@ class Debugger(Visitor):
         result: Variable = i.expression.accept(self)
 
         if result is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+            self.errors.append(ExceptionPyType("RETURN, NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
             return None
 
         return result
@@ -1237,11 +1211,10 @@ class Debugger(Visitor):
         right = i.right_operator.accept(self)
 
         if right is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA.")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN UNARIA, DEBIDO QUE ES NULL", i.line, i.column))
             return None
         if right.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().INTERFACE:
-            self.errors.append("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
-            print("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES")
+            self.errors.append(ExceptionPyType("SOLO PUEDES REALIZAR OPERACIONES UNARIAS ENTRE VARIABLES", i.line, i.column))
             return None
         if right.symbol_type == SymbolType().FUNCTION:
             return self.assignDefaultValue(VariableType().buscar_type("NUMBER"))
@@ -1250,7 +1223,7 @@ class Debugger(Visitor):
 
         if i.operator == OperationType.NEGATIVE:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE VARIABLES TIPO NUMBER")
+                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE VARIABLES TIPO NUMBER"))
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
@@ -1260,7 +1233,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.POSITIVE:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER")
+                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER"))
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
@@ -1270,7 +1243,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.NOT:
             if right.data_type != VariableType.lista_variables["BOOLEAN"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLES TIPO BOOLEAN.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN."))
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -1280,7 +1253,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.INCREMENT:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER."))
                 return None
 
             var = self.symbol_table.find_var_by_id(right.id)
@@ -1291,7 +1264,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.DECREMENT:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER.")
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER."))
                 return None
 
             var = self.symbol_table.find_var_by_id(right.id)
@@ -1305,12 +1278,12 @@ class Debugger(Visitor):
         condition: Variable = i.condition.accept(self)
 
         if condition is None:
-            self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA")
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA"))
 
         else:
 
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
-                self.errors.append("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN")
+                self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN"))
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
         self.symbol_table = temporal_table
@@ -1353,7 +1326,7 @@ class Debugger(Visitor):
         elif i.value_type == ValueType.LITERAL:
             var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS, DEBUG")
+                self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE: " + str(i.value) + " EN LA TABLA DE SIMBOLOS, DEBUG"))
                 return None
 
             if var_in_table.symbol_type == SymbolType().ARRAY or not VariableType().is_primitive(var_in_table.data_type):
