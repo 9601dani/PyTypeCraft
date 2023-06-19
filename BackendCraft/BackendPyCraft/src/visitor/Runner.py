@@ -566,7 +566,7 @@ class Runner(Visitor):
             current_model: ArrayModel = current_var.value
 
             if int(index.value) > current_model.len-1:
-                self.errors.append("INDICE FUERA DE LOS LÍMITES SE ESPERABA:"+str(current_model.len)+" PERO SE OBTUVO:"+str(index.value))
+                self.errors.append("INDICE FUERA DE LOS LÍMITES SE ESPERABA: "+str(current_model.len-1)+" PERO SE OBTUVO: "+str(index.value))
                 return None
 
             for i in range(int(index.value)):
@@ -776,7 +776,6 @@ class Runner(Visitor):
             return None
         for instruction in i.instructions:
             variable: Variable = instruction.accept(self)
-            variable.type_modifier = i.type
 
             if variable is None:
                 self.errors.append("NO SE PUDO DECLARAR LA VARIABLE.")
@@ -1209,37 +1208,94 @@ class Runner(Visitor):
                 self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
                 print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
                 return None
-            if i.parameter is None:
+            if len(i.parameter) == 0:
                 self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
                 print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
                 return None
-            nume = i.parameter[0]
-            var_n = copy.deepcopy(variable)
-            var_n.value = variable.value.split(nume.accept(self).value)
-            #var_n.data_type = VariableType.lista_variables["ARRAY"]
-            return var_n
+            parameter = i.parameter[0].accept(self)
+
+            if parameter is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                return None
+
+            if parameter.data_type != VariableType().buscar_type("STRING"):
+                self.errors.append("SE ESPERABA UN VALOR TIPO STRING")
+                return None
+
+            values = variable.value.split(parameter.value)
+
+            first_node = None
+            result = Variable()
+            result.symbol_type = SymbolType().ARRAY
+            result.isAny = False
+
+            for value in values:
+                newVar = Variable()
+                newVar.data_type = VariableType().buscar_type("STRING")
+                newVar.isAny = False
+                newVar.symbol_type = SymbolType().VARIABLE
+                newVar.value = str(value)
+
+                current_node = ArrayModel(newVar)
+
+                if first_node is None:
+                    first_node = current_node
+                else:
+                    next_node: ArrayModel = first_node
+
+                    while next_node.next is not None:
+                        next_node = next_node.next
+
+                    next_node.next = current_node
+                    first_node.len = first_node.len + 1
+                    # print("AGREGANDO OTRO NODO")
+
+            result.value = first_node
+            return result
         elif i.type == NativeFunType.CONCAT:
             variable: Variable = i.variable.accept(self)
             if variable is None:
                 self.errors.append("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
                 print("ERROR EN FUNCION NATIVA NO EXISTE LA VARIABLE.")
                 return None
-            if variable.data_type != VariableType.lista_variables["STRING"] and variable.data_type != VariableType.lista_variables["ARRAY"]:
-                self.errors.append("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
-                print("ERROR EN FUNCION NATIVA LA VARIABLE NO ES DE TIPO STRING.")
-                return None
             if i.parameter is None:
                 self.errors.append("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
                 print("ERROR EN FUNCION NATIVA NO TIENE PARAMETROS.")
                 return None
-            if variable.data_type == VariableType.lista_variables["STRING"]:
+
+            if variable.symbol_type == SymbolType().VARIABLE:
+                if variable.data_type != VariableType().buscar_type("STRING"):
+                    self.errors.append("SOLO PUEDE CONCATENAR VARIABLES TIPO STRING")
+                    return None
+
                 nume = i.parameter[0]
                 var_n = copy.deepcopy(variable)
                 var_n.value = variable.value + nume.accept(self).value
                 return var_n
-            elif variable.data_type == VariableType.lista_variables["ARRAY"]:
-                pass
-                #TODO: CONCATENAR ARRAYS
+
+            elif variable.symbol_type == SymbolType().ARRAY:
+                arr = i.parameter[0]
+                arr_result:Variable = arr.accept(self)
+
+                if arr_result is None:
+                    self.errors.append("NO SE PUDO EJECUTAR LA OPERACIÓN")
+                    return None
+
+                if arr_result.symbol_type != SymbolType().ARRAY:
+                    self.errors.append("SE ESPERABA UN ARRAY")
+                    return None
+
+                arrayModel = variable.value
+                newArrayModel = arr_result.value
+                arrayModel.len = arrayModel.len + newArrayModel.len
+
+                while arrayModel.next is not None:
+                    arrayModel = arrayModel.next
+
+                arrayModel.next = newArrayModel
+
+                return variable
+                # TODO: CONCATENAR ARRAYS
         elif i.type == NativeFunType.LENGTH:
             variable: Variable = i.variable.accept(self)
             if variable is None:
@@ -1260,7 +1316,61 @@ class Runner(Visitor):
 
             elif variable.symbol_type == SymbolType().ARRAY:
                 #TODO: AGREGAR FUNCIONALIDAD PARA OBTENER EL  LEN DE UN ARRAY
-                print("PRINT PARA QUE NO DE ERROR")
+                result = Variable()
+                result.symbol_type = SymbolType().VARIABLE
+                result.data_type = VariableType().buscar_type("NUMBER")
+                arrayModel: ArrayModel = variable.value
+                result.isAny = False
+                result.value = arrayModel.len
+                return result
+        elif i.type == NativeFunType.PUSH:
+            variable: Variable = i.variable.accept(self)
+
+            if variable is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                return None
+
+            if variable.symbol_type != SymbolType().ARRAY:
+                self.errors.append("SE ESPERABA UNA VARIABLE TIPO ARRAY")
+                return None
+
+            parameter: Variable = i.parameter[0].accept(self)
+
+            if parameter is None:
+                self.errors.append("NO SE PUDO REALIZAR LA OPERACIÓN")
+                return None
+
+            if parameter.symbol_type != SymbolType().VARIABLE:
+                self.errors.append("SE ESPERABA UNA VARIABLE PERO SE OBTUVO:"+parameter.symbol_type)
+                return None
+
+            if variable.isAny:
+                arrayModel = variable.value
+                arrayModel.len = arrayModel.len+1
+
+                while arrayModel.next is not None:
+                    arrayModel = arrayModel.next
+
+                newModel = ArrayModel(parameter)
+                newModel.isAny = parameter.isAny
+                arrayModel.next = newModel
+                return variable
+
+            if variable.data_type != parameter.data_type:
+                self.errors.append("INCOMPATIBILIDAD DE TIPOS")
+                return None
+
+            arrayModel = variable.value
+            arrayModel.len = arrayModel.len+1
+
+            while arrayModel.next is not None:
+                arrayModel = arrayModel.next
+
+            newModel = ArrayModel(parameter)
+            newModel.isAny = parameter.isAny
+            arrayModel.next = newModel
+            return variable
+
 
 
     def visit_only_assign(self, i: OnlyAssignment):
@@ -1327,6 +1437,8 @@ class Runner(Visitor):
 
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = -right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.POSITIVE:
@@ -1336,6 +1448,8 @@ class Runner(Visitor):
 
             result.data_type = VariableType().buscar_type("NUMBER")
             result.value = right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.NOT:
@@ -1345,6 +1459,8 @@ class Runner(Visitor):
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
             result.value = not right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
             return result
 
         elif i.operator == OperationType.INCREMENT:
@@ -1441,13 +1557,17 @@ class Runner(Visitor):
 
             return variable
         elif i.value_type == ValueType.LITERAL:
-            var_in_table: Variable = self.symbol_table.find_var_by_id(str(i.value))
+            var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                print("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS")
+                self.errors.append("NO SE ENCONTRÓ LA VARIABLE: " + i.value + " EN LA TABLA DE SIMBOLOS, DEBUG")
                 return None
 
-            variable = copy.deepcopy(var_in_table)
-            return variable
+            if var_in_table.symbol_type == SymbolType().ARRAY or not VariableType().is_primitive(var_in_table.data_type):
+                return var_in_table
+
+            # print("ENCONTRANDO VALOR PRIMITIVO, HACIENDO COPIA")
+            result = copy.deepcopy(var_in_table)
+            return result
 
     ######################################## METODOS NATIVOS ########################################
     def toFixed(self, num, decimales=0):

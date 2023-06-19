@@ -8,3 +8,4 @@ class NativeFunType:
     LENGTH = "LENGTH"
     CONCAT = "CONCAT"
     STRING_CAST = "STRING_CAST"
+    PUSH = "PUSH"
