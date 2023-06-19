@@ -128,6 +128,10 @@ class Debugger(Visitor):
                     self.errors.append(ExceptionPyType("NO SE PUEDE ASIGNAR UN ARREGLO ANY A UNA VARIABLE QUE NO LO ES", i.line, i.column))
                     return None
 
+                if i.type != value.data_type:
+                    self.errors.append(ExceptionPyType("LOS TIPOS DE DATO NO COINCIDEN", i.line, i.column))
+                    return None
+
                 result.data_type = value.data_type
                 result.symbol_type = SymbolType().ARRAY
                 result.isAny = False

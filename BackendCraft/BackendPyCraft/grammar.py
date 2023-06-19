@@ -611,54 +611,61 @@ def p_instruccion_expresion14(t):
 def p_instruccion_expresion15(t):
     ''' g     : g TIMES h
                 | g DIVIDE h
-                | g MOD h
-                | g POTENCIA h'''
+                | g MOD h'''
     t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
 
 def p_instruccion_expresion16(t):
     ''' g     : h '''
     t[0] = t[1]
 
+def p_instruccion_expresion17(t):
+    '''h    : h POTENCIA i'''
+    t[0] = BinaryOperation(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3], return_operation_type(t[2]))
+
+def p_instruccion_expresion17_1(t):
+    '''h    : i'''
+    t[0] = t[1]
+
 def p_instruccion_expresion18(t):
-    ''' h     : ENTERO'''
+    ''' i     : ENTERO'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.ENTERO)
 
 def p_instruccion_expresion19(t):
-    ''' h     : DECIMAL'''
+    ''' i     : DECIMAL'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.DECIMAL)
 
 def p_instruccion_expresion20(t):
-    ''' h     : CADENA'''
+    ''' i     : CADENA'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.CADENA)
 
 def p_instruccion_expresion21(t):
-    ''' h     : LITERAL'''
+    ''' i     : LITERAL'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.LITERAL)
 
 def p_instruccion_expresion22(t):
-    ''' h     : TRUE
+    ''' i     : TRUE
               | FALSE'''
     t[0]= Value(t.lineno(1),find_column(input, t.slice[1]),t[1], ValueType.BOOLEANO)
 
 def p_instruccion_expresion23(t):
-    ''' h     : call_function_pro
+    ''' i     : call_function_pro
               | array_pro
               | interface_assi'''
     t[0] = t[1]
 def p_instruccion_expresion24(t):
-    ''' h     : L_PAREN a R_PAREN'''
+    ''' i     : L_PAREN a R_PAREN'''
     t[0] = t[2]
 
 def p_instruccion_expresion25(t):
-    '''h    : array_val_pro'''
+    '''i    : array_val_pro'''
     t[0] = t[1]
 
 def p_instruccion_expresion26(t):
-    '''h    : a PUNTO LITERAL'''
+    '''i    : a PUNTO LITERAL'''
     t[0] = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3])
 
 def p_instruccion_expresion27(t):
-    '''h    : a PUNTO nativeFun L_PAREN expresion R_PAREN
+    '''i    : a PUNTO nativeFun L_PAREN expresion R_PAREN
             | a PUNTO nativeFun L_PAREN R_PAREN'''
     # print("EVALUANDO NATIVAS")
     # print(t[3])
@@ -760,17 +767,41 @@ test_lexer(lexer)
 
 
 instruccion : [Instruction] =parse("""
+let val1:number = 1;
+let val2:number = 10;
+let val3:number = 2021.2020;
 
-let var: string = "a,b,c,d";
+console.log("Probando declaracion de variables \n");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
+// COMENTARIO DE UNA LINEA
+val1 = val1 + 41 - 123 * 4 / (2 + 2 * 2) - (10 + (125 % 5)) * 2 ^ 2;
+val2 = 11 * (11 % (12 + -10)) + 22 / 2;
+val3 = 2 ^ (5 * 12 ^ 2) + 25 / 5;
+console.log("Probando asignación de variables y aritmeticas");
+console.log(val1, " ", val2, " ", val3);
+console.log("---------------------------------");
 
-let arr = var.split(",");
+let rel1 = (((val1 - val2) === 24) && (true && (false || 5 >= 5))) || ((7*7) !== (15+555) || -61 > 51);
+let rel2 = (7*7) <= (15+555) && 1 < 2;
+let rel3 = ((0 === 0) !== ((532 > 532)) === ("Hola" === "Hola")) && (false || (!false));
+console.log("Probando relacionales y logicas");
+console.log(rel1, " ", rel2, " ", rel3);
+console.log("---------------------------------");
 
-console.log("arr[0]:",arr[0]);
-console.log("arr[1]:",arr[1]);
-console.log("arr[2]:",arr[2]);
-console.log("arr[3]:",arr[3]);
-console.log("arr.len:",arr.length());
+console.log("OPERACIONES " , "CON " + "Cadenas");  // Otra forma de realizar el console.log
+let despedida = "Adios mundo :c";
+let saludo:string = "Hola Mundo! ";
+console.log(saludo.toLowerCase(), despedida.toUpperCase());
 
+console.log("Probando algunas funciones nativas de PyTypeCraft");
+console.log("Funciones relacionadas a conversiones");
+let aprox_1 = 3.141516;
+console.log(aprox_1.toFixed(3), aprox_1.toExponential(3));
+let carnet:string = "201903865";
+console.log("Hola " + toString(carnet));
+console.log(typeof(val1), " ", typeof(rel1)); // Esta funcion sera extra, la veremos en clase para que la implementen
+console.log("---------------------------------");
 """)
 
 

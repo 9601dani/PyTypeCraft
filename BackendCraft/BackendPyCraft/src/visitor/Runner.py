@@ -133,6 +133,10 @@ class Runner(Visitor):
                     self.errors.append(ExceptionPyType("NO SE PUEDE ASIGNAR UN ARREGLO ANY A UNA VARIABLE QUE NO LO ES", i.line, i.column))
                     return None
 
+                if i.type != value.data_type:
+                    self.errors.append(ExceptionPyType("LOS TIPOS DE DATO NO COINCIDEN", i.line, i.column))
+                    return None
+
                 result.data_type = value.data_type
                 result.symbol_type = SymbolType().ARRAY
                 result.isAny = False
@@ -886,7 +890,7 @@ class Runner(Visitor):
         result_comparacion: Variable = i.condition.accept(self)
         isBreak=False
         while result_comparacion.value is True:
-            self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+            # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
             for instruction in i.instructions:
                 result = instruction.accept(self)
                 if result is not None:
@@ -901,16 +905,19 @@ class Runner(Visitor):
                     elif result.__class__.__name__ == "Continue":
                         break
                     elif result.__class__.__name__ == "Break":
-                        isBreak=True
-                        break
-            self.symbol_table = self.symbol_table.parent
-            if isBreak:
-                isBreak=False
-                break
-            result_comparacion = i.condition.accept(self)
-            if(result_comparacion is False):
-                break
+                        self.symbol_table = self.symbol_table.parent
+                        # isBreak=True
+                        return None
+            # self.symbol_table = self.symbol_table.parent
+            # if isBreak:
+                # isBreak=False
+                # break
             i.increment.accept(self)
+            result_comparacion = i.condition.accept(self)
+            if result_comparacion is False:
+                self.symbol_table = self.symbol_table.parent
+                return None
+                # break
 
         self.symbol_table = self.symbol_table.parent
         return None
