@@ -172,7 +172,7 @@ class Debugger(Visitor):
                             break
 
                     if attrInValue is None:
-                        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + attr.id, i.line, i.column))
+                        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + str(attr.id), i.line, i.column))
                         return None
 
                     if attr.data_type != attrInValue.data_type:
@@ -244,8 +244,6 @@ class Debugger(Visitor):
         if left.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().ARRAY or left.symbol_type == SymbolType().INTERFACE or right.symbol_type == SymbolType().INTERFACE:
             self.errors.append(ExceptionPyType("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES", i.line, i.column))
             return None
-
-
 
         result = Variable()
 
@@ -575,7 +573,6 @@ class Debugger(Visitor):
 
         if value is None:
             self.errors.append(ExceptionPyType("NO SE ENCONTRO LA VARIABLE",i.line,i.column))
-            self.errors.append("NO SE ENCONTRÓ LA VARIABLE")
             return None
 
         if not isinstance(value.value, InterfaceModel):
@@ -587,7 +584,7 @@ class Debugger(Visitor):
         for attribute in model.attributes:
             if attribute.id == i.attr:
                 return attribute
-        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + i.attr,i.line,i.column))
+        self.errors.append(ExceptionPyType("NO SE ENCONTRÓ EL ATRIBUTO: " + str(i.attr),i.line,i.column))
         return None
 
     def visit_call_fun(self, i: CallFunction):
@@ -1227,7 +1224,7 @@ class Debugger(Visitor):
 
         if i.operator == OperationType.NEGATIVE:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE VARIABLES TIPO NUMBER"))
+                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE VARIABLES TIPO NUMBER"),i.line, i.column)
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
@@ -1237,7 +1234,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.POSITIVE:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER"))
+                self.errors.append(ExceptionPyType("SOLO SE PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER"),i.line, i.column)
                 return None
 
             result.data_type = VariableType().buscar_type("NUMBER")
@@ -1247,7 +1244,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.NOT:
             if right.data_type != VariableType.lista_variables["BOOLEAN"]:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN."))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN."),i.line, i.column)
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -1257,7 +1254,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.INCREMENT:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER."))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (++) UNARIO ENTRE VARIABLE DE TIPO NUMBER."),i.line, i.column)
                 return None
 
             var = self.symbol_table.find_var_by_id(right.id)
@@ -1268,7 +1265,7 @@ class Debugger(Visitor):
             return result
         if i.operator == OperationType.DECREMENT:
             if right.data_type != VariableType.lista_variables["NUMBER"]:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER."))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (--) UNARIO ENTRE VARIABLE DE TIPO NUMBER."),i.line, i.column)
                 return None
 
             var = self.symbol_table.find_var_by_id(right.id)
@@ -1282,12 +1279,12 @@ class Debugger(Visitor):
         condition: Variable = i.condition.accept(self)
 
         if condition is None:
-            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA"))
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA"),i.line, i.column)
 
         else:
 
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
-                self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN"))
+                self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN"),i.line, i.column)
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
         self.symbol_table = temporal_table
@@ -1330,7 +1327,7 @@ class Debugger(Visitor):
         elif i.value_type == ValueType.LITERAL:
             var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE: " + str(i.value) + " EN LA TABLA DE SIMBOLOS, DEBUG"))
+                self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE: " + str(i.value) + " EN LA TABLA DE SIMBOLOS, DEBUG",i.line, i.column))
                 return None
 
             if var_in_table.symbol_type == SymbolType().ARRAY or not VariableType().is_primitive(var_in_table.data_type):

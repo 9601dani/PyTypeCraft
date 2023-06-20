@@ -25,11 +25,12 @@ async def get_text_compiler(content : TextApi):
     return ParsearTextoApi(text)
 
 def ParsearTextoApi(texto):
+    errors = grammar.global_arr
     instrucciones : Instruction = grammar.parse(texto)
 #################  VISITOR DEBUG  #################
-    errors = []
     table= SymbolTable()
     debbuger= Debugger(table,errors)
+
 
     if instrucciones is not None:
         for instruccion in instrucciones:

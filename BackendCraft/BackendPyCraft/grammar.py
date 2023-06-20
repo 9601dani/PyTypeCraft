@@ -1,6 +1,7 @@
 
 import re
 import ply.lex as lex
+from src.ObjectError.ExceptionPyType import ExceptionPyType
 
 # here start grammar
 #--------------------------------------------------------------
@@ -8,6 +9,8 @@ import ply.lex as lex
 # proyecto 1 - compiladores 2 usac 2023
 #--------------------------------------------------------------
 # Definimos las palabras reservadas de nuestro lenguaje
+global_arr = []
+
 reservadas ={
     # Conditions
     'if' : 'IF',
@@ -140,7 +143,7 @@ def t_DECIMAL(t):
     try:
         t.value = float(t.value)
     except ValueError:
-        print("Float value too large %d", t.value)
+        global_arr.append(ExceptionPyType(str(t.value) + " DEMASIADO GRANDE",t.lexer.lineno,-1))
         t.value = 0
     return t
 
@@ -150,7 +153,7 @@ def t_ENTERO(t):
     try:
         t.value = int(t.value)
     except ValueError:
-        print("Integer value too large %d", t.value)
+        global_arr.append(ExceptionPyType(str(t.value)+" DEMASIADO GRANDE",t.lexer.lineno, -1))
         t.value = 0
     return t
 
@@ -188,6 +191,8 @@ def find_column(inp, token):
 
 def t_error(t):
     #errores.append(Excepcion("Lexico","Error léxico." + t.value[0] , t.lexer.lineno, find_column(input, t)))
+    global_arr.append(ExceptionPyType(str(t.value)+" NO FORMA PARTE DEL LENGUAJE",t.lexer.lineno, find_column(input, t)))
+
     t.lexer.skip(1)
 
 # Se construye el analizador lexico
@@ -744,7 +749,10 @@ def p_instruccion_nativas(t):
 
 
 def p_error(t):
-    print("Error sintáctico en '%s'" % t.value+" "+ t.type)
+    # print("Error sintáctico en '%s'" % t.value+" "+ t.type)
+    if t is not None:
+        global_arr.append(ExceptionPyType("ERROR SINTACTICO en "+str(t.value)+" SE ESPERABA ALGO MAS",t.lexer.lineno, find_column(input, t)))
+
 
 def test_lexer(lexer):
     while True:
@@ -754,9 +762,11 @@ def test_lexer(lexer):
         print(tok)
 import ply.yacc as yacc
 def parse(inp):
+
     global parser
     global lexer
     lexer = lex.lex(reflags=re.IGNORECASE)
     parser= yacc.yacc()
     lexer.lineno = 1
+    print("TAMAÑO ARREGLO:",len(global_arr))
     return parser.parse(inp)
