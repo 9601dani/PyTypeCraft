@@ -234,6 +234,7 @@ from src.models.InterfaceAssign import InterfaceAssign
 from src.models.CallAttribute import CallAttribute
 from src.models.ArrayState import ArrayState
 from src.models.CallArray import CallArray
+from src.models.ArrayAssign import ArrayAssign
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
@@ -310,6 +311,7 @@ def p_instruccion(t):
                         | declaration_instruction sc
                         | assig_pro sc
                         | interface_assign_pro sc
+                        | array_assign_pro sc
                         | if_pro sc
                         | while_pro sc
                         | for_pro sc
@@ -332,11 +334,21 @@ def p_semi_colon(t):
 ############################################## DECLARACION DE FUNCIÓN ##############################################
 def p_instruccion_function(t):
     '''function_pro : FUNCTION LITERAL L_PAREN parameters_pro R_PAREN L_LLAVE instrucciones R_LLAVE'''
-    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[7])
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[7], None)
 
 def p_instruccion_function2(t):
     '''function_pro : FUNCTION LITERAL L_PAREN R_PAREN L_LLAVE instrucciones R_LLAVE'''
-    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, None, t[6])
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, None, t[6],None)
+
+def p_instruccion_function3(t):
+    '''function_pro : FUNCTION LITERAL L_PAREN parameters_pro R_PAREN COLON type L_LLAVE instrucciones R_LLAVE
+                    | FUNCTION LITERAL L_PAREN parameters_pro R_PAREN COLON LITERAL L_LLAVE instrucciones R_LLAVE'''
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, t[4], t[9],t[7],)
+
+def p_instruccion_function4(t):
+    '''function_pro : FUNCTION LITERAL L_PAREN R_PAREN COLON type L_LLAVE instrucciones R_LLAVE
+                    | FUNCTION LITERAL L_PAREN R_PAREN COLON LITERAL L_LLAVE instrucciones R_LLAVE'''
+    t[0] = FunctionState(t.lineno(1),find_column(input, t.slice[1]), t[2], False, None, t[8],t[6])
 
 ############################################## LLAMADA DE FUNCIÓN ##############################################
 def p_instruccion_call_function(t):
@@ -728,6 +740,10 @@ def p_instruccion_array_pro(t):
     t[0] = ArrayState(t.lineno(1), find_column(input, t.slice[1]), t[2])
 
 
+############################################## ASIGNACION DE ELEMENTOS DE ARREGLO ##############################################
+def p_instruccion_array_assign_pro(t):
+    '''array_assign_pro    : LITERAL dimensions IGUAL a'''
+    t[0] = ArrayAssign(t.lineno(1), find_column(input, t.slice[1]), t[1],t[2],t[4])
 
 ############################################## NATIVAS ##############################################
 

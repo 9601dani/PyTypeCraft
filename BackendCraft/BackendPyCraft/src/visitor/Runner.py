@@ -1,6 +1,6 @@
 from .Visitor import Visitor
 from ..models import Assignment, Parameter
-from ..models import ArrayState
+from ..models import ArrayState, ArrayAssign
 from ..models import BinaryOperation
 from ..models import Break
 from ..models import CallArray
@@ -203,6 +203,62 @@ class Runner(Visitor):
             result.isAny = False
             result.value = value.value
             return result
+
+    def visit_array_assign(self, i: ArrayAssign):
+        variable: Variable = self.symbol_table.find_var_by_id(i.id)
+
+        if variable is None:
+            self.errors.append(ExceptionPyType("NO SE ENCONTRO EL ARRAY"+i.id,i.line,i.column))
+            return None
+
+        if variable.symbol_type != SymbolType().ARRAY:
+            self.errors.append(ExceptionPyType("LA VARIABLE NO ES UN ARRAY",i.line,i.column))
+            return None
+
+        current_var = variable
+
+        for dimension in i.dimensions:
+            index: Variable = dimension.accept(self)
+
+            if index is None:
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN, EL INDICE ES NULO",i.line,i.column))
+                return None
+
+            if index.data_type != VariableType().buscar_type("NUMBER"):
+                self.errors.append(ExceptionPyType("EL ÍNDICE DEBE SER TIPO NUMBER",i.line,i.column))
+                return None
+
+            if current_var.symbol_type != SymbolType().ARRAY:
+                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",i.line,i.column))
+                return None
+
+            current_model: ArrayModel = current_var.value
+
+            if int(index.value) > current_model.len-1:
+                self.errors.append(ExceptionPyType("INDICE FUERA DE LOS LÍMITES SE ESPERABA: "+str(current_model.len-1)+" PERO SE OBTUVO:"+str(index.value),i.line,i.column))
+                return None
+
+            for ind in range(int(index.value)):
+                current_model = current_model.next
+
+            current_var = current_model.var
+
+        value: Variable = i.value.accept(self)
+
+        if value is None:
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN",i.line,i.column))
+            return None
+
+        if variable.isAny:
+            current_var.value = value.value
+            return current_var
+
+        if variable.data_type != value.data_type:
+            self.errors.append(ExceptionPyType("INCOMPATIBILIDAD DE TIPOS",i.line,i.column))
+            return None
+
+        current_var.value = value.value
+        return current_var
 
     def visit_array_state(self, i: ArrayState):
         first_node = None

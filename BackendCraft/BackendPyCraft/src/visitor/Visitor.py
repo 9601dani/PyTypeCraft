@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from ..models import ArrayAssign
 from ..models import Assignment
 from ..models import ArrayState
 from ..models import BinaryOperation
@@ -33,6 +34,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_assignment(self, i: Assignment):
+        pass
+
+    @abstractmethod
+    def visit_array_assign(self, i: ArrayAssign):
         pass
 
     @abstractmethod

@@ -30,6 +30,7 @@ async def get_text_compiler(content : TextApi):
     return ParsearTextoApi(text)
 
 def ParsearTextoApi(texto):
+    grammar.global_arr = []
     errors = grammar.global_arr
     instrucciones : Instruction = grammar.parse(texto)
 #################  VISITOR DEBUG  #################
