@@ -768,5 +768,6 @@ def parse(inp):
     lexer = lex.lex(reflags=re.IGNORECASE)
     parser= yacc.yacc()
     lexer.lineno = 1
-    print("TAMAÑO ARREGLO:",len(global_arr))
+    #print("TAMAÑO ARREGLO:",len(global_arr))
     return parser.parse(inp)
+

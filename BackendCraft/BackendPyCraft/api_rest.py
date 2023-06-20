@@ -10,10 +10,15 @@ from src.ObjectError.ModelResponse import ModelResponse
 import grammar
 import json
 import pickle
+import sys
 
 app = FastAPI()
 
 class TextApi(BaseModel):
+
+    print(sys.getrecursionlimit())
+    sys.setrecursionlimit(1500)
+    print(sys.getrecursionlimit())
     text: str
 @app.get("/")
 def test_api():
