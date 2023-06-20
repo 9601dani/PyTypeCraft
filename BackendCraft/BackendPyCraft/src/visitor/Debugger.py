@@ -844,7 +844,7 @@ class Debugger(Visitor):
 
             self.symbol_table = self.symbol_table.parent
 
-            functionModel= FunctionModel(i.id, param, i.instructions)
+            functionModel= FunctionModel(i.id, param, i.instructions, i.return_type)
 
             result = Variable()
             result.id= i.id

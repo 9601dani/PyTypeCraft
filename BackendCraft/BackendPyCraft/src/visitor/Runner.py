@@ -784,13 +784,25 @@ class Runner(Visitor):
             result = instruction.accept(self)
             if result is not None:
                 if result.__class__.__name__ == "Return":
-                    vr_return = result.expression.accept(self)
+                    vr_return:Variable = result.expression.accept(self)
                     self.symbol_table = self.symbol_table.parent
-                    vr_return.isAny = True
-                    #print("RETORNANDO VALOR: "+vr_return.__str__() )
-                    return vr_return
+                    if(vr_return is not None):
+                        vr_return.isAny = True
 
+                        #print("RETORNANDO VALOR: "+vr_return.__str__() )
+                        if match_fun.return_type is not None:
+                            if match_fun.return_type != vr_return.data_type:
+                                if(type(i)== int):
+                                    print(i)
+                                    self.errors.append(ExceptionPyType("EL TIPO DE RETORNO NO COINCIDE CON EL TIPO DE LA FUNCIÓN: "+match_fun.id, 1))
+                                    return None
+                                else:
+                                    self.errors.append(ExceptionPyType("EL TIPO DE RETORNO NO COINCIDE CON EL TIPO DE LA FUNCIÓN", i.line, i.column))
+                                    return None
 
+                        return vr_return
+                    else:
+                        return None
         self.symbol_table = self.symbol_table.parent
         return None
 
