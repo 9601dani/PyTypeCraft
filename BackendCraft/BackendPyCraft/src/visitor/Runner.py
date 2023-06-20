@@ -46,10 +46,11 @@ from decimal import Decimal
 
 class Runner(Visitor):
 
-    def __init__(self, symbol_table: SymbolTable, errors):
+    def __init__(self, symbol_table: SymbolTable, errors, console):
         super().__init__()
         self.symbol_table = symbol_table
         self.errors = errors
+        self.console = console
 
     def visit_assignment(self, i: Assignment):
         result = Variable()
@@ -710,7 +711,7 @@ class Runner(Visitor):
         match_fun:FunctionModel = self.get_fun(i.name, arguments)
 
         if match_fun is None:
-            print("NO SE ENCONTRÓ LA FUNCIÓN")
+            self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA FUNCIÓN, REVISA EL TIPO DE PARAMETROS", i.line, i.column))
             return None
 
         #print("FUNCIÓN: "+match_fun.id)
@@ -751,7 +752,8 @@ class Runner(Visitor):
 
             content = content + " " + str(result.value)
 
-        print(content)
+        #print(content)
+        self.console.append(content)
 
     def visit_continue(self, i: Continue):
         if self.symbol_table.parent is None:
