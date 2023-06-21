@@ -752,7 +752,19 @@ class Runner(Visitor):
             elif result.symbol_type == "ARRAY":
                 array_auxiliar= copy.deepcopy(result)
                 while array_auxiliar.value is not None:
+                    print(array_auxiliar.value)
                     content = content + " " + str(array_auxiliar.value)
+                    try:
+                        array_auxiliar1 = copy.deepcopy(array_auxiliar.value)
+                        print(array_auxiliar.value.var.value.next)
+                        while array_auxiliar1.var.value.next is not None:
+                            print("==========")
+                            content = content + " " + str(array_auxiliar1.var.value.next)
+                            array_auxiliar1.var.value = array_auxiliar1.var.value.next
+                            #content = content + " " + str(array_auxiliar1.value.next)
+                            #array_auxiliar1.value = array_auxiliar1.value.next
+                    except:
+                        pass
                     array_auxiliar.value = array_auxiliar.value.next
             else:
                 content = content + " " + str(result.value)
@@ -1356,6 +1368,7 @@ class Runner(Visitor):
             newModel = ArrayModel(parameter)
             newModel.isAny = parameter.isAny
             arrayModel.next = newModel
+
             return variable
 
 
