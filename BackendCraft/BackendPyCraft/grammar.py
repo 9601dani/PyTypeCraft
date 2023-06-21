@@ -892,6 +892,9 @@ console.log(compararMatrices(a, b));
 console.log("");
 console.log("Push a b");
 b.push([3010.1999]);
+b.push(4);
+b[3].push(5);
+console.log(b[3]);
 printMatriz(b);
 
 b = a;

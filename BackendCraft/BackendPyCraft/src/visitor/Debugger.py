@@ -224,7 +224,7 @@ class Debugger(Visitor):
                 return None
 
             if current_var.symbol_type != SymbolType().ARRAY:
-                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",i.line,i.column))
+                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",1,1))
                 return None
 
             current_model: ArrayModel = current_var.value
@@ -610,7 +610,7 @@ class Debugger(Visitor):
                 return None
 
             if current_var.symbol_type != SymbolType().ARRAY:
-                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",i.line,i.column))
+                self.errors.append(ExceptionPyType("DIMENSIÓN NO ENCONTRADA",1,1))
                 return None
 
             current_model: ArrayModel = current_var.value
@@ -1173,7 +1173,7 @@ class Debugger(Visitor):
                 self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
                 return None
 
-            if parameter.symbol_type != SymbolType().VARIABLE:
+            if parameter.symbol_type != SymbolType().VARIABLE and parameter.symbol_type != SymbolType().ARRAY:
                 self.errors.append(ExceptionPyType("SE ESPERABA UNA VARIABLE PERO SE OBTUVO: "+parameter.symbol_type, i.line, i.column))
                 return None
 
