@@ -1335,12 +1335,12 @@ class Debugger(Visitor):
         condition: Variable = i.condition.accept(self)
 
         if condition is None:
-            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA"),i.line, i.column)
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN BOOLEANA",i.line, i.column))
 
         else:
 
             if condition.data_type != VariableType().buscar_type("BOOLEAN"):
-                self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN"),i.line, i.column)
+                self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN",i.line, i.column))
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
         self.symbol_table = temporal_table
