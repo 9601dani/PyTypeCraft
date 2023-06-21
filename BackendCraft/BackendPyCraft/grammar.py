@@ -787,3 +787,43 @@ def parse(inp):
     #print("TAMAÑO ARREGLO:",len(global_arr))
     return parser.parse(inp)
 
+instrucciones : Instruction = parse("""
+let arreglo = [32, 7 * 3, 7, 89, 56, 909, 109, 2, 9, 9874+ 0, 44, 3, 820 * 10, 11, 8 * 0 + 8, 10];
+console.log(arreglo);
+
+""")
+
+#################  VISITOR DEBUG  #################
+errors = []
+table= SymbolTable()
+debbuger= Debugger(table,errors)
+
+
+if instrucciones is not None:
+   for instruccion in instrucciones:
+       instruccion.accept(debbuger)
+
+errorsR = errors
+tableR =  SymbolTable()
+console= []
+VariableType().clean_types()
+tableR.symbols = debbuger.symbol_table.getAllFunctions()
+#################  VISITOR RUNNER  #################
+print("#################  VISITOR RUNNER  #################")
+runner = Runner(tableR,errorsR,console)
+if instrucciones is not None:
+    for instruccion in instrucciones:
+        instruccion.accept(runner)
+print("#############################TABLA DE SIMBOLOS")
+for i in runner.symbol_table.symbols:
+    print(str(i))
+print("#############################ERRORES")
+if len(runner.errors) > 0:
+    for error in runner.errors:
+        print(str(error))
+print("#############################CONSOLE")
+for console in runner.console:
+    print(str(console))
+#objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
+#print("#############################OBJETO RETURN")
+#print(objeto_return)

@@ -749,8 +749,14 @@ class Runner(Visitor):
             if result is None:
                 self.errors.append(ExceptionPyType("ERROR EN CONSOLE LOG NO SE PUDO IMPRIMIR EL VALOR.", i.line, i.column))
                 continue
-
-            content = content + " " + str(result.value)
+            elif result.symbol_type == "ARRAY":
+                array_auxiliar= copy.deepcopy(result)
+                while array_auxiliar.value is not None:
+                    content = content + " " + str(array_auxiliar.value)
+                    array_auxiliar.value = array_auxiliar.value.next
+            else:
+                content = content + " " + str(result.value)
+            #content = content + " " + str(result.value)
 
         #print(content)
         self.console.append(content)
