@@ -296,25 +296,29 @@ class Runner(Visitor):
         return result
 
     def visit_binary_op(self, i: BinaryOperation):
-
         left = i.left_operator.accept(self)
         right = i.right_operator.accept(self)
 
         if left is None or right is None:
-            self.errors.append(ExceptionPyType("NO SE PUEDE REALIZAR LA OPERACION BINARIA YA QUE HAY VALORES NULOS", i.line, i.column))
+            self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA OPERACIÓN", i.line, i.column))
             return None
 
-        if(left.symbol_type != SymbolType().VARIABLE or right.symbol_type != SymbolType().VARIABLE):
+        if left.symbol_type == SymbolType().ARRAY or right.symbol_type == SymbolType().ARRAY or left.symbol_type == SymbolType().INTERFACE or right.symbol_type == SymbolType().INTERFACE:
             self.errors.append(ExceptionPyType("SOLO PUEDES REALIZAR OPERACIONES ENTRE VARIABLES", i.line, i.column))
             return None
 
         result = Variable()
 
+        if left.symbol_type == SymbolType().FUNCTION:
+            return self.assignDefaultValue(right.data_type)
+        elif right.symbol_type == SymbolType().FUNCTION:
+            return self.assignDefaultValue(left.data_type)
+
         if i.operator == OperationType.MAS:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
-                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO NUMBER.", i.line, i.column))
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -324,10 +328,10 @@ class Runner(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
-                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES TIPO STRING.", i.line, i.column))
+                    self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE STRING.", i.line, i.column))
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -341,9 +345,10 @@ class Runner(Visitor):
             else:
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER Y STRING.", i.line, i.column))
 
+
         elif i.operator == OperationType.MENOS:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -355,8 +360,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.TIMES:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (*) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -369,8 +374,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.DIVIDE:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (/) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -387,8 +392,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.MOD:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (%) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -401,8 +406,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.POTENCIA:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (^) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -415,8 +420,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.MAYOR_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -427,8 +432,8 @@ class Runner(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
@@ -444,9 +449,10 @@ class Runner(Visitor):
             else:
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
 
+
         elif i.operator == OperationType.MENOR_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -457,8 +463,8 @@ class Runner(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
@@ -472,11 +478,12 @@ class Runner(Visitor):
                 return result
 
             else:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
+
 
         elif i.operator == OperationType.MAYOR_IGUAL_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -487,11 +494,10 @@ class Runner(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
-
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -503,11 +509,12 @@ class Runner(Visitor):
                 return result
 
             else:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
+
 
         elif i.operator == OperationType.MENOR_IGUAL_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -518,10 +525,11 @@ class Runner(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
+
                     return None
 
                 result.symbol_type = SymbolType().VARIABLE
@@ -533,7 +541,8 @@ class Runner(Visitor):
                 return result
 
             else:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLES DE TIPO NUMBER O STRING.", i.line, i.column))
+
 
         elif i.operator == OperationType.TRIPLE_IGUAL:
 
@@ -551,10 +560,10 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.OR:
-            if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
-                    VariableType.lista_variables["BOOLEAN"]:
+            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
+                    VariableType().lista_variables("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.", i.line, i.column))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -564,10 +573,10 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.AND:
-            if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
-                    VariableType.lista_variables["BOOLEAN"]:
+            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
+                    VariableType().lista_variables("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.", i.line, i.column))
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
 
             result.data_type = VariableType().buscar_type("BOOLEAN")
@@ -576,6 +585,7 @@ class Runner(Visitor):
             result.isAny = False
 
             return result
+
 
     def visit_break(self, i: Break):
         if self.symbol_table.parent is None:
@@ -645,87 +655,6 @@ class Runner(Visitor):
         return None
 
     def visit_call_fun(self, i: CallFunction):
-        # print("CALL FUN")
-        #print(i.assignments)
-        # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
-        # vr: Variable = Variable()
-        # variables_nuevas = []
-        # if i.assignments is not None:
-        #     if self.symbol_table.fun_in_table(i.name) is not None:
-        #         for assignment in i.assignments:
-        #             result = assignment.accept(self)
-        #             if result.__class__.__name__ == "Variable":
-        #                 vr = result
-        #                 variables_nuevas.append(vr)
-        #             else:
-        #                 print("ERROR EN ASIGNACIÓN DE VALORES EN FUNCIÓN.")
-        #                 self.symbol_table = self.symbol_table.parent
-        #                 return None
-        #
-        #         fun_match: Variable = Variable()
-        #         find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
-        #         for parametro in find_fun:
-        #             if len(parametro.value.parameters) == len(i.assignments):
-        #                 fun_match = parametro
-        #                 break
-        #
-        #         fun_ejecutar_value: FunctionModel = fun_match.value
-        #         fun_ejecutar: FunctionState = fun_ejecutar_value
-        #         if len(fun_ejecutar.parameters) != len(variables_nuevas):
-        #             self.errors.append("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
-        #             print("LA CANTIDAD DE PARAMETROS NO COINCIDE CON LA FUNCIÓN.")
-        #             self.symbol_table = self.symbol_table.parent
-        #             return None
-        #         for p in range(len(fun_ejecutar.parameters)):
-        #             fun_ejecutar.parameters[p].value = variables_nuevas[p].value
-        #             nv_parametro = Variable()
-        #             nv_parametro.id = fun_ejecutar.parameters[p].id
-        #             nv_parametro.data_type = fun_ejecutar.parameters[p].data_type
-        #             nv_parametro.value = fun_ejecutar.parameters[p].value
-        #             nv_parametro.symbol_type = SymbolType.VARIABLE
-        #             self.symbol_table.add_variable(nv_parametro)
-        #         for fs in fun_ejecutar.instructions:
-        #             result_fs = fs.accept(self)
-        #             if result_fs is not None:
-        #                 if result_fs.__class__.__name__ == "Return":
-        #                     vr_return = result_fs.expression.accept(self)
-        #                     self.symbol_table = self.symbol_table.parent
-        #                     return vr_return
-        #                 elif result_fs.__class__.__name__ == "Variable":
-        #                     self.symbol_table = self.symbol_table.parent
-        #                     return result_fs
-        #
-        #     else:
-        #                 self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-        #                 self.symbol_table = self.symbol_table.parent
-        #                 return None
-        # else:
-        #     #self.symbol_table= SymbolTable(self.symbol_table, ScopeType.FUNCTION_SCOPE)
-        #     find_fun: [Variable] = self.symbol_table.find_fun_by_id(i.name)
-        #     fun_match: Variable = Variable()
-        #     if find_fun is None or len(find_fun) == 0:
-        #         self.errors.append("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-        #         print("NO SE ENCONTRÓ LA FUNCIÓN: " + i.name)
-        #         self.symbol_table = self.symbol_table.parent
-        #         return None
-        #
-        #     for parametro in find_fun:
-        #         if len(parametro.value.parameters) == 0:
-        #             fun_match = parametro
-        #             break
-        #     fun_ejecutar_value: FunctionModel = fun_match.value
-        #     fun_ejecutar: FunctionState = fun_ejecutar_value
-        #     for fs in fun_ejecutar.instructions:
-        #         result_fs = fs.accept(self)
-        #         if result_fs is not None:
-        #             if result_fs.__class__.__name__ == "Return":
-        #                 vr_return = result_fs.expression.accept(self)
-        #                 self.symbol_table = self.symbol_table.parent
-        #                 return vr_return
-        #             elif result_fs.__class__.__name__ == "Variable":
-        #                 self.symbol_table = self.symbol_table.parent
-        #                 return result_fs
-
         #TODO: PRUEBA DE MODIFICACIÓN EN CALL_FUN
 
         arguments = []
@@ -777,6 +706,9 @@ class Runner(Visitor):
         # AGREGANDO LOS ARGUMENTOS CON SUS PARÁMETROS A LA TABLA DE SIMBOLOS
         for i in range(len(match_fun.parameters)):
             match_fun.parameters[i].value = arguments[i].value
+            match_fun.parameters[i].symbol_type = arguments[i].symbol_type
+            match_fun.parameters[i].data_type = arguments[i].data_type
+            print(f'####### AGREGANDO -> {match_fun.parameters[i].__str__()}###############')
             self.symbol_table.add_variable(match_fun.parameters[i])
 
         for instruction in match_fun.instructions:
@@ -959,6 +891,11 @@ class Runner(Visitor):
         i.declaration.accept(self)
         result_comparacion: Variable = i.condition.accept(self)
         isBreak=False
+
+        if result_comparacion is None:
+            print("EL RESULTADO DE LA COMPARACIÓN ES NONE")
+            return None
+
         while result_comparacion.value is True:
             # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
             for instruction in i.instructions:
@@ -1357,6 +1294,7 @@ class Runner(Visitor):
                 return result
 
             elif variable.symbol_type == SymbolType().ARRAY:
+                print("#### ENTRANDO A LENGTH ARRAY ####")
                 #TODO: AGREGAR FUNCIONALIDAD PARA OBTENER EL  LEN DE UN ARRAY
                 result = Variable()
                 result.symbol_type = SymbolType().VARIABLE
@@ -1364,6 +1302,7 @@ class Runner(Visitor):
                 arrayModel: ArrayModel = variable.value
                 result.isAny = False
                 result.value = arrayModel.len
+                print(f'RETORNANDO {result.value} {result.symbol_type}')
                 return result
         elif i.type == NativeFunType.PUSH:
             variable: Variable = i.variable.accept(self)
@@ -1677,7 +1616,7 @@ class Runner(Visitor):
             same_params = True
 
             for i in range(len(functionModel.parameters)):
-                if functionModel.parameters[i].data_type != arguments[i].data_type:
+                if functionModel.parameters[i].data_type != arguments[i].data_type and not functionModel.parameters[i].isAny:
                     same_params = False
                     break
 

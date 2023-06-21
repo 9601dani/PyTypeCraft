@@ -678,12 +678,12 @@ def p_instruccion_expresion25(t):
     t[0] = t[1]
 
 def p_instruccion_expresion26(t):
-    '''i    : a PUNTO LITERAL'''
+    '''i    : i PUNTO LITERAL'''
     t[0] = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3])
 
 def p_instruccion_expresion27(t):
-    '''i    : a PUNTO nativeFun L_PAREN expresion R_PAREN
-            | a PUNTO nativeFun L_PAREN R_PAREN'''
+    '''i    : i PUNTO nativeFun L_PAREN expresion R_PAREN
+            | i PUNTO nativeFun L_PAREN R_PAREN'''
     # print("EVALUANDO NATIVAS")
     # print(t[3])
     if(t[5] == ")"):

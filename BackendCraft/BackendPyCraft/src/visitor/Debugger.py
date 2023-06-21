@@ -311,8 +311,8 @@ class Debugger(Visitor):
             return self.assignDefaultValue(left.data_type)
 
         if i.operator == OperationType.MAS:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE NUMBER.", i.line, i.column))
                     return None
@@ -324,8 +324,8 @@ class Debugger(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE VARIABLES DEL MISMO TIPO.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (+) ENTRE STRING.", i.line, i.column))
                     return None
@@ -343,8 +343,8 @@ class Debugger(Visitor):
 
 
         elif i.operator == OperationType.MENOS:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (-) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -356,8 +356,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.TIMES:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (*) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -370,8 +370,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.DIVIDE:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (/) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -388,8 +388,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.MOD:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (%) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -402,8 +402,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.POTENCIA:
-            if left.data_type != VariableType.lista_variables["NUMBER"] or right.data_type != \
-                    VariableType.lista_variables["NUMBER"]:
+            if left.data_type != VariableType().buscar_type("NUMBER") or right.data_type != \
+                    VariableType().buscar_type("NUMBER"):
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (^) ENTRE NUMBER.", i.line, i.column))
                 return None
 
@@ -416,8 +416,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.MAYOR_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -428,8 +428,8 @@ class Debugger(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
@@ -447,8 +447,8 @@ class Debugger(Visitor):
 
 
         elif i.operator == OperationType.MENOR_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -459,8 +459,8 @@ class Debugger(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
@@ -478,8 +478,8 @@ class Debugger(Visitor):
 
 
         elif i.operator == OperationType.MAYOR_IGUAL_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -490,8 +490,8 @@ class Debugger(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (>=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
@@ -509,8 +509,8 @@ class Debugger(Visitor):
 
 
         elif i.operator == OperationType.MENOR_IGUAL_QUE:
-            if left.data_type == VariableType.lista_variables["NUMBER"]:
-                if right.data_type != VariableType.lista_variables["NUMBER"]:
+            if left.data_type == VariableType().buscar_type("NUMBER"):
+                if right.data_type != VariableType().buscar_type("NUMBER"):
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
                     return None
 
@@ -521,8 +521,8 @@ class Debugger(Visitor):
 
                 # result.type_modifier = False
                 return result
-            elif left.data_type == VariableType.lista_variables["STRING"]:
-                if right.data_type != VariableType.lista_variables["STRING"]:
+            elif left.data_type == VariableType().buscar_type("STRING"):
+                if right.data_type != VariableType().buscar_type("STRING"):
                     # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.")
                     self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (<=) ENTRE VARIABLE DE TIPO NUMBER O STRING.", i.line, i.column))
 
@@ -556,8 +556,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.OR:
-            if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
-                    VariableType.lista_variables["BOOLEAN"]:
+            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
+                    VariableType().lista_variables("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -569,8 +569,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.AND:
-            if left.data_type != VariableType.lista_variables["BOOLEAN"] or right.data_type != \
-                    VariableType.lista_variables["BOOLEAN"]:
+            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
+                    VariableType().lista_variables("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -1132,7 +1132,7 @@ class Debugger(Visitor):
         elif i.type == NativeFunType.LENGTH:
             variable: Variable = i.variable.accept(self)
             if variable is None:
-                self.errors.append(ExceptionPyType("FUNCIÓN NATIVA, NO EXISTE LA VARIABLE.", i.line, i.column))
+                self.errors.append(ExceptionPyType("FUNCIÓN NATIVA, NO EXISTE LA VARIABLE. "+str(i.variable), i.line, i.column))
                 return None
 
             if variable.symbol_type == SymbolType().VARIABLE:
@@ -1203,9 +1203,6 @@ class Debugger(Visitor):
             newModel.isAny = parameter.isAny
             arrayModel.next = newModel
             return variable
-
-
-
 
     def visit_only_assign(self, i: OnlyAssignment):
         variable: Variable = self.symbol_table.find_var_by_id(i.id)
