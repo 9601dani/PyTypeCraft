@@ -3,6 +3,12 @@ from .Instruction import Instruction
 
 class ForEachState(Instruction):
 
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
         return visitor.visit_foreach(self)
 

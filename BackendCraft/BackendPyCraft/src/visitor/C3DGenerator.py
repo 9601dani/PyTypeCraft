@@ -2,10 +2,13 @@ from .Visitor import Visitor
 from ..models import Value, WhileState, UnaryOperation, Return, Parameter, OnlyAssignment, NativeFunction, \
     InterfaceState, InterAttributeAssign, InterfaceAssign, IfState, FunctionState, ForState, ForEachState, ElseState, \
     Declaration, Continue, ConsoleLog, CallFunction, CallAttribute, CallArray, Break, BinaryOperation, ArrayState, \
-    Assignment
+    Assignment, ArrayAssign
 
 
 class C3DGenerator(Visitor):
+    def visit_array_assign(self, i: ArrayAssign):
+        pass
+
     def visit_assignment(self, i: Assignment):
         pass
 

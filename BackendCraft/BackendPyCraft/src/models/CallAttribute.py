@@ -3,6 +3,12 @@ from ..models.Instruction import Instruction
 
 class CallAttribute(Instruction):
 
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
         return visitor.visit_call_attr(self)
 

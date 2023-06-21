@@ -3,6 +3,12 @@ from .Instruction import Instruction
 
 class ForState(Instruction):
 
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
       return  visitor.visit_for(self)
 

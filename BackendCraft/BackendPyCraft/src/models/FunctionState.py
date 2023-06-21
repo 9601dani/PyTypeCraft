@@ -4,6 +4,12 @@ from .VariableType import VariableType
 
 class FunctionState(Instruction):
 
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
       return  visitor.visit_function(self)
 

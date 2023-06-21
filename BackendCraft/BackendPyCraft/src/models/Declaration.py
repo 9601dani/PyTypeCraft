@@ -1,7 +1,27 @@
 import src.visitor.Visitor
 from .Instruction import Instruction
 from src.visitor import Visitor
+
+
 class Declaration(Instruction):
+
+    def node_name(self):
+        return f'declaration_{self.line}_{self.column}'
+
+    def node_value(self):
+        return f'declaration'
+
+    def let_name(self):
+        return f'let_{self.line}_{self.column}'
+
+    def let_value(self):
+        return f'{self.type}'
+
+    def assign_name(self):
+        return f'assignment_list_{self.line}_{self.column}'
+
+    def assign_value(self):
+        return f'assignment_list'
 
     def accept(self, visitor: Visitor):
         # print(visitor)

@@ -2,6 +2,12 @@ from .Instruction import Instruction
 
 
 class UnaryOperation(Instruction):
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
        return visitor.visit_unary_op(self)
 

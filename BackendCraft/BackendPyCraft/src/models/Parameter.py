@@ -3,6 +3,11 @@ from .Instruction import Instruction
 
 class Parameter(Instruction):
 
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
 
     def accept(self, visitor):
        return visitor.visit_parameter(self)

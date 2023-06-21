@@ -2,6 +2,12 @@ from .Instruction import Instruction
 
 
 class Break(Instruction):
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
         return visitor.visit_break(self)
 

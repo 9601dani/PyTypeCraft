@@ -2,6 +2,12 @@ from .Instruction import Instruction
 
 
 class ArrayAssign(Instruction):
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
         return visitor.visit_array_assign(self)
 

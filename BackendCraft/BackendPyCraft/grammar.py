@@ -229,6 +229,7 @@ from src.models.Value import Value
 from src.models.ValueType import ValueType
 from src.visitor.Debugger import Debugger
 from src.visitor.Runner import Runner
+from src.visitor.CstDrawer import CstDrawer
 from src.symbolTable.SymbolTable import SymbolTable
 from src.models.InterfaceAssign import InterfaceAssign
 from src.models.CallAttribute import CallAttribute
@@ -821,7 +822,7 @@ bubbleSort(arreglo);
 console.log("BubbleSort => ", arreglo);
 """)
 
-#################  VISITOR DEBUG  #################
+################  VISITOR DEBUG  #################
 errors = []
 table= SymbolTable()
 debbuger= Debugger(table,errors)
@@ -855,3 +856,17 @@ for console in runner.console:
 #objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
 #print("#############################OBJETO RETURN")
 #print(objeto_return)
+
+#################  VISITOR CSTDRAWER  #################
+
+# drawer = CstDrawer()
+# content = "digraph {\n"
+# if instrucciones is not None:
+#     for i in instrucciones:
+#         content = content + f'init -> {i.node_name()}\n'
+#         content = content + i.accept(drawer)
+#
+# content = content+"}\n"
+#
+# print("#### CST ####")
+# print(content)

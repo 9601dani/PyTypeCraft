@@ -3,6 +3,12 @@ from .NativeFunType import NativeFunType
 
 
 class NativeFunction(Instruction):
+    def node_name(self):
+        pass
+
+    def node_value(self):
+        pass
+
     def accept(self, visitor):
         return visitor.visit_native(self)
 

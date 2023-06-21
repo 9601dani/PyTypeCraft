@@ -17,3 +17,11 @@ class Instruction(ABC):
 
     def __str__(self):
         return f"""{{"Instruction": {self.line} {self.column}}}"""
+
+    @abstractmethod
+    def node_name(self):
+        pass
+
+    @abstractmethod
+    def node_value(self):
+        pass
