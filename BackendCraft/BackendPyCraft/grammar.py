@@ -789,67 +789,13 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-interface Actor {
-    nombre: string;
-    edad: number;
-}
 
-interface Pelicula {
-    nombre: string;
-    posicion: number;
-}
+let array = [1,2,3,4,5];
 
-interface Contrato {
-    actor: Actor;
-    pelicula: Pelicula;
+for (let a of "hola"){
+    let b = a.concat("-");
+    console.log(b);
 }
-
-let actores = ["Elizabeth Olsen", "Adam Sandler", "Christian Bale", "Jennifer Aniston"];
-let peliculas = ["Avengers: Age of Ultron", "Mr. Deeds", "Batman: The Dark Knight", "Marley & Me"];
-
-function contratar(actor: Actor, pelicula: Pelicula): Contrato {
-    let c1: Contrato = {
-        actor: actor,
-        pelicula: pelicula
-    };
-    return c1;
-}
-
-function crearActor(nombre: string, edad: number): Actor {
-    let a1: Actor = {
-        nombre: nombre,
-        edad: edad
-    };
-    return a1;
-}
-
-function crearPelicula(nombre: string, posicion: number): Pelicula {
-    let p1:Pelicula = {
-        nombre: nombre,
-        posicion: posicion
-    };
-    return p1;
-}
-function imprimir(contrato: Contrato) {
-    console.log("Actor:", contrato.actor.nombre, "   Edad:", contrato.actor.edad);
-    console.log("Pelicula:", contrato.pelicula.nombre, "   Genero:", contrato.pelicula.posicion);
-}
-function contratos() {
-    let actor: Actor;
-    let pelicula: Pelicula;
-    let contrato: Contrato;
-    
-    for (let i = 1; i < 3; i++) {
-        
-        actor = crearActor(actores[i], i + 38);
-        pelicula = crearPelicula(peliculas[i], i);
-        contrato = contratar(actor, pelicula);
-        
-        imprimir(contrato);
-    }
-}
-
-contratos();
 
 """)
 

@@ -847,8 +847,11 @@ class Runner(Visitor):
                 self.symbol_table.add_variable(var)
                 for value in assignment.value:
                     var.value = value
+                    self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+
                     for instruction in i.instructions:
                         instruction.accept(self)
+                    self.symbol_table = self.symbol_table.parent
 
                 self.symbol_table = self.symbol_table.parent
 
@@ -859,8 +862,10 @@ class Runner(Visitor):
 
                 for value in range(assignment.value):
                     var.value = value
+                    self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
                     for instruction in i.instructions:
                         instruction.accept(self)
+                    self.symbol_table = self.symbol_table.parent
 
                 self.symbol_table = self.symbol_table.parent
             else:
@@ -880,6 +885,7 @@ class Runner(Visitor):
             self.symbol_table.add_variable(variable)
 
             while arrayModel is not None:
+                self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
                 current_var: Variable = arrayModel.var
                 variable.data_type = current_var.data_type
                 variable.symbol_type = current_var.symbol_type
@@ -890,6 +896,7 @@ class Runner(Visitor):
                     instruction.accept(self)
 
                 arrayModel = arrayModel.next
+                self.symbol_table = self.symbol_table.parent
 
             self.symbol_table = self.symbol_table.parent
             return None
@@ -915,7 +922,7 @@ class Runner(Visitor):
             return None
 
         while result_comparacion.value is True:
-            # self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
+            self.symbol_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
             for instruction in i.instructions:
                 result = instruction.accept(self)
                 if result is not None:
@@ -933,7 +940,7 @@ class Runner(Visitor):
                         self.symbol_table = self.symbol_table.parent
                         # isBreak=True
                         return None
-            # self.symbol_table = self.symbol_table.parent
+            self.symbol_table = self.symbol_table.parent
             # if isBreak:
                 # isBreak=False
                 # break
