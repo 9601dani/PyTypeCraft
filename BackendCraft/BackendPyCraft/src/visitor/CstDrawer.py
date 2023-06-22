@@ -78,7 +78,13 @@ class CstDrawer(Visitor):
         return content
 
     def visit_else(self, i: ElseState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+
+        for instruction in i.bloque:
+            content = content + f'{i.node_name()} -> {instruction.node_name()}\n\n'
+            content = content + instruction.accept(self)
+
+        return content
 
     def visit_foreach(self, i: ForEachState):
         return ""
@@ -91,10 +97,29 @@ class CstDrawer(Visitor):
     def visit_function(self, i: FunctionState):
         return ""
 
-
     def visit_if(self, i: IfState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content = content + f'{i.condition_name()} [label = "{i.condition_value()}"]\n'
+        content = content + f'{i.node_name()} -> {i.condition_name()}\n\n'
 
+        content = content + f'{i.condition_name()} -> {i.condition.node_name()}\n\n'
+
+        content = content + i.condition.accept(self)
+
+        content = content + f'{i.true_name()} [label = "{i.true_value()}"]\n'
+        content = content + f'{i.node_name()} -> {i.true_name()}\n\n'
+
+        for instruction in i.bloque_verdadero:
+            content = content + f'{i.true_name()} -> {instruction.node_name()}\n\n'
+            content = content + instruction.accept(self)
+
+        if i.bloque_falso is not None:
+            content = content + f'{i.false_name()} [label = "{i.false_value()}"]\n'
+            content = content + f'{i.node_name()} -> {i.false_name()}\n\n'
+            content = content + f'{i.false_name()} -> {i.bloque_falso.node_name()}\n\n'
+            content = content + i.bloque_falso.accept(self)
+
+        return content
 
     def visit_interface_assign(self, i: InterfaceAssign):
         return ""
@@ -129,18 +154,29 @@ class CstDrawer(Visitor):
     def visit_parameter(self, i: Parameter):
         return ""
 
-
     def visit_return(self, i: Return):
         return ""
-
 
     def visit_unary_op(self, i: UnaryOperation):
         return ""
 
-
     def visit_while(self, i: WhileState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content = content + f'{i.condition_name()} [label = "{i.condition_value()}"]\n'
+        content = content + f'{i.node_name()} -> {i.condition_name()}\n\n'
 
+        content = content + f'{i.condition_name()} -> {i.condition.node_name()}\n\n'
+
+        content = content + i.condition.accept(self)
+
+        content = content + f'{i.body_name()} [label = "{i.body_value()}"]\n'
+        content = content + f'{i.node_name()} -> {i.body_name()}\n\n'
+
+        for instruction in i.instructions:
+            content = content + f'{i.body_name()} -> {instruction.node_name()}\n\n'
+            content = content + instruction.accept(self)
+
+        return content
 
     def visit_value(self, i: Value):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'

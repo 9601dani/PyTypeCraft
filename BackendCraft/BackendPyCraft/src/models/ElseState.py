@@ -4,10 +4,10 @@ from .Instruction import Instruction
 class ElseState(Instruction):
 
     def node_name(self):
-        pass
+        return f'else_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'Else_statement'
 
     def accept(self, visitor):
         return visitor.visit_else(self)

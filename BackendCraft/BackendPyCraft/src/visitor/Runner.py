@@ -726,7 +726,7 @@ class Runner(Visitor):
                             if match_fun.return_type != vr_return.data_type:
                                 if(type(i)== int):
                                     print(i)
-                                    self.errors.append(ExceptionPyType("EL TIPO DE RETORNO NO COINCIDE CON EL TIPO DE LA FUNCIÓN: "+match_fun.id, 1))
+                                    self.errors.append(ExceptionPyType("EL TIPO DE RETORNO NO COINCIDE CON EL TIPO DE LA FUNCIÓN: "+match_fun.id, 1,1))
                                     return None
                                 else:
                                     self.errors.append(ExceptionPyType("EL TIPO DE RETORNO NO COINCIDE CON EL TIPO DE LA FUNCIÓN", i.line, i.column))

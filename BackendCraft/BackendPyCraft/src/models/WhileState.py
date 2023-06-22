@@ -4,10 +4,22 @@ from .Instruction import Instruction
 class WhileState(Instruction):
 
     def node_name(self):
-        pass
+        return f'while_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'While_statement'
+
+    def condition_name(self):
+        return f'condition_{self.line}_{self.column}'
+
+    def condition_value(self):
+        return f'condition'
+
+    def body_name(self):
+        return f'body_{self.line}_{self.column}'
+
+    def body_value(self):
+        return f'body'
 
     def accept(self, visitor):
         return visitor.visit_while(self)

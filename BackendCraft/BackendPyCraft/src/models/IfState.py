@@ -4,10 +4,28 @@ from .Instruction import Instruction
 class IfState(Instruction):
 
     def node_name(self):
-        pass
+        return f'if_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'If_statement'
+
+    def condition_name(self):
+        return f'condition_{self.line}_{self.column}'
+
+    def condition_value(self):
+        return f'condition'
+
+    def true_name(self):
+        return f'true_{self.line}_{self.column}'
+
+    def true_value(self):
+        return f'true_block'
+
+    def false_name(self):
+        return f'false_{self.line}_{self.column}'
+
+    def false_value(self):
+        return f'false_block'
 
     def accept(self, visitor):
         return visitor.visit_if(self)

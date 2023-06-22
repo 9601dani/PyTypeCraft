@@ -789,37 +789,68 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-function swap(i: number, j: number, arr) {
-    let temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
+interface Actor {
+    nombre: string;
+    edad: number;
 }
 
-function bubbleSort(arr) {
-    for (let i = 0; i < arr.length() - 1; i++) {
-        for (let j = 1; j < arr.length() - 1; j++) {
-        if (arr[j] > arr[j + 1]) {
-            swap(j, j + 1, arr);
-        }
-        }
+interface Pelicula {
+    nombre: string;
+    posicion: number;
+}
+
+interface Contrato {
+    actor: Actor;
+    pelicula: Pelicula;
+}
+
+let actores = ["Elizabeth Olsen", "Adam Sandler", "Christian Bale", "Jennifer Aniston"];
+let peliculas = ["Avengers: Age of Ultron", "Mr. Deeds", "Batman: The Dark Knight", "Marley & Me"];
+
+function contratar(actor: Actor, pelicula: Pelicula): Contrato {
+    let c1: Contrato = {
+        actor: actor,
+        pelicula: pelicula
+    };
+    return c1;
+}
+
+function crearActor(nombre: string, edad: number): Actor {
+    let a1: Actor = {
+        nombre: nombre,
+        edad: edad
+    };
+    return a1;
+}
+
+function crearPelicula(nombre: string, posicion: number): Pelicula {
+    let p1:Pelicula = {
+        nombre: nombre,
+        posicion: posicion
+    };
+    return p1;
+}
+function imprimir(contrato: Contrato) {
+    console.log("Actor:", contrato.actor.nombre, "   Edad:", contrato.actor.edad);
+    console.log("Pelicula:", contrato.pelicula.nombre, "   Genero:", contrato.pelicula.posicion);
+}
+function contratos() {
+    let actor: Actor;
+    let pelicula: Pelicula;
+    let contrato: Contrato;
+    
+    for (let i = 1; i < 3; i++) {
+        
+        actor = crearActor(actores[i], i + 38);
+        pelicula = crearPelicula(peliculas[i], i);
+        contrato = contratar(actor, pelicula);
+        
+        imprimir(contrato);
     }
 }
 
-function insertionSort(arr) {
-    for (let i = 1; i < arr.length(); i++) {
-        let j = i;
-        let temp = arr[i];
-        while (j > 0 && arr[j - 1] > temp) {
-        arr[j] = arr[j - 1];
-        j = j - 1;
-    }
-    arr[j] = temp;
-    }
-}
+contratos();
 
-let arreglo = [32, 7 * 3, 7, 89, 56, 909, 109, 2, 9, 9874 ^ 0, 44, 3, 820 * 10, 11, 8 * 0 + 8, 10];
-bubbleSort(arreglo);
-console.log("BubbleSort => ", arreglo);
 """)
 
 ################  VISITOR DEBUG  #################
