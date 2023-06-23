@@ -38,7 +38,11 @@ export class CodePageComponent implements OnInit{
       .subscribe( (value : any) => {
         if(value){
           console.log(value);
-          this.outValue = value.result;
+          let console_result = ''
+          value.console.forEach((it: any) =>{
+            console_result = console_result + it +"\n"
+          })
+          this.outValue = console_result;
         }
       } )
 
