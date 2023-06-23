@@ -6,7 +6,7 @@ import { ReportPageComponent } from './pages/report-page/report-page.component';
 import {SharedModule} from "../../shared/shared.module";
 import { ErrorReportComponent } from './pages/error-report/error-report.component';
 import { TableReportComponent } from './pages/table-report/table-report.component';
-import { AstReportComponent } from './pages/ast-report/ast-report.component';
+import { CstReportComponent } from './pages/cst-report/cst-report.component';
 
 
 @NgModule({
@@ -14,7 +14,7 @@ import { AstReportComponent } from './pages/ast-report/ast-report.component';
     ReportPageComponent,
     ErrorReportComponent,
     TableReportComponent,
-    AstReportComponent
+    CstReportComponent
   ],
     imports: [
         CommonModule,

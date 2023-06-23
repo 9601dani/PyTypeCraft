@@ -7,14 +7,14 @@
     <div class="btns">
       <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.ERROR_REPORT)">Reporte de errores</button>
       <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.TABLE_REPORT)">Reporte de Tabla de símbolos</button>
-      <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.AST_REPORT)">AST</button>
+      <button type="button" class="btn btn-primary btn-report" (click)="changeReport(ReportType.CST_REPORT)">CST</button>
     </div>
   </div>
 
   <div class="report-container">
     <div *ngIf="reportType == ReportType.ERROR_REPORT"><app-error-report></app-error-report></div>
     <div *ngIf="reportType == ReportType.TABLE_REPORT"><app-table-report></app-table-report></div>
-    <div *ngIf="reportType == ReportType.AST_REPORT"><app-ast-report></app-ast-report></div>
+    <div *ngIf="reportType == ReportType.CST_REPORT"><app-cst-report></app-cst-report></div>
   </div>
 
 </div>

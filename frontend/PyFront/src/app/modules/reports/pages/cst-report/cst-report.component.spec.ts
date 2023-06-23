@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AstReportComponent } from './ast-report.component';
+import { CstReportComponent } from './cst-report.component';
 
-describe('AstReportComponent', () => {
-  let component: AstReportComponent;
-  let fixture: ComponentFixture<AstReportComponent>;
+describe('CstReportComponent', () => {
+  let component: CstReportComponent;
+  let fixture: ComponentFixture<CstReportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AstReportComponent ]
+      declarations: [ CstReportComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AstReportComponent);
+    fixture = TestBed.createComponent(CstReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
