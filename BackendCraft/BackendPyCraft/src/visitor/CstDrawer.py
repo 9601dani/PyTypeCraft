@@ -47,7 +47,7 @@ class CstDrawer(Visitor):
         return content
 
     def visit_break(self, i: Break):
-        return ""
+        return f'{i.node_name()} [label = "{i.node_value()}"]\n'
 
     def visit_call_arr(self, i: CallArray):
         return ""
@@ -56,13 +56,33 @@ class CstDrawer(Visitor):
         return ""
 
     def visit_call_fun(self, i: CallFunction):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+
+        if len(i.assignments) > 0:
+            content += f'{i.args_name()} [label = "{i.args_value()}"]\n'
+            content += f'{i.node_name()} -> {i.args_name()}\n\n'
+
+            for assignment in i.assignments:
+                content += f'{i.args_name()} -> {assignment.node_name()}\n\n'
+                content += assignment.accept(self)
+
+        return content
 
     def visit_console(self, i: ConsoleLog):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.content_name()} [label = "{i.content_value()}"]\n'
+        content += f'{i.node_name()} -> {i.content_name()}\n\n'
+
+        for instruction in i.value:
+            content += f'{i.content_name()} -> {instruction.node_name()}\n\n'
+            content += instruction.accept(self)
+
+        return content
 
     def visit_continue(self, i: Continue):
-        return ""
+        return f'{i.node_name()} [label = "{i.node_value()}"]\n'
 
     def visit_declaration(self, i: Declaration):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -89,13 +109,35 @@ class CstDrawer(Visitor):
     def visit_foreach(self, i: ForEachState):
         return ""
 
-
     def visit_for(self, i: ForState):
         return ""
 
-
     def visit_function(self, i: FunctionState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+
+        if len(i.parameters) > 0:
+            content += f'{i.params_name()} [label = "{i.params_value()}"]\n'
+            content += f'{i.node_name()} -> {i.params_name()}\n\n'
+
+            for param in i.parameters:
+                content += f'{i.params_name()} -> {param.node_name()}\n\n'
+                content += param.accept(self)
+
+        if i.return_type is not None:
+            content += f'{i.return_name()} [label = "{i.return_value()}"]\n'
+            content += f'{i.node_name()} -> {i.return_name()}\n\n'
+
+        content += f'{i.body_name()} [label = "{i.body_value()}"]\n'
+        content += f'{i.node_name()} -> {i.body_name()}\n\n'
+
+        for instruction in i.instructions:
+            content += f'{i.body_name()} -> {instruction.node_name()}\n\n'
+            content += instruction.accept(self)
+
+        return content
 
     def visit_if(self, i: IfState):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -124,18 +166,38 @@ class CstDrawer(Visitor):
     def visit_interface_assign(self, i: InterfaceAssign):
         return ""
 
-
     def visit_inter_attr_assign(self, i: InterAttributeAssign):
         return ""
 
-
     def visit_interface(self, i: InterfaceState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
 
+        content += f'{i.attrs_name()} [label = "{i.attrs_value()}"]\n'
+        content += f'{i.node_name()} -> {i.attrs_name()}\n\n'
+        for attribute in i.attributes:
+            content += f'{i.attrs_name()} -> {attribute.node_name()}\n\n'
+            content += attribute.accept(self)
+
+        return content
 
     def visit_native(self, i: NativeFunction):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.var_name()} [label = "{i.var_value()}"]\n'
+        content += f'{i.node_name()} -> {i.var_name()}\n\n'
+        content += f'{i.var_name()} -> {i.variable.node_name()}\n\n'
+        content += i.variable.accept(self)
+        content += f'{i.native_name()} [label = "{i.native_value()}"]\n'
+        content += f'{i.node_name()} -> {i.native_name()}\n\n'
 
+        if len(i.parameter) > 0:
+            content += f'{i.arg_name()} [label = "{i.arg_value()}"]\n'
+            content += f'{i.node_name()} -> {i.arg_name()}\n\n'
+            content += f'{i.arg_name()} -> {i.parameter[0].node_name()}\n\n'
+            content += i.parameter[0].accept(self)
+
+        return content
 
     def visit_only_assign(self, i: OnlyAssignment):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -152,13 +214,37 @@ class CstDrawer(Visitor):
         return content
 
     def visit_parameter(self, i: Parameter):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+
+        if i.type is not None:
+            content += f'{i.type_name()} [label = "{i.type_value()}"]\n'
+            content += f'{i.node_name()} -> {i.type_name()}\n\n'
+
+        return content
 
     def visit_return(self, i: Return):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        if i.expression is not None:
+            content += f'{i.expr_name()} [label = "{i.expr_value()}"]\n'
+            content += f'{i.node_name()} -> {i.expr_name()}\n\n'
+            content += f'{i.expr_name()} -> {i.expression.node_name()}\n\n'
+            content += i.expression.accept(self)
+
+        return content
 
     def visit_unary_op(self, i: UnaryOperation):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.op_name()} [label = "{i.op_value()}"]\n'
+        content += f'{i.node_name()} -> {i.op_name()}\n\n'
+
+        content += f'{i.right_name()} [label = "{i.right_value()}"]\n'
+        content += f'{i.node_name()} -> {i.right_name()}\n\n'
+        content += f'{i.right_name()} -> {i.right_operator.node_name()}\n\n'
+        content += i.right_operator.accept(self)
+
+        return content
 
     def visit_while(self, i: WhileState):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'

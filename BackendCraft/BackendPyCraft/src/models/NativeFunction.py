@@ -4,10 +4,28 @@ from .NativeFunType import NativeFunType
 
 class NativeFunction(Instruction):
     def node_name(self):
-        pass
+        return f'native_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'native_function'
+
+    def var_name(self):
+        return f'var_{self.line}_{self.column}'
+
+    def var_value(self):
+        return f'variable'
+
+    def native_name(self):
+        return f'nat_type_{self.line}_{self.column}'
+
+    def native_value(self):
+        return f'{self.type}'
+
+    def arg_name(self):
+        return f'arg_{self.line}_{self.column}'
+
+    def arg_value(self):
+        return f'argument'
 
     def accept(self, visitor):
         return visitor.visit_native(self)

@@ -3,10 +3,22 @@ from .Instruction import Instruction
 
 class CallFunction(Instruction):
     def node_name(self):
-        pass
+        return f'call_fn_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'call_function'
+
+    def id_name(self):
+        return f'id_{self.line}_{self.column}'
+
+    def id_value(self):
+        return f'{self.name}'
+
+    def args_name(self):
+        return f'args_{self.line}_{self.column}'
+
+    def args_value(self):
+        return f'arguments'
 
     def accept(self, visitor):
         return visitor.visit_call_fun(self)

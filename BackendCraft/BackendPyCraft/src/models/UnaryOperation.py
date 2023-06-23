@@ -1,12 +1,34 @@
 from .Instruction import Instruction
+from .OperationType import OperationType
 
 
 class UnaryOperation(Instruction):
     def node_name(self):
-        pass
+        return f'unary_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'unary_operation'
+
+    def right_name(self):
+        return f'right_{self.line}_{self.column}'
+
+    def right_value(self):
+        return f'right'
+
+    def op_name(self):
+        return f'op_{self.line}_{self.column}'
+
+    def op_value(self):
+        if self.operator == OperationType.NOT:
+            return "!"
+        elif self.operator == OperationType.INCREMENT:
+            return "++"
+        elif self.operator == OperationType.DECREMENT:
+            return "--"
+        elif self.operator == OperationType.POSITIVE:
+            return "+"
+        elif self.operator == OperationType.NEGATIVE:
+            return "-"
 
     def accept(self, visitor):
        return visitor.visit_unary_op(self)

@@ -790,60 +790,70 @@ def parse(inp):
 
 instrucciones : Instruction = parse("""
 
-let array = [1,2,3,4,5];
-
-for (let a of "hola"){
-    let b = a.concat("-");
-    console.log(b);
+interface Car {
+    serial: number;
+    color: string;
 }
 
+function sum(a:number, b: number, c): number {
+    if (true){
+        continue;
+    }
+    
+    return a * b;
+}
+
+
+sum();
+sum(19, 1*3, "bool");
+console.log("todo ok");
 """)
 
 ################  VISITOR DEBUG  #################
-errors = []
-table= SymbolTable()
-debbuger= Debugger(table,errors)
-
-
-if instrucciones is not None:
-   for instruccion in instrucciones:
-       instruccion.accept(debbuger)
-
-errorsR = errors
-tableR =  SymbolTable()
-console= []
-VariableType().clean_types()
-tableR.symbols = debbuger.symbol_table.getAllFunctions()
-#################  VISITOR RUNNER  #################
-print("#################  VISITOR RUNNER  #################")
-runner = Runner(tableR,errorsR,console)
-if instrucciones is not None:
-    for instruccion in instrucciones:
-        instruccion.accept(runner)
-print("#############################TABLA DE SIMBOLOS")
-for i in runner.symbol_table.symbols:
-    print(str(i))
-print("#############################ERRORES")
-if len(runner.errors) > 0:
-    for error in runner.errors:
-        print(str(error))
-print("#############################CONSOLE")
-for console in runner.console:
-    print(str(console))
+# errors = []
+# table= SymbolTable()
+# debbuger= Debugger(table,errors)
+#
+#
+# if instrucciones is not None:
+#    for instruccion in instrucciones:
+#        instruccion.accept(debbuger)
+#
+# errorsR = errors
+# tableR =  SymbolTable()
+# console= []
+# VariableType().clean_types()
+# tableR.symbols = debbuger.symbol_table.getAllFunctions()
+# #################  VISITOR RUNNER  #################
+# print("#################  VISITOR RUNNER  #################")
+# runner = Runner(tableR,errorsR,console)
+# if instrucciones is not None:
+#     for instruccion in instrucciones:
+#         instruccion.accept(runner)
+# print("#############################TABLA DE SIMBOLOS")
+# for i in runner.symbol_table.symbols:
+#     print(str(i))
+# print("#############################ERRORES")
+# if len(runner.errors) > 0:
+#     for error in runner.errors:
+#         print(str(error))
+# print("#############################CONSOLE")
+# for console in runner.console:
+#     print(str(console))
 #objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
 #print("#############################OBJETO RETURN")
 #print(objeto_return)
 
 #################  VISITOR CSTDRAWER  #################
 
-# drawer = CstDrawer()
-# content = "digraph {\n"
-# if instrucciones is not None:
-#     for i in instrucciones:
-#         content = content + f'init -> {i.node_name()}\n'
-#         content = content + i.accept(drawer)
-#
-# content = content+"}\n"
-#
-# print("#### CST ####")
-# print(content)
+drawer = CstDrawer()
+content = "digraph {\n"
+if instrucciones is not None:
+    for i in instrucciones:
+        content = content + f'init -> {i.node_name()}\n'
+        content = content + i.accept(drawer)
+
+content = content+"}\n"
+
+print("#### CST ####")
+print(content)

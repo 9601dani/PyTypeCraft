@@ -3,10 +3,10 @@ from .Instruction import Instruction
 
 class Continue(Instruction):
     def node_name(self):
-        pass
+        return f'continue_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'continue_statement'
 
     def accept(self, visitor):
         return visitor.visit_continue(self)

@@ -3,10 +3,16 @@ from .Instruction import Instruction
 
 class ConsoleLog(Instruction):
     def node_name(self):
-        pass
+        return f'console_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'console_log'
+
+    def content_name(self):
+        return f'content_{self.line}_{self.column}'
+
+    def content_value(self):
+        return f'values'
 
     def accept(self, visitor):
        return visitor.visit_console(self)
