@@ -1,0 +1,3 @@
+export enum ReportType{
+  NONE, ERROR_REPORT, TABLE_REPORT, CST_REPORT
+}

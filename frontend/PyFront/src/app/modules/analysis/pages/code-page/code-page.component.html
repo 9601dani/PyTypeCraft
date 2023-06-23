@@ -1,0 +1,19 @@
+<app-header></app-header>
+<div class="code-container">
+
+  <h5 class="input-tittle">Entrada</h5>
+  <h5 class="output-tittle">Salida</h5>
+  <div class="input">
+    <ngs-code-editor
+      class="input-editor"
+      [theme] = "theme"
+      [codeModel]="model"
+      [options]="options">
+
+    </ngs-code-editor>
+    <button type="button" class="btn btn-primary btn-analisis" (click)="compile()">Analizar</button>
+  </div>
+  <div class="output">
+    <textarea class="out-area" [value]="outValue" cols="50" rows="15" readonly></textarea>
+  </div>
+</div>
