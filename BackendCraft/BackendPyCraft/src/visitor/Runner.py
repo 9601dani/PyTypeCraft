@@ -560,8 +560,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.OR:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -573,8 +573,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.AND:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
