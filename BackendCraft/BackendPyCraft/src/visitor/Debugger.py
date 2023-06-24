@@ -112,7 +112,7 @@ class Debugger(Visitor):
             value: Variable = i.value.accept(self)
             # print(i.type)
             if value is None:
-                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGANCION ", i.line, i.column))
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGNACION ", i.line, i.column))
                 # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
                 return None
 

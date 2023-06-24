@@ -451,7 +451,7 @@ def p_instruccion_interfaceAtributo2(t):
 ############################################## ASIGNACIÓN A ATRIBUTOS DE INTERFAZ ##############################################
 
 def p_instruccion_interface_assign_pro(t):
-    '''interface_assign_pro : a PUNTO LITERAL IGUAL a'''
+    '''interface_assign_pro : i PUNTO LITERAL IGUAL a'''
     attrVal = CallAttribute(t.lineno(1),find_column(input, t.slice[2]),t[1], t[3])
     t[0] = InterAttributeAssign(t.lineno(1),find_column(input, t.slice[2]), attrVal, t[5])
 
@@ -789,71 +789,110 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-
-interface Car {
-    serial: number;
-    color: string;
+interface Actor {
+    nombre: string;
+    edad: number;
 }
 
-function sum(a:number, b: number, c): number {
-    if (true){
-        continue;
-    }
+interface Pelicula {
+    nombre: string;
+    posicion: number;
+}
+
+interface Contrato {
+    actor: Actor;
+    pelicula: Pelicula;
+}
+
+let actores = ["Elizabeth Olsen", "Adam Sandler", "Christian Bale", "Jennifer Aniston"];
+let peliculas = ["Avengers: Age of Ultron", "Mr. Deeds", "Batman: The Dark Knight", "Marley & Me"];
+
+function contratar(actor: Actor, pelicula: Pelicula): Contrato {
+    let c1: Contrato = {
+        actor: actor,
+        pelicula: pelicula
+    };
+    return c1;
+}
+
+function crearActor(nombre: string, edad: number): Actor {
+    let a1: Actor = {
+        nombre: nombre,
+        edad: edad
+    };
+    return a1;
+}
+
+function crearPelicula(nombre: string, posicion: number): Pelicula {
+    let p1:Pelicula = {
+        nombre: nombre,
+        posicion: posicion
+    };
+    return p1;
+}
+function imprimir(contrato: Contrato) {
+    console.log("Actor:", contrato.actor.nombre, "   Edad:", contrato.actor.edad);
+    console.log("Pelicula:", contrato.pelicula.nombre, "   Genero:", contrato.pelicula.posicion);
+}
+function contratos() {
     
-    return a * b;
+    
+    for (let i = 1; i < 3; i++) {
+        let actor: Actor = crearActor(actores[i - 1], i + 38);
+    	let pelicula: Pelicula = crearPelicula(peliculas[i - 1], i);
+    	let contrato: Contrato = contratar(actor, pelicula);
+        imprimir(contrato);
+    }
 }
 
-
-sum();
-sum(19, 1*3, "bool");
-console.log("todo ok");
+contratos();
 """)
 
-################  VISITOR DEBUG  #################
-# errors = []
-# table= SymbolTable()
-# debbuger= Debugger(table,errors)
-#
-#
-# if instrucciones is not None:
-#    for instruccion in instrucciones:
-#        instruccion.accept(debbuger)
-#
-# errorsR = errors
-# tableR =  SymbolTable()
-# console= []
-# VariableType().clean_types()
-# tableR.symbols = debbuger.symbol_table.getAllFunctions()
-# #################  VISITOR RUNNER  #################
-# print("#################  VISITOR RUNNER  #################")
-# runner = Runner(tableR,errorsR,console)
-# if instrucciones is not None:
-#     for instruccion in instrucciones:
-#         instruccion.accept(runner)
-# print("#############################TABLA DE SIMBOLOS")
-# for i in runner.symbol_table.symbols:
-#     print(str(i))
-# print("#############################ERRORES")
-# if len(runner.errors) > 0:
-#     for error in runner.errors:
-#         print(str(error))
-# print("#############################CONSOLE")
-# for console in runner.console:
-#     print(str(console))
+###############  VISITOR DEBUG  #################
+errors = []
+table= SymbolTable()
+debbuger= Debugger(table,errors)
+
+
+if instrucciones is not None:
+   for instruccion in instrucciones:
+       instruccion.accept(debbuger)
+
+errorsR = errors
+tableR =  SymbolTable()
+console= []
+VariableType().clean_types()
+tableR.symbols = debbuger.symbol_table.getAllFunctions()
+#################  VISITOR RUNNER  #################
+print("#################  VISITOR RUNNER  #################")
+runner = Runner(tableR,errorsR,console)
+if instrucciones is not None:
+    for instruccion in instrucciones:
+        instruccion.accept(runner)
+print("#############################TABLA DE SIMBOLOS")
+for i in runner.symbol_table.symbols:
+    print(str(i))
+print("#############################ERRORES")
+if len(runner.errors) > 0:
+    for error in runner.errors:
+        print(str(error))
+print("#############################CONSOLE")
+for console in runner.console:
+    print(str(console))
 #objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
 #print("#############################OBJETO RETURN")
 #print(objeto_return)
 
 #################  VISITOR CSTDRAWER  #################
 
-drawer = CstDrawer()
-content = "digraph {\n"
-if instrucciones is not None:
-    for i in instrucciones:
-        content = content + f'init -> {i.node_name()}\n'
-        content = content + i.accept(drawer)
-
-content = content+"}\n"
-
-print("#### CST ####")
-print(content)
+# drawer = CstDrawer()
+# content = "digraph {\n"
+# if instrucciones is not None:
+#     for i in instrucciones:
+#         content = content + f'init -> {i.node_name()}\n'
+#         content = content + i.accept(drawer)
+#
+# content = content+"}\n"
+#
+# print("#### CST ####")
+# print(content)
