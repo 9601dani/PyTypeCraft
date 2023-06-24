@@ -236,6 +236,7 @@ from src.models.CallAttribute import CallAttribute
 from src.models.ArrayState import ArrayState
 from src.models.CallArray import CallArray
 from src.models.ArrayAssign import ArrayAssign
+from src.visitor.C3DGenerator import C3DGenerator
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
@@ -789,37 +790,8 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-function swap(i: number, j: number, arr) {
-    let temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
-}
-
-function bubbleSort(arr) {
-    for (let i = 0; i < arr.length() - 1; i++) {
-        for (let j = 1; j < arr.length() - 1; j++) {
-        if (arr[j] > arr[j + 1]) {
-            swap(j, j + 1, arr);
-        }
-        }
-    }
-}
-
-function insertionSort(arr) {
-    for (let i = 1; i < arr.length(); i++) {
-        let j = i;
-        let temp = arr[i];
-        while (j > 0 && arr[j - 1] > temp) {
-        arr[j] = arr[j - 1];
-        j = j - 1;
-    }
-    arr[j] = temp;
-    }
-}
-
-let arreglo = [32, 7 * 3, 7, 89, 56, 909, 109, 2, 9, 9874 ^ 0, 44, 3, 820 * 10, 11, 8 * 0 + 8, 10];
-bubbleSort(arreglo);
-console.log("BubbleSort => ", arreglo);
+console.log(4+5*6);
+console.log(1+1);
 
 """)
 
@@ -860,14 +832,22 @@ console.log("BubbleSort => ", arreglo);
 
 #################  VISITOR CSTDRAWER  #################
 
-drawer = CstDrawer()
-content = "digraph {\n"
+#drawer = CstDrawer()
+#content = "digraph {\n"
+#if instrucciones is not None:
+#    for i in instrucciones:
+#        content = content + f'init -> {i.node_name()}\n'
+#        content = content + i.accept(drawer)
+
+#content = content+"}\n"
+
+#print("#### CST ####")
+#print(content)
+table= SymbolTable()
+code_c3d= C3DGenerator(table)
+code_c3d.cleanAll()
 if instrucciones is not None:
-    for i in instrucciones:
-        content = content + f'init -> {i.node_name()}\n'
-        content = content + i.accept(drawer)
-
-content = content+"}\n"
-
-print("#### CST ####")
-print(content)
+    for instruccion in instrucciones:
+        instruccion.accept(code_c3d)
+print("#############################CODIGO C3D")
+print(code_c3d.get_code())
