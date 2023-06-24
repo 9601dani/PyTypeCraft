@@ -47,7 +47,17 @@ def ParsearTextoApi(texto):
     console= []
     VariableType().clean_types()
     tableR.symbols = debbuger.symbol_table.getAllFunctions()
+####################### CST #######################
+    drawer = CstDrawer()
+    content = "digraph {\n"
+    if instrucciones is not None:
+        for i in instrucciones:
+            content = content + f'init -> {i.node_name()}\n'
+            content = content + i.accept(drawer)
+    content = content+"}\n"
 
+    print("#### CST ####")
+    print(content)
 #################  VISITOR RUNNER  #################
     print("#################  VISITOR RUNNER  #################")
     runner = Runner(tableR,errorsR,console)
@@ -64,7 +74,7 @@ def ParsearTextoApi(texto):
     print("#############################CONSOLE")
     for console in runner.console:
         print(str(console))
-    objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
+    objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console, content)
     print("#############################OBJETO RETURN")
     print(objeto_return)
     return (objeto_return.__getstate__())

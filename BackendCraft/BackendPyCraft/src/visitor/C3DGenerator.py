@@ -83,3 +83,6 @@ class C3DGenerator(Visitor):
 
     def visit_value(self, i: Value):
         pass
+
+    def init_header(self):
+        pass
