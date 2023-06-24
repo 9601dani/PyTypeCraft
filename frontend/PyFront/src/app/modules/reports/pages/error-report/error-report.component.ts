@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {ReportModel} from "../../../../models/ReportModel";
 
 @Component({
   selector: 'app-error-report',
@@ -7,4 +8,5 @@ import { Component } from '@angular/core';
 })
 export class ErrorReportComponent {
 
+  protected readonly ReportModel = ReportModel;
 }
