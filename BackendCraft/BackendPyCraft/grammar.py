@@ -789,110 +789,85 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-interface Actor {
-    nombre: string;
-    edad: number;
+function swap(i: number, j: number, arr) {
+    let temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
 }
 
-interface Pelicula {
-    nombre: string;
-    posicion: number;
-}
-
-interface Contrato {
-    actor: Actor;
-    pelicula: Pelicula;
-}
-
-let actores = ["Elizabeth Olsen", "Adam Sandler", "Christian Bale", "Jennifer Aniston"];
-let peliculas = ["Avengers: Age of Ultron", "Mr. Deeds", "Batman: The Dark Knight", "Marley & Me"];
-
-function contratar(actor: Actor, pelicula: Pelicula): Contrato {
-    let c1: Contrato = {
-        actor: actor,
-        pelicula: pelicula
-    };
-    return c1;
-}
-
-function crearActor(nombre: string, edad: number): Actor {
-    let a1: Actor = {
-        nombre: nombre,
-        edad: edad
-    };
-    return a1;
-}
-
-function crearPelicula(nombre: string, posicion: number): Pelicula {
-    let p1:Pelicula = {
-        nombre: nombre,
-        posicion: posicion
-    };
-    return p1;
-}
-function imprimir(contrato: Contrato) {
-    console.log("Actor:", contrato.actor.nombre, "   Edad:", contrato.actor.edad);
-    console.log("Pelicula:", contrato.pelicula.nombre, "   Genero:", contrato.pelicula.posicion);
-}
-function contratos() {
-    
-    
-    for (let i = 1; i < 3; i++) {
-        let actor: Actor = crearActor(actores[i - 1], i + 38);
-    	let pelicula: Pelicula = crearPelicula(peliculas[i - 1], i);
-    	let contrato: Contrato = contratar(actor, pelicula);
-        imprimir(contrato);
+function bubbleSort(arr) {
+    for (let i = 0; i < arr.length() - 1; i++) {
+        for (let j = 1; j < arr.length() - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+            swap(j, j + 1, arr);
+        }
+        }
     }
 }
 
-contratos();
+function insertionSort(arr) {
+    for (let i = 1; i < arr.length(); i++) {
+        let j = i;
+        let temp = arr[i];
+        while (j > 0 && arr[j - 1] > temp) {
+        arr[j] = arr[j - 1];
+        j = j - 1;
+    }
+    arr[j] = temp;
+    }
+}
+
+let arreglo = [32, 7 * 3, 7, 89, 56, 909, 109, 2, 9, 9874 ^ 0, 44, 3, 820 * 10, 11, 8 * 0 + 8, 10];
+bubbleSort(arreglo);
+console.log("BubbleSort => ", arreglo);
+
 """)
 
 ###############  VISITOR DEBUG  #################
-errors = []
-table= SymbolTable()
-debbuger= Debugger(table,errors)
-
-
-if instrucciones is not None:
-   for instruccion in instrucciones:
-       instruccion.accept(debbuger)
-
-errorsR = errors
-tableR =  SymbolTable()
-console= []
-VariableType().clean_types()
-tableR.symbols = debbuger.symbol_table.getAllFunctions()
-#################  VISITOR RUNNER  #################
-print("#################  VISITOR RUNNER  #################")
-runner = Runner(tableR,errorsR,console)
-if instrucciones is not None:
-    for instruccion in instrucciones:
-        instruccion.accept(runner)
-print("#############################TABLA DE SIMBOLOS")
-for i in runner.symbol_table.symbols:
-    print(str(i))
-print("#############################ERRORES")
-if len(runner.errors) > 0:
-    for error in runner.errors:
-        print(str(error))
-print("#############################CONSOLE")
-for console in runner.console:
-    print(str(console))
+# errors = []
+# table= SymbolTable()
+# debbuger= Debugger(table,errors)
+#
+#
+# if instrucciones is not None:
+#    for instruccion in instrucciones:
+#        instruccion.accept(debbuger)
+#
+# errorsR = errors
+# tableR =  SymbolTable()
+# console= []
+# VariableType().clean_types()
+# tableR.symbols = debbuger.symbol_table.getAllFunctions()
+# #################  VISITOR RUNNER  #################
+# print("#################  VISITOR RUNNER  #################")
+# runner = Runner(tableR,errorsR,console)
+# if instrucciones is not None:
+#     for instruccion in instrucciones:
+#         instruccion.accept(runner)
+# print("#############################TABLA DE SIMBOLOS")
+# for i in runner.symbol_table.symbols:
+#     print(str(i))
+# print("#############################ERRORES")
+# if len(runner.errors) > 0:
+#     for error in runner.errors:
+#         print(str(error))
+# print("#############################CONSOLE")
+# for console in runner.console:
+#     print(str(console))
 #objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
 #print("#############################OBJETO RETURN")
 #print(objeto_return)
 
 #################  VISITOR CSTDRAWER  #################
 
-# drawer = CstDrawer()
-# content = "digraph {\n"
-# if instrucciones is not None:
-#     for i in instrucciones:
-#         content = content + f'init -> {i.node_name()}\n'
-#         content = content + i.accept(drawer)
-#
-# content = content+"}\n"
-#
-# print("#### CST ####")
-# print(content)
+drawer = CstDrawer()
+content = "digraph {\n"
+if instrucciones is not None:
+    for i in instrucciones:
+        content = content + f'init -> {i.node_name()}\n'
+        content = content + i.accept(drawer)
+
+content = content+"}\n"
+
+print("#### CST ####")
+print(content)
