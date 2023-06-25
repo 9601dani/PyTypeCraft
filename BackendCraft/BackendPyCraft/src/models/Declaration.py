@@ -31,6 +31,9 @@ class Declaration(Instruction):
         super().__init__(line, column)
         self.type = type
         self.instructions = instructions
+        #C3D
+        self.find= True
+        self.gosth=-1
 
     def __str__(self):
         return f"""{{"Declaration": {self.type}, {self.instructions.__str__()}}}"""

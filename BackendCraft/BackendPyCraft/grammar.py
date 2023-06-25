@@ -237,6 +237,7 @@ from src.models.ArrayState import ArrayState
 from src.models.CallArray import CallArray
 from src.models.ArrayAssign import ArrayAssign
 from src.visitor.C3DGenerator import C3DGenerator
+from src.symbolTable.TableC3d import TableC3d
 def return_operation_type(operation_type):
     if(operation_type== "||"):
         return OperationType.OR
@@ -790,8 +791,8 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-console.log(4+5*6);
-console.log(2^3);
+let daniel= 1+1*1;
+console.log(daniel);
 
 """)
 
@@ -843,7 +844,7 @@ console.log(2^3);
 
 #print("#### CST ####")
 #print(content)
-table= SymbolTable()
+table= TableC3d()
 code_c3d= C3DGenerator(table)
 code_c3d.cleanAll()
 if instrucciones is not None:

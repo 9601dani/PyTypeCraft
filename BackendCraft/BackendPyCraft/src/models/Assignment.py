@@ -29,6 +29,9 @@ class Assignment(Instruction):
         self.type = type
         self.value = value
         self.isAny= isAny
+        # C3D
+        self.find = True
+        self.gosth = -1
         
     def __str__(self):
         return f"""{{"Assignment": {self.id}, {self.type}, {self.value.__str__()}, {self.isAny}}}"""

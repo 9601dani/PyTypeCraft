@@ -41,12 +41,13 @@ from ..models.Return import Return
 from ..models.Value import Value
 from ..models.ReturnC3d import ReturnC3d
 from ..ObjectError.ExceptionPyType import ExceptionPyType
+from ..symbolTable.TableC3d import TableC3d
 import copy
 from decimal import Decimal
 
 
 class C3DGenerator(Visitor):
-    def __init__(self, symbol_table: SymbolTable):
+    def __init__(self, symbol_table: TableC3d):
         #### Tabla de simbolos ####
         self.symbol_table = symbol_table
         #### Contadores C3D ####
@@ -129,7 +130,7 @@ class C3DGenerator(Visitor):
                 self.funcs = self.funcs + '/*------FUNCIONES------*/\n'
             self.funcs = self.funcs + tab + code
         else:
-            self.code = self.code + tab + code
+            self.code = self.code + '\t' + code
 
     def add_comment(self, comment):
         self.code_in(f'/* {comment} */\n')
@@ -581,7 +582,107 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_assignment(self, i: Assignment):
-        pass
+        if i.value is not None:
+            if i.type is not None:
+                self.add_comment('Asignacion de variable')
+                val = i.value.accept(self)
+                if val is not None:
+                    self.add_comment('Error al asignar la variable 1')
+                    return None
+
+                if val.type != VariableType().buscar_type(i.data_type):
+                    self.add_comment('Error al asignar la variable, tipos son distintos')
+                    return None
+
+                if val.type  == VariableType().buscar_type('ARRAY'):
+                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), True, i.find)
+                    simbolo.set_tipo_aux(val.get_tipo_aux())
+                    simbolo.set_length(val.get_length())
+                    simbolo.set_referencia(True)
+                else:
+                    # Guardado y obtencion de variable. Esta tiene la posicion, lo que nos sirve para asignarlo en el heap
+                    simbolo = self.symbol_table.setTabla(i.id, val.get_tipo(), (val.type == VariableType().buscar_type("STRING") or val.type == VariableType().buscar_type("STRUCT") or val.type == VariableType().buscar_type("ARRAY")), self.find)
+
+                # Obtencion de posicion de la variable
+                temp_pos = simbolo.get_pos()
+                if not simbolo.is_global:
+                    temp_pos = self.add_temp()
+                    self.add_expression(temp_pos, 'P', simbolo.get_pos(), "+")
+
+                if(val.type == VariableType().buscar_type("BOOLEAN")):
+                    temp_lbl = self.new_label()
+
+                    self.put_label(val.true_lbl)
+                    self.set_stack(temp_pos, "1")
+
+                    self.add_goto(temp_lbl)
+
+                    self.put_label(val.false_lbl)
+                    self.set_stack(temp_pos, "0")
+
+                    self.put_label(temp_lbl)
+                else:
+                    self.set_stack(temp_pos, val.value)
+                self.add_comment("Fin de valor de variable")
+                self.add_space()
+                return temp_pos
+            else:
+                self.add_comment("Compilacion de valor de variable")
+                # Compilacion de valor que estamos asignando
+                val = i.value.accept(self)
+                #if isinstance(val, Excepcion): return val
+
+                if val.get_tipo() == VariableType().buscar_type("ARRAY"):
+                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), True, i.find)
+                    simbolo.set_tipo_aux(val.get_tipo_aux())
+                    simbolo.set_length(val.get_length())
+                    simbolo.set_referencia(val.get_referencia())
+                else:
+                    # Guardado y obtencion de variable. Esta tiene la posicion, lo que nos sirve para asignarlo en el heap
+                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), (val.type == VariableType().buscar_type("STRING") or val.type == VariableType().buscar_type("ARRAY")), i.find)
+
+                # Obtencion de posicion de la variable
+                temp_pos = simbolo.get_pos()
+                if not simbolo.is_global:
+                    temp_pos = self.add_temp()
+                    self.add_expression(temp_pos, 'P', simbolo.pos, "+")
+
+                if(val.type == VariableType().buscar_type("BOOLEAN")):
+                    temp_lbl = self.new_label()
+
+                    self.put_label(val.true_lbl)
+                    self.set_stack(temp_pos, "1")
+
+                    self.add_goto(temp_lbl)
+
+                    self.put_label(val.false_lbl)
+                    self.set_stack(temp_pos, "0")
+
+                    self.put_label(temp_lbl)
+                else:
+                    self.set_stack(temp_pos, val.value)
+                self.add_comment("Fin de valor de variable")
+                self.add_space()
+                return temp_pos
+        else:
+            self.add_comment("Compilacion de valor de variable")
+            if not i.type:
+                simbolo = self.symbol_table.set_tabla(i.id, VariableType().buscar_type("STRING"), True)
+            else:
+                simbolo = self.symbol_table.set_tabla(i.id, i.type, True)
+
+            temp_pos = simbolo.get_pos()
+            if not simbolo.is_global:
+                temp_pos = self.add_temp()
+                self.add_expression(temp_pos, 'P', simbolo.pos, "+")
+
+            self.set_stack(temp_pos,i.gosth)
+            self.addComment("Fin de valor de variable")
+
+            return temp_pos
+
+
+
 
     def visit_array_state(self, i: ArrayState):
         pass
@@ -673,7 +774,20 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_declaration(self, i: Declaration):
-        pass
+        if i.type is None:
+            self.errors.append(ExceptionPyType("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.", i.line, i.column))
+            return None
+        for instruction in i.instructions:
+            variable = instruction.accept(self)
+            if variable is None:
+                self.add_comment('Error en declaracion de variable')
+                #self.errors.append(ExceptionPyType("ERROR EN DECLARACION DE VARIABLE NO SE PUDO DECLARAR LA VARIABLE DEBIDO QUE ES NULA", i.line, i.column))
+                return None
+
+            #if variable.data_type != i.type:
+             #   self.add_comment('Error en declaracion de variable')
+              #  return None
+
 
     def visit_else(self, i: ElseState):
         pass
@@ -718,7 +832,21 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_value(self, i: Value):
-        return ReturnC3d(str(i.value),i.value_type, False)
+        tipo=None
+        if i.value_type == ValueType.CADENA:
+            tipo= VariableType().buscar_type("STRING")
+        elif i.value_type == ValueType.ENTERO:
+            tipo= VariableType().buscar_type("NUMBER")
+        elif i.value_type == ValueType.DECIMAL:
+            tipo= VariableType().buscar_type("NUMBER")
+        elif i.value_type == ValueType.BOOLEANO:
+            tipo= VariableType().buscar_type("BOOLEAN")
+        elif i.value_type == ValueType.LITERAL:
+            var_in_table = self.symbol_table.find_tabla(str(i.value))
+            if var_in_table is None:
+               self.add_comment("Variable no encontrada en la tabla de simbolos")
+               return None
+        return ReturnC3d(str(i.value),tipo, False)
 
 """
     Creditos: 
