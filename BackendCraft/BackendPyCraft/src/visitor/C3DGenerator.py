@@ -681,9 +681,6 @@ class C3DGenerator(Visitor):
 
             return temp_pos
 
-
-
-
     def visit_array_state(self, i: ArrayState):
         pass
 
@@ -745,8 +742,6 @@ class C3DGenerator(Visitor):
             self.add_potencia(temporal, left.value, right.value)
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
 
-
-
     def visit_break(self, i: Break):
         pass
 
@@ -790,7 +785,8 @@ class C3DGenerator(Visitor):
 
 
     def visit_else(self, i: ElseState):
-        pass
+        for instruction in i.bloque:
+            instruction.accept(self)
 
     def visit_foreach(self, i: ForEachState):
         pass
@@ -802,7 +798,34 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_if(self, i: IfState):
-        pass
+        left = ''
+        right = ''
+        op = ''
+
+        if i.condition.left_operator is not None:
+            left = i.condition.left_operator.accept(self)
+
+        if i.condition.right_operator is not None:
+            right = i.condition.right_operator.accept(self)
+
+        if i.condition.operator is not None:
+            op = i.condition.op_value()
+
+        true_label = self.new_label()
+
+        self.add_if(left.value, right.value, op,true_label)
+
+        if i.bloque_falso is not None:
+            i.bloque_falso.accept(self)
+
+        lbl = self.new_label()
+        self.add_goto(lbl)
+
+        self.put_label(true_label)
+        for instruction in i.bloque_verdadero:
+            instruction.accept(self)
+
+        self.put_label(lbl)
 
     def visit_interface_assign(self, i: InterfaceAssign):
         pass
@@ -817,7 +840,13 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_only_assign(self, i: OnlyAssignment):
-        pass
+        result = self.symbol_table.get_symbol_by_id(i.id)
+
+        if result is None:
+            return None
+
+        val = i.value.accept(self)
+        self.set_stack(result.pos, val.value)
 
     def visit_parameter(self, i: Parameter):
         pass
@@ -829,7 +858,32 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_while(self, i: WhileState):
-        pass
+        while_label = self.new_label()
+        self.put_label(while_label)
+        left = ''
+        right = ''
+        op = ''
+
+        if i.condition.left_operator is not None:
+            left = i.condition.left_operator.accept(self)
+
+        if i.condition.right_operator is not None:
+            right = i.condition.right_operator.accept(self)
+
+        if i.condition.operator is not None:
+            op = i.condition.op_value()
+
+        true_label = self.new_label()
+        self.add_if(left.value, right.value, op, true_label)
+        false_label = self.new_label()
+        self.add_goto(false_label)
+
+        self.put_label(true_label)
+        for instruction in i.instructions:
+            instruction.accept(self)
+
+        self.add_goto(while_label)
+        self.put_label(false_label)
 
     def visit_value(self, i: Value):
         # tipo=None

@@ -791,10 +791,13 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-let daniel= 1+1*5;
-console.log(daniel);
 
-
+let a = 0;
+let b = 5
+while (a < b){
+    a = a + 1;
+    console.log(a);
+}
 """)
 
 ###############  VISITOR DEBUG  #################
