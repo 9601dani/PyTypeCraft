@@ -791,8 +791,9 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-let daniel= 1+1*1;
+let daniel= 1+1*5;
 console.log(daniel);
+
 
 """)
 

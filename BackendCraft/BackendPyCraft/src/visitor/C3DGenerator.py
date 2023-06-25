@@ -650,12 +650,12 @@ class C3DGenerator(Visitor):
                 if(val.type == VariableType().buscar_type("BOOLEAN")):
                     temp_lbl = self.new_label()
 
-                    self.put_label(val.true_lbl)
+                    self.put_label(val.trueLb1)
                     self.set_stack(temp_pos, "1")
 
                     self.add_goto(temp_lbl)
 
-                    self.put_label(val.false_lbl)
+                    self.put_label(val.falseLb1)
                     self.set_stack(temp_pos, "0")
 
                     self.put_label(temp_lbl)
@@ -832,25 +832,34 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_value(self, i: Value):
-        tipo=None
+        # tipo=None
         if i.value_type == ValueType.CADENA:
-            tipo= VariableType().buscar_type("STRING")
+            # tipo= VariableType().buscar_type("STRING")
+            return ReturnC3d(i.value, VariableType().buscar_type("STRING"), False)
+
         elif i.value_type == ValueType.ENTERO:
-            tipo= VariableType().buscar_type("NUMBER")
+            # tipo= VariableType().buscar_type("NUMBER")
+            return ReturnC3d(i.value/1, VariableType().buscar_type("NUMBER"), False)
+
         elif i.value_type == ValueType.DECIMAL:
-            tipo= VariableType().buscar_type("NUMBER")
+            # tipo= VariableType().buscar_type("NUMBER")
+            return ReturnC3d(i.value/º, VariableType().buscar_type("NUMBER"), False)
         elif i.value_type == ValueType.BOOLEANO:
-            tipo= VariableType().buscar_type("BOOLEAN")
+            # tipo= VariableType().buscar_type("BOOLEAN")
+            return ReturnC3d(bool(i.value), VariableType().buscar_type("BOOLEAN"), False)
+
         elif i.value_type == ValueType.LITERAL:
-            var_in_table = self.symbol_table.find_tabla(str(i.value))
+            var_in_table = self.symbol_table.get_symbol_by_id(str(i.value))
             if var_in_table is None:
-               self.add_comment("Variable no encontrada en la tabla de simbolos")
-               return None
-        return ReturnC3d(str(i.value),tipo, False)
+                self.add_comment("Variable no encontrada en la tabla de simbolos")
+                return None
+            return ReturnC3d(f'stack[int({var_in_table.pos})]', var_in_table.type, False)
+
+        # return ReturnC3d(str(i.value),tipo, False)
 
 """
     Creditos: 
         Diego Obin - Repositorio del Curso
         Se utilizo como una base para generador de c3d
-        Erick Morales/ Levi Hernandez - Desarolladores
+        Erick Morales/ Levi Hernandez - Desarrolladores
 """

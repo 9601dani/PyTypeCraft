@@ -42,6 +42,15 @@ class TableC3d:
                 tablaActual = tablaActual.anterior
         return False
 
+    def get_symbol_by_id(self, id: str):
+        current_table = self
+        while current_table is not None:
+            if id in current_table.tabla:
+                return current_table.tabla[id]
+            current_table = current_table.anterior
+
+        return None
+
     def get_tabla(self, ide):
         tablaActual = self
         while tablaActual != None:
