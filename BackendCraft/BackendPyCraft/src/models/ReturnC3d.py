@@ -6,8 +6,8 @@ class ReturnC3d:
         self.auxType = auxType
         self.length = length
         self.referencia = referencia
-        self.trueLb1 = ""
-        self.falseLb1 = ""
+        self.true_lbl = ""
+        self.false_lbl = ""
 
     def get_value(self):
         return self.value
@@ -25,10 +25,10 @@ class ReturnC3d:
         return self.referencia
 
     def get_true_lb1(self):
-        return self.trueLb1
+        return self.true_lbl
 
     def get_false_lb1(self):
-        return self.falseLb1
+        return self.false_lbl
 
     def set_value(self,value):
         self.value = value
@@ -46,10 +46,10 @@ class ReturnC3d:
         self.referencia = referencia
 
     def set_true_lb1(self,trueLb1):
-        self.trueLb1 = trueLb1
+        self.true_lbl = trueLb1
 
     def set_false_lb1(self,falseLb1):
-        self.falseLb1 = falseLb1
+        self.false_lbl = falseLb1
 
     def get_isTemp(self):
         return self.isTemp
