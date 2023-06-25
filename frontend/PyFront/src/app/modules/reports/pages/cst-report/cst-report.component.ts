@@ -10,8 +10,8 @@ import { graphviz } from "d3-graphviz"
 })
 export class CstReportComponent implements OnInit{
   ngOnInit(): void {
-    graphviz("#graph").renderDot(ReportModel.getInstance().cstContent)
+    graphviz("#graph")
+      .renderDot(ReportModel.getInstance().cstContent)
   }
-
 
 }

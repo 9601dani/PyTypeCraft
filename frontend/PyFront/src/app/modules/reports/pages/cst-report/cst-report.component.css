@@ -3,6 +3,8 @@
 }
 
 .graph-div{
-  width: 65%;
+  max-width: 65%;
+  max-height: 600px;
+  overflow: auto;
   margin: 0 auto;
 }
