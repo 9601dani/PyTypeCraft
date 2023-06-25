@@ -66,3 +66,6 @@ class TableC3d:
         while tablaActual.anterior != None:
             tablaActual = tablaActual.anterior
         return tablaActual
+
+    def __str__(self):
+        return f"""{{"Tabla": {str(self.tabla)}}}"""

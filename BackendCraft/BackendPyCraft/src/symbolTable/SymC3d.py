@@ -55,3 +55,6 @@ class SymC3d:
         return self.value
     def set_value(self, value):
         self.value = value
+
+    def __str__(self):
+        return f"""{{"SymC3d": {self.id}, {self.type}, {self.pos}, {self.is_global}}}"""

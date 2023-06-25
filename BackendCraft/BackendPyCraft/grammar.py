@@ -852,3 +852,5 @@ if instrucciones is not None:
         instruccion.accept(code_c3d)
 print("#############################CODIGO C3D")
 print(code_c3d.get_code())
+print("#############################TABLA DE SIMBOLOS")
+print(str(code_c3d.symbol_table))
