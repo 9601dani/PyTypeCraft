@@ -791,8 +791,10 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-let daniel:boolean= true;
-console.log(daniel);
+let trueBool: boolean = true;
+let falseBool: boolean = false;
+console.log(trueBool);
+console.log(falseBool);
 """)
 
 ###############  VISITOR DEBUG  #################

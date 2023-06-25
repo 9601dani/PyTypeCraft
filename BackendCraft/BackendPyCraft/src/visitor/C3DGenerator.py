@@ -611,17 +611,23 @@ class C3DGenerator(Visitor):
                     self.add_expression(temp_pos, 'P', simbolo.get_pos(), "+")
 
                 if(val.type == VariableType().buscar_type("BOOLEAN")):
-                    temp_lbl = self.new_label()
+                    # temp_lbl = self.new_label()
+                    #
+                    # self.put_label(val.true_lbl)
+                    # self.set_stack(temp_pos, "1")
+                    #
+                    # self.add_goto(temp_lbl)
+                    #
+                    # self.put_label(val.false_lbl)
+                    # self.set_stack(temp_pos, "0")
+                    #
+                    # self.put_label(temp_lbl)
 
-                    self.put_label(val.true_lbl)
-                    self.set_stack(temp_pos, "1")
+                    if val.value:
+                        self.set_stack(temp_pos, "1")
+                    else:
+                        self.set_stack(temp_pos, "0")
 
-                    self.add_goto(temp_lbl)
-
-                    self.put_label(val.false_lbl)
-                    self.set_stack(temp_pos, "0")
-
-                    self.put_label(temp_lbl)
                 else:
                     self.set_stack(temp_pos, val.value)
                 self.add_comment("Fin de valor de variable")
@@ -765,7 +771,15 @@ class C3DGenerator(Visitor):
             elif result.type == VariableType().buscar_type("STRING"):
                 self.add_print('s', result.value)
             elif result.type == VariableType().buscar_type("BOOLEAN"):
-                self.add_print('t', result.value)
+                true_label = self.new_label()
+                lbl = self.new_label()
+                self.add_if(result.value, '0', '!=', true_label)
+                self.print_false()
+                self.add_goto(lbl)
+                self.put_label(true_label)
+                self.print_true()
+                self.put_label(lbl)
+                # self.add_print('t', f'{result.value} != 0')
             #TODO: FALTAN DEMAS TIPOS
 
     def visit_continue(self, i: Continue):
@@ -795,7 +809,38 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_for(self, i: ForState):
-        pass
+        i.declaration.accept(self)
+        loop_label = self.new_label()
+        self.put_label(loop_label)
+
+        left = ''
+        right = ''
+        op = ''
+
+        if i.condition.left_operator is not None:
+            left = i.condition.left_operator.accept(self)
+
+        if i.condition.right_operator is not None:
+            right = i.condition.right_operator.accept(self)
+
+        if i.condition.operator is not None:
+            op = i.condition.op_value()
+
+        true_label = self.new_label()
+        self.add_if(left.value, right.value, op, true_label)
+        false_label = self.new_label()
+        self.add_goto(false_label)
+
+        self.put_label(true_label)
+        for instruction in i.instructions:
+            instruction.accept(self)
+
+        i.increment.accept(self)
+
+        self.add_goto(loop_label)
+        self.put_label(false_label)
+
+
 
     def visit_function(self, i: FunctionState):
         pass
@@ -903,7 +948,7 @@ class C3DGenerator(Visitor):
             return ReturnC3d(i.value/º, VariableType().buscar_type("NUMBER"), False)
         elif i.value_type == ValueType.BOOLEANO:
             # tipo= VariableType().buscar_type("BOOLEAN")
-            return ReturnC3d(bool(i.value), VariableType().buscar_type("BOOLEAN"), False)
+            return ReturnC3d(True if i.value == "true" else False, VariableType().buscar_type("BOOLEAN"), False)
 
         elif i.value_type == ValueType.LITERAL:
             var_in_table = self.symbol_table.get_symbol_by_id(str(i.value))
