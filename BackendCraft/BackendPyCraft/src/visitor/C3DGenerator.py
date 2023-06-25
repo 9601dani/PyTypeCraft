@@ -53,11 +53,22 @@ class C3DGenerator(Visitor):
         self.contadores_tmp = 0
         self.contadores_etiquetas = 0
         self.lista_tmp = []
-        self.lista_nativas = []
+        self.lista_nativas =''
         #### manejadores del texto final ####
         self.header = ""
         self.code = ""
         self.footer = ""
+        self.funcs = ''
+        self.in_func = False
+        self.in_natives = False
+    ####### Metodos nativas #######
+        self.print_string= False
+        self.compare_string= False
+        self.potencia= False
+        self.length= False
+        self.upper= False
+        self.lower= False
+        self.relacionales = ['>', '<', '>=', '<=']
         ### Los importes de go ####
         self.imports = []
         ### importe de fmt (console) y math (math) ####
@@ -69,23 +80,28 @@ class C3DGenerator(Visitor):
         self.lista_tmp = []
         self.imports = []
         self.imports_default = ['fmt', 'math']
+######## nativas ########
+        self.print_string= False
+        self.compare_string= False
+        self.potencia= False
+        self.length= False
+        self.upper= False
+        self.lower= False
     ###### METODOS CODIGO 3D ########
     def set_import(self, lib):
         if lib in self.imports_default:
             self.imports_default.remove(lib)
         else:
             return
+        ret= f'import(\n\t"{lib}"\n)\n'
+        self.imports.append(ret)
 
-        self.imports.append(f'"{lib}"\n')
-
-    #### CODIGO ####
+    ####  TODO: CODIGO ####
     def get_header(self):
         code= '/*------HEADER------*/\n package main;\n\n'
-        code+= 'import(\n'
         if len(self.imports) > 0:
             for temp in self.imports:
                 code += temp
-        code += ')\n'
         if len(self.lista_tmp) > 0:
             code += '\n/*------TEMPORALES------*/\n'
             code += 'var '
@@ -101,44 +117,81 @@ class C3DGenerator(Visitor):
     def get_code(self):
         code = '/*------CODE------*/\n'
         #TODO: Aun falta agregar las nativas aqui
-        return f'{self.get_header()}\n func main() {{\n{self.code}\n}}'
+        return f'{code+self.get_header()}{self.lista_nativas}\n{self.funcs}\n func main() {{\n{self.code}\n}}'
+
+    def code_in(self, code, tab="\t"):
+        if self.in_natives:
+            if self.lista_nativas == '':
+                self.lista_nativas= self.lista_nativas+ '/*------NATIVAS------*/\n'
+            self.lista_nativas = self.lista_nativas + tab + code
+        elif self.in_func:
+            if self.funcs == '':
+                self.funcs = self.funcs + '/*------FUNCIONES------*/\n'
+            self.funcs = self.funcs + tab + code
+        else:
+            self.code = self.code + tab + code
 
     def add_comment(self, comment):
-        self.code += f'/* {comment} */\n'
+        self.code_in(f'/* {comment} */\n')
 
     def add_space(self):
-        self.code += '\n'
+        self.code_in("\n")
 
-    ##### MANAGE TMP #####
+#####  TODO: MANAGE TMP #####
     def add_temp(self):
         temp = f't{self.contadores_tmp}'
         self.contadores_tmp += 1
         self.lista_tmp.append(temp)
         return temp
 
-    # MANAGE ETIQUETAS  #
-    def add_labels(self):
-        pass
-    # MANAGE GOTO#
-    def add_goto(self):
+########  TODO: MANAGE ETIQUETAS ########
+    def new_label(self):
+        label = f'L{self.contadores_etiquetas}'
+        self.contadores_etiquetas += 1
+        return label
+
+    def put_label(self, label):
+        self.code_in(f'{label}:\n')
+
+    def add_ident(self):
+        self.code_in("")
+
+######  TODO: MANAGE GOTO ######
+    def add_goto(self, label):
         self.code += f'goto {label};\n'
-    # IF#
-    ##### EXPRESIONES #####
+#########  TODO: MANAGE IF #########
+    def add_if(self, left, right, op, label):
+        self.code_in(f'if {left} {op} {right} {{goto {label};}}\n')
+
+#####  TODO: EXPRESIONES #####
     def add_expression(self, result, left, right, op):
         self.code += f'{result} = {left} {op} {right};\n'
 
     def add_expression_unary(self, result, left, op):
         self.code += f'{result} = {op} {left};\n'
 
+    def add_potencia(self, result, left, right):
+        self.code += f'{result} = math.Pow({left}, {right});\n'
+
     def add_assig(self, result, left):
         self.code += f'{result} = {left};\n'
-    ##### MANAGE STACK #####
-    def add_stack(self, pos, value):
+#####  TODO: FUNCIONES #####
+    def add_begin_func(self, id):
+        if not self.in_natives:
+            self.in_func = True
+        self.code_in(f'func {id}(){{\n', '')
+
+    def add_end_func(self):
+        self.code_in('return;\n}\n')
+        if not self.in_natives:
+            self.in_func = False
+#####  TODO: MANAGE STACK #####
+    def set_stack(self, pos, value):
         self.code += f'stack[int({pos})] = {value};\n'
 
     def get_stack(self, place, pos):
         self.code += f'{place} = stack[int({pos})];\n'
-    ###### MANAGE ENVIROMENT ######
+###### TODO: MANAGE ENVIROMENT ######
     def new_env(self, size):
         self.code += '/*------NUEVO ENTORNO------*/\n'
         self.code += f'P = P + {size};\n'
@@ -150,8 +203,8 @@ class C3DGenerator(Visitor):
     def call_fun(self, id):
         self.code += f'/*------LLAMADA A FUNCION------*/\n'
         self.code += f'{id}();\n'
-    ###### MANAGE HEAP ######
-    def add_heap(self, pos, value):
+    ######  TODO: MANAGE HEAP ######
+    def set_heap(self, pos, value):
         self.code += f'heap[int({pos})] = {value};\n'
 
     def get_heap(self, place, pos):
@@ -161,16 +214,367 @@ class C3DGenerator(Visitor):
     def next_heap(self):
         self.code += f'H = H + 1;\n'
 
-    ##### INSTRUCCIONES #####
-    def add_if(self, condition, label):
-        self.code += f'if {condition} goto {label};\n'
-
+    #####  TODO: INSTRUCCIONES #####
     def add_print(self,type, value):
         self.code += f'/*------PRINT------*/\n'
         self.set_import('fmt')
         self.code += f'fmt.Printf("%{type}", {value});\n'
 
+    def print_float(self, type,value):
+        self.code += f'/*------PRINT------*/\n'
+        self.set_import('fmt')
+        self.code += f'fmt.Printf("%{type}", {value});\n'
 
+    def print_true(self):
+        self.set_import('fmt')
+        self.add_ident()
+        self.add_print("c", "116")
+        self.add_ident()
+        self.add_print("c", "114")
+        self.add_ident()
+        self.add_print("c", "117")
+        self.add_ident()
+        self.add_print("c", "101")
+
+    def print_false(self):
+        self.set_import('fmt')
+        self.add_ident()
+        self.add_print("c", "102")
+        self.add_ident()
+        self.add_print("c", "97")
+        self.add_ident()
+        self.add_print("c", "108")
+        self.add_ident()
+        self.add_print("c", "115")
+        self.add_ident()
+        self.add_print("c", "101")
+
+########## TODO: MANAGE NATIVAS ##########
+    def f_to_string(self):
+        self.in_natives = True
+        self.add_begin_func('toString')
+        self.in_natives = False
+
+    def f_print_string(self):
+        self.set_import('fmt')
+        if self.print_string:
+            return
+        self.print_string = True
+        self.in_natives = True
+
+        self.add_begin_func('printString')
+        return_lbl = self.new_label()
+        compare_lbl = self.new_label()
+        temp_p = self.add_temp()
+        temp_h = self.add_temp()
+        self.add_expression(temp_p, 'P', '1', '+')
+        self.get_stack(temp_h, temp_p)
+        temp_c = self.add_temp()
+        self.put_label(compare_lbl)
+        self.add_ident()
+        self.get_heap(temp_c, temp_h)
+        self.add_ident()
+        self.add_if(temp_c, '==', '-1', return_lbl)
+        self.add_ident()
+        self.add_print('c', temp_c)
+        self.add_ident()
+        self.add_expression(temp_h, temp_h, '1', '+')
+        self.add_ident()
+        self.add_goto(compare_lbl)
+        self.put_label(return_lbl)
+        self.add_end_func()
+        self.in_natives = False
+
+    def f_length(self):
+        if self.length:
+            return
+        self.length = True
+        self.in_natives = True
+        self.add_begin_func('length')
+        lbl_return = self.new_label()
+        ## tmp del punteo del stack
+        temp = self.add_temp()
+        ## tmp del puntero del heap
+        temp_h = self.add_temp()
+        ## tmp del resultado
+        temp_r = self.add_temp()
+
+        # SE BUSCA LA POSICION EN STACK
+        self.add_expression(temp, 'P', '1', '+')
+
+        # SE OBTIENE EL VALOR DE LA POSICION EN STACK
+        self.get_stack(temp_h, temp)
+        self.get_heap(temp_r, temp_h)
+        self.set_heap('P', temp_r)
+
+        self.add_goto(lbl_return)
+        self.put_label(lbl_return)
+        self.add_end_func()
+        self.in_natives = False
+
+    def f_upper_case(self):
+        if self.upper:
+            return
+        self.upper = True
+        self.in_natives = True
+        self.add_begin_func('upperCase')
+
+        t1= self.add_temp()
+        t2= self.add_temp()
+        t3= self.add_temp()
+
+        lbl0= self.new_label()
+        lbl1= self.new_label()
+        lbl2= self.new_label()
+
+        self.add_assig(t1,'H')
+        self.add_expression(t2,'P','1','+')
+        self.get_stack(t2,t2)
+        self.put_label(lbl0)
+
+        self.get_heap(t3,t2)
+        self.add_if(t3, '-1', '==', lbl2)
+        self.add_if(t3, '97', '<', lbl1)
+        self.add_if(t3, '122', '>', lbl1)
+        self.add_expression(t3,t3,'32','-')
+        self.put_label(lbl1)
+
+        self.set_heap('H',t3)
+        self.next_heap()
+        self.add_expression(t2,t2,'1','+')
+        self.add_goto(lbl0)
+
+        self.put_label(lbl2)
+        self.set_heap('H','-1')
+        self.next_heap()
+        self.set_stack('P',t1)
+        self.add_end_func()
+        self.in_natives = False
+
+    def f_lower_case(self):
+        if self.upper:
+            return
+        self.upper = True
+        self.in_natives = True
+
+        self.add_begin_func('lowerCase')
+
+        t1= self.add_temp()
+        t2= self.add_temp()
+        t3= self.add_temp()
+
+        lbl0= self.new_label()
+        lbl1= self.new_label()
+        lbl2= self.new_label()
+
+        self.add_assig(t1,'H')
+        self.add_expression(t2,'P','1','+')
+        self.get_stack(t2,t2)
+        self.put_label(lbl0)
+
+        self.get_heap(t3,t2)
+        self.add_if(t3, '-1', '==', lbl2)
+        self.add_if(t3, '65', '<', lbl1)
+        self.add_if(t3, '90', '>', lbl1)
+        self.add_expression(t3,t3,'32','+')
+        self.put_label(lbl1)
+
+        self.set_heap('H',t3)
+        self.next_heap()
+        self.add_expression(t2,t2,'1','+')
+        self.add_goto(lbl0)
+
+        self.put_label(lbl2)
+        self.set_heap('H','-1')
+        self.next_heap()
+        self.set_stack('P',t1)
+        self.add_end_func()
+        self.in_natives = False
+
+    def f_compare_string(self):
+        if self.compare_string:
+            return
+        self.compare_string = True
+        self.in_natives = True
+        self.add_begin_func('compareString')
+        return_lbl = self.new_label()
+
+        t2 = self.add_temp()
+        self.add_expression(t2, 'P', '1', '+')
+        t3= self.add_temp()
+        self.get_stack(t3, t2)
+        self.add_expression(t2, t2, '1', '+')
+        t4= self.add_temp()
+        self.get_stack(t4, t2)
+
+        l1 = self.new_label()
+        l2 = self.new_label()
+        l3 = self.new_label()
+        self.put_label(l1)
+
+        t5 = self.add_temp()
+        self.add_ident()
+        self.get_heap(t5, t3)
+
+        t6 = self.add_temp()
+        self.add_ident()
+        self.get_heap(t6, t4)
+
+        self.add_ident()
+        self.add_if(t5, t6, '!=', l3)
+        self.add_ident()
+        self.add_if(t5, '-1', '==', l2)
+
+        self.add_ident()
+        self.add_expression(t3, t3, '1', '+')
+        self.add_ident()
+        self.add_expression(t4, t4, '1', '+')
+        self.add_ident()
+        self.add_goto(l1)
+
+        self.put_label(l2)
+        self.add_ident()
+        self.set_stack('P', '1')
+        self.add_ident()
+        self.add_goto(return_lbl)
+        self.put_label(l3)
+        self.add_ident()
+        self.set_stack('P', '0')
+        self.put_label(return_lbl)
+        self.add_end_func()
+        self.in_natives = False
+
+    def f_potencia(self):
+        if self.potencia:
+            return
+        self.potencia = True
+        self.in_natives = True
+        self.add_begin_func('potencia')
+
+        lbl0 = self.new_label()
+        lbl1 = self.new_label()
+        lbl2 = self.new_label()
+        lbl3 = self.new_label()
+
+        t1 = self.add_temp()
+        t2 = self.add_temp()
+        t3 = self.add_temp()
+        t4 = self.add_temp()
+
+        self.add_expression(t2, 'P', '1', '+')
+        self.get_stack(t1, t2)
+        self.add_expression(t3, t1, '','')
+        self.add_expression(t4, t1, '', '')
+        self.add_expression(t2, 'P', '2', '+')
+        self.get_stack(t1, t2)
+        self.add_if(t1, '0', '==', lbl1)
+        self.put_label(lbl2)
+        self.add_ident()
+        self.add_if(t1, '1', '<=', lbl0)
+        self.add_ident()
+        self.add_expression(t3, t3,t4,'*')
+        self.add_ident()
+        self.add_expression(t1,t1,'1', '-')
+        self.add_ident()
+        self.add_goto(lbl2)
+        self.put_label(lbl0)
+        self.add_ident()
+        self.set_stack('P', t3)
+        self.add_ident()
+        self.add_goto(lbl3)
+        self.put_label(lbl1)
+        self.add_ident()
+        self.set_stack('P', '1')
+        self.put_label(lbl3)
+        self.add_end_func()
+        self.add_space()
+        self.in_natives = False
+
+    def f_relational_string(self, op):
+        if op in self.relacionales:
+            self.relacionales.remove(op)
+        else:
+            return
+
+        if op == '>':
+            self.addBeginFunc('relationalStringM')
+        elif op == '<':
+            self.addBeginFunc('relationalStringm')
+        elif op == '>=':
+            self.addBeginFunc('relationalStringMI')
+        elif op == '<=':
+            self.addBeginFunc('relationalStringmI')
+
+
+        t2 = self.add_temp()
+        t3 = self.add_temp()
+        t4 = self.add_temp()
+        t5 = self.add_temp()
+        t6 = self.add_temp()
+        t7 = self.add_temp()
+        t8 = self.add_temp()
+
+        Lbl1 = self.new_label()
+        Lbl2 = self.new_label()
+        Lbl3 = self.new_label()
+        Lbl4 = self.new_label()
+        Lbl5 = self.new_label()
+        Lbl6 = self.new_label()
+
+        self.add_expression(t2, 'P', '1','+')
+        self.get_stack(t3, t2)
+        self.add_expression(t2, t2,'1','+')
+        self.get_stack(t4, t2)
+        self.add_expression(t5,'0','','')
+        self.add_expression(t7,'0','','')
+
+
+        self.put_label(Lbl1)
+        self.add_ident()
+        self.get_heap(t6, t3)
+        self.add_ident()
+        self.add_if(t6, '-1','==', Lbl2)
+        self.add_ident()
+        self.add_expression(t5, t5, t6, '+')
+        self.add_ident()
+        self.add_expression(t3, t3,'1','+')
+        self.add_ident()
+        self.add_goto(Lbl1)
+
+
+        self.put_label(Lbl2)
+        self.add_ident()
+        self.get_heap(t8,t4)
+        self.add_ident()
+        self.add_if(t8,'-1','==', Lbl3)
+        self.add_ident()
+        self.add_expression(t7,t7,t8,'+')
+        self.add_ident()
+        self.add_expression(t4,t4,'1','+')
+        self.add_ident()
+        self.add_goto(Lbl2)
+
+        self.put_label(Lbl3)
+        self.add_ident()
+        self.add_if(t5, t7,op, Lbl4)
+        self.add_ident()
+        self.add_goto(Lbl5)
+
+        self.put_label(Lbl4)
+        self.add_ident()
+        self.set_stack('P', '1')
+        self.add_ident()
+        self.add_goto(Lbl6)
+
+        self.put_label(Lbl5)
+        self.add_ident()
+        self.set_stack('P', '0')
+
+        self.put_label(Lbl6)
+        self.add_end_func()
+        self.add_space()
+
+        self.inNatives = False
 
     ############################################# METODOS VISIT #############################################
     def visit_array_assign(self, i: ArrayAssign):
@@ -206,12 +610,40 @@ class C3DGenerator(Visitor):
             temporal = self.add_temp()
             self.add_expression(temporal,left.value, right.value, operator)
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
-        elif i.operator == OperationType.DIVISION:
+        elif i.operator == OperationType.DIVIDE:
             operator = '/'
             temporal = self.add_temp()
             self.add_expression(temporal, left.value, right.value, operator)
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
         #TODO: FALTAN DEMAS OPERACIONES
+        elif i.operator == OperationType.MOD:
+            operator = '%'
+            temporal = self.add_temp()
+            self.add_expression(temporal, left.value, right.value, operator)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+        elif i.operator == OperationType.POTENCIA:
+            #temp = self.add_temp()
+            #self.f_potencia()
+            #t5= self.add_temp()
+
+            #self.add_expression(t5, 'P', self.symbol_table.get_size(),'+' )
+            #self.add_expression(t5,t5, '1', '+')
+
+            #self.set_stack(t5, left.value)
+            #self.add_expression(t5, t5, '1', '+')
+            #self.set_stack(t5, right.value)
+
+            #self.new_env(self.symbol_table.get_size())
+            #self.call_fun('potencia')
+            #self.get_stack(temp, 'P')
+            #self.ret_env(self.symbol_table.get_size())
+
+            #return ReturnC3d(temp,VariableType().buscar_type("NUMBER"), True)
+            temporal= self.add_temp()
+            self.set_import('math')
+            self.add_potencia(temporal, left.value, right.value)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
 
 
     def visit_break(self, i: Break):
@@ -288,4 +720,9 @@ class C3DGenerator(Visitor):
     def visit_value(self, i: Value):
         return ReturnC3d(str(i.value),i.value_type, False)
 
-
+"""
+    Creditos: 
+        Diego Obin - Repositorio del Curso
+        Se utilizo como una base para generador de c3d
+        Erick Morales/ Levi Hernandez - Desarolladores
+"""

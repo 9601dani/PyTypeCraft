@@ -113,3 +113,6 @@ class SymbolTable:
         for symbol in self.symbols:
             data += symbol.__str__()
         return f"""{{"SymbolTable": {data}}}"""
+
+    def get_size(self):
+        return len(self.symbols)

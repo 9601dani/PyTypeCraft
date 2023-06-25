@@ -51,7 +51,6 @@ def ParsearTextoApi(texto):
 ####################### CST #######################
     drawer = CstDrawer()
     content = "digraph {\n"
-    content += 'bgcolor = "#E5E5E5"\n'
     if instrucciones is not None:
         for i in instrucciones:
             content = content + f'init -> {i.node_name()}\n'

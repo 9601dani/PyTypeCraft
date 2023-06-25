@@ -791,7 +791,7 @@ def parse(inp):
 
 instrucciones : Instruction = parse("""
 console.log(4+5*6);
-console.log(1+1);
+console.log(2^3);
 
 """)
 
