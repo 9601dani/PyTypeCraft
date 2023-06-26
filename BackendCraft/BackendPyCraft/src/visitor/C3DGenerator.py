@@ -255,7 +255,9 @@ class C3DGenerator(Visitor):
         self.in_natives = True
         self.add_begin_func('toString')
         self.in_natives = False
-
+    def add_print_char(self, value):
+        self.set_import('fmt')
+        self.code_in(f'fmt.Printf("%c", int({value}));\n')
     def f_print_string(self):
         self.set_import('fmt')
         if self.print_string:
@@ -275,9 +277,9 @@ class C3DGenerator(Visitor):
         self.add_ident()
         self.get_heap(temp_c, temp_h)
         self.add_ident()
-        self.add_if(temp_c, '==', '-1', return_lbl)
+        self.add_if(temp_c, '-1', '==', return_lbl)
         self.add_ident()
-        self.add_print('c', temp_c)
+        self.add_print_char(temp_c)
         self.add_ident()
         self.add_expression(temp_h, temp_h, '1', '+')
         self.add_ident()
@@ -595,7 +597,7 @@ class C3DGenerator(Visitor):
                     self.add_comment('Error al asignar la variable, tipos son distintos')
                     return None
 
-                if val.type  == VariableType().buscar_type('ARRAY'):
+                if val.type  == VariableType().buscar_type('STRING'):
                     simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), True, i.find)
                     simbolo.set_tipo_aux(val.get_tipo_aux())
                     simbolo.set_length(val.get_length())
@@ -769,7 +771,21 @@ class C3DGenerator(Visitor):
             if result.get_tipo() == VariableType().buscar_type("NUMBER"):
                 self.add_print('f', result.value)
             elif result.type == VariableType().buscar_type("STRING"):
-                self.add_print('s', result.value)
+
+                self.f_print_string()
+                param_temp= self.add_temp()
+
+                self.add_expression(param_temp, 'P', self.symbol_table.size, '+')
+                self.add_expression(param_temp, param_temp, '1', '+')
+                self.set_stack(param_temp, result.value)
+
+                self.new_env(self.symbol_table.size)
+                self.call_fun('printString')
+
+                temp= self.add_temp()
+                self.get_stack(temp, 'P')
+                self.ret_env(self.symbol_table.size)
+
             elif result.type == VariableType().buscar_type("BOOLEAN"):
                 true_label = self.new_label()
                 lbl = self.new_label()
@@ -942,7 +958,17 @@ class C3DGenerator(Visitor):
         # tipo=None
         if i.value_type == ValueType.CADENA:
             # tipo= VariableType().buscar_type("STRING")
-            return ReturnC3d(i.value, VariableType().buscar_type("STRING"), False)
+            temporal = self.add_temp()
+            self.add_assig(temporal, 'H')
+
+            for char in str(i.value):
+                self.set_heap('H', ord(char))
+                self.next_heap()
+            self.set_heap('H', -1)
+            self.next_heap()
+
+            return ReturnC3d(temporal, i.value_type, True)
+
 
         elif i.value_type == ValueType.ENTERO:
             # tipo= VariableType().buscar_type("NUMBER")
