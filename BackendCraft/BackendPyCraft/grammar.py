@@ -792,8 +792,11 @@ def parse(inp):
 
 instrucciones : Instruction = parse("""
 let daniel=2;
-let pedro=-daniel;
-console.log(pedro);
+daniel++;
+console.log(daniel);
+daniel--;
+daniel--;
+console.log(daniel);
 
 """)
 

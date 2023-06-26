@@ -943,7 +943,9 @@ class C3DGenerator(Visitor):
             operator = '-'
             temporal = self.add_temp()
             self.add_expression_unary(temporal, right.value, operator)
-            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
+
+            return ReturnC3d(temporal, VariableType().buscar_type("NUMBER"), True)
 
 
         elif i.operator == OperationType.POSITIVE:
@@ -954,29 +956,32 @@ class C3DGenerator(Visitor):
 
         elif i.operator == OperationType.NOT:
             if right.data_type != VariableType.lista_variables["BOOLEAN"]:
-                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN.", i.line, i.column))
+                # self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN.", i.line, i.column))
                 return None
 
-            result.data_type = VariableType().buscar_type("BOOLEAN")
-            result.value = not right.value
-            result.symbol_type = SymbolType().VARIABLE
-            result.isAny = False
-            return result
+            # result.data_type = VariableType().buscar_type("BOOLEAN")
+            # result.value = not right.value
+            # result.symbol_type = SymbolType().VARIABLE
+            # result.isAny = False
+            # return result
 
         elif i.operator == OperationType.INCREMENT:
             operator = '+'
             temporal = self.add_temp()
             self.add_expression(temporal, right.value, 1, operator)
-            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+            right_symbol = self.symbol_table.get_symbol_by_id(i.right_operator.value)
 
+            self.set_stack(right_symbol.pos, temporal)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
 
         elif i.operator == OperationType.DECREMENT:
             operator = '-'
             temporal = self.add_temp()
             self.add_expression(temporal, right.value, 1, operator)
+            right_symbol = self.symbol_table.get_symbol_by_id(i.right_operator.value)
+            self.set_stack(right_symbol.pos, temporal)
+
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
-
-
 
     def visit_while(self, i: WhileState):
         while_label = self.new_label()
