@@ -176,6 +176,9 @@ class C3DGenerator(Visitor):
     def add_potencia(self, result, left, right):
         self.code_in(f'{result} = math.Pow({left}, {right});\n')
 
+    def add_mod(self, result, left, right):
+        self.code_in(f'{result} = math.Mod({left}, {right});\n')
+
     def add_assig(self, result, left):
         self.code_in(f'{result} = {left};\n')
 #####  TODO: FUNCIONES #####
@@ -727,9 +730,9 @@ class C3DGenerator(Visitor):
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
         #TODO: FALTAN DEMAS OPERACIONES
         elif i.operator == OperationType.MOD:
-            operator = '%'
-            temporal = self.add_temp()
-            self.add_expression(temporal, left.value, right.value, operator)
+            temporal= self.add_temp()
+            self.set_import('math')
+            self.add_mod(temporal, left.value, right.value)
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
         elif i.operator == OperationType.POTENCIA:
             #temp = self.add_temp()
@@ -796,7 +799,7 @@ class C3DGenerator(Visitor):
             return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
 
     def visit_break(self, i: Break):
-        pass
+        self.add_goto(self.symbol_table.break_lbl)
 
     def visit_call_arr(self, i: CallArray):
         pass
@@ -812,6 +815,7 @@ class C3DGenerator(Visitor):
             print(val)
             result = val.accept(self)
             print(str(result))
+
             if result.get_tipo() == VariableType().buscar_type("NUMBER"):
                 self.add_print('f', result.value)
             elif result.type == VariableType().buscar_type("STRING"):
@@ -845,7 +849,7 @@ class C3DGenerator(Visitor):
         self.add_print('s', '\"\\n\"')
 
     def visit_continue(self, i: Continue):
-        pass
+        self.add_goto(self.symbol_table.continue_lbl)
 
     def visit_declaration(self, i: Declaration):
         if i.type is None:
@@ -864,8 +868,12 @@ class C3DGenerator(Visitor):
 
 
     def visit_else(self, i: ElseState):
+        self.symbol_table = TableC3d(self.symbol_table)
+        self.symbol_table.break_lbl = self.symbol_table.anterior.break_lbl
+        self.symbol_table.continue_lbl = self.symbol_table.anterior.continue_lbl
         for instruction in i.bloque:
             instruction.accept(self)
+        self.symbol_table = self.symbol_table.anterior
 
     def visit_foreach(self, i: ForEachState):
         pass
@@ -932,10 +940,13 @@ class C3DGenerator(Visitor):
         self.add_goto(lbl)
 
         self.put_label(true_label)
+        self.symbol_table = TableC3d(self.symbol_table)
+        self.symbol_table.break_lbl = self.symbol_table.anterior.break_lbl
+        self.symbol_table.continue_lbl = self.symbol_table.anterior.continue_lbl
         for instruction in i.bloque_verdadero:
             instruction.accept(self)
-
         self.put_label(lbl)
+        self.symbol_table = self.symbol_table.anterior
 
     def visit_interface_assign(self, i: InterfaceAssign):
         pass
@@ -978,7 +989,7 @@ class C3DGenerator(Visitor):
     def visit_unary_op(self, i: UnaryOperation):
         right = i.right_operator.accept(self)
         if right is None:
-            self.add_comment('El operador es nulo', i.line, i.column)
+            self.add_comment('El operador es nulo')
             return None
 
         if i.operator == OperationType.NEGATIVE:
@@ -1026,8 +1037,8 @@ class C3DGenerator(Visitor):
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
 
     def visit_while(self, i: WhileState):
-        while_label = self.new_label()
-        self.put_label(while_label)
+        loop_label = self.new_label()
+        self.put_label(loop_label)
         left = ''
         right = ''
         op = ''
@@ -1047,11 +1058,14 @@ class C3DGenerator(Visitor):
         self.add_goto(false_label)
 
         self.put_label(true_label)
+        self.symbol_table = TableC3d(self.symbol_table)
+        self.symbol_table.break_lbl = false_label
+        self.symbol_table.continue_lbl = loop_label
         for instruction in i.instructions:
             instruction.accept(self)
-
-        self.add_goto(while_label)
+        self.add_goto(loop_label)
         self.put_label(false_label)
+        self.symbol_table = self.symbol_table.anterior
 
     def visit_value(self, i: Value):
         # tipo=None
@@ -1074,7 +1088,7 @@ class C3DGenerator(Visitor):
 
         elif i.value_type == ValueType.DECIMAL:
             # tipo= VariableType().buscar_type("NUMBER")
-            return ReturnC3d(i.value/º, VariableType().buscar_type("NUMBER"), False)
+            return ReturnC3d(i.value/1, VariableType().buscar_type("NUMBER"), False)
         elif i.value_type == ValueType.BOOLEANO:
             # tipo= VariableType().buscar_type("BOOLEAN")
             return ReturnC3d(True if i.value == "true" else False, VariableType().buscar_type("BOOLEAN"), False)

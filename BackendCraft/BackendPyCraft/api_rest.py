@@ -18,7 +18,7 @@ app = FastAPI()
 class TextApi(BaseModel):
 
     print(sys.getrecursionlimit())
-    sys.setrecursionlimit(1500)
+    sys.setrecursionlimit(2000)
     print(sys.getrecursionlimit())
     text: str
 @app.get("/")
