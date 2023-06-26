@@ -49,6 +49,7 @@ from decimal import Decimal
 class C3DGenerator(Visitor):
     def __init__(self, symbol_table: TableC3d):
         #### Tabla de simbolos ####
+        super().__init__()
         self.symbol_table = symbol_table
         #### Contadores C3D ####
         self.contadores_tmp = 0
@@ -170,13 +171,13 @@ class C3DGenerator(Visitor):
         self.code_in(f'{result} = {left} {op} {right};\n')
 
     def add_expression_unary(self, result, left, op):
-        self.code += f'{result} = {op} {left};\n'
+        self.code_in(f'{result} = {op} {left};\n')
 
     def add_potencia(self, result, left, right):
-        self.code += f'{result} = math.Pow({left}, {right});\n'
+        self.code_in(f'{result} = math.Pow({left}, {right});\n')
 
     def add_assig(self, result, left):
-        self.code += f'{result} = {left};\n'
+        self.code_in(f'{result} = {left};\n')
 #####  TODO: FUNCIONES #####
     def add_begin_func(self, id):
         if not self.in_natives:
@@ -665,17 +666,11 @@ class C3DGenerator(Visitor):
                     self.add_expression(temp_pos, 'P', simbolo.pos, "+")
 
                 if(val.type == VariableType().buscar_type("BOOLEAN")):
-                    temp_lbl = self.new_label()
+                    if val.value:
+                        self.set_stack(temp_pos, "1")
+                    else:
+                        self.set_stack(temp_pos, "0")
 
-                    self.put_label(val.true_lbl)
-                    self.set_stack(temp_pos, "1")
-
-                    self.add_goto(temp_lbl)
-
-                    self.put_label(val.false_lbl)
-                    self.set_stack(temp_pos, "0")
-
-                    self.put_label(temp_lbl)
                 else:
                     self.set_stack(temp_pos, val.value)
                 self.add_comment("Fin de valor de variable")
@@ -759,6 +754,47 @@ class C3DGenerator(Visitor):
             self.add_potencia(temporal, left.value, right.value)
             return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
 
+        elif i.operator == OperationType.MENOR_QUE:
+            temporal = self.add_temp()
+            value = 1 if left.value < right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.MAYOR_QUE:
+            temporal = self.add_temp()
+            value = 1 if left.value > right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.MENOR_IGUAL_QUE:
+            temporal = self.add_temp()
+            value = 1 if left.value <= right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.MAYOR_IGUAL_QUE:
+            temporal = self.add_temp()
+            value = 1 if left.value >= right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.TRIPLE_IGUAL:
+            temporal = self.add_temp()
+            value = 1 if left.value == right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.DISTINTO_QUE:
+            temporal = self.add_temp()
+            value = 1 if left.value != right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.AND:
+            temporal = self.add_temp()
+            value = 1 if left.value and right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+        elif i.operator == OperationType.OR:
+            temporal = self.add_temp()
+            value = 1 if left.value or right.value else 0
+            self.add_expression(temporal, value, '', '')
+            return ReturnC3d(temporal, VariableType().buscar_type("BOOLEAN"), True)
+
     def visit_break(self, i: Break):
         pass
 
@@ -805,6 +841,8 @@ class C3DGenerator(Visitor):
                 self.put_label(lbl)
                 # self.add_print('t', f'{result.value} != 0')
             #TODO: FALTAN DEMAS TIPOS
+
+        self.add_print('s', '\"\\n\"')
 
     def visit_continue(self, i: Continue):
         pass
@@ -920,8 +958,12 @@ class C3DGenerator(Visitor):
         val = i.value.accept(self)
 
         if val.type == VariableType().buscar_type("BOOLEAN"):
-            value = 1 if val.value is True else 0
-            self.set_stack(result.pos, value)
+            if val.isTemp:
+                self.set_stack(result.pos, val.value)
+            else:
+                value = 1 if val.value is True else 0
+                self.set_stack(result.pos, value)
+
         elif val.type == VariableType().buscar_type("STRING"):
             self.set_stack(result.pos, val.value)
         else:
