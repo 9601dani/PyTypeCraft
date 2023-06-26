@@ -59,6 +59,16 @@ def ParsearTextoApi(texto):
 
     print("#### CST ####")
     print(content)
+################# C3D #################
+    table= TableC3d()
+    code_c3d= C3DGenerator(table)
+    code_c3d.cleanAll()
+    if instrucciones is not None:
+        for instruccion in instrucciones:
+            instruccion.accept(code_c3d)
+    print("#############################CODIGO C3D")
+    print(code_c3d.get_code())
+
 #################  VISITOR RUNNER  #################
     print("#################  VISITOR RUNNER  #################")
     runner = Runner(tableR,errorsR,console)
@@ -75,7 +85,7 @@ def ParsearTextoApi(texto):
     print("#############################CONSOLE")
     for console in runner.console:
         print(str(console))
-    objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console, content)
+    objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console, content, code_c3d.get_code())
     print("#############################OBJETO RETURN")
     print(objeto_return)
     return (objeto_return.__getstate__())
