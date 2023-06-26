@@ -894,7 +894,12 @@ class C3DGenerator(Visitor):
             return None
 
         val = i.value.accept(self)
-        self.set_stack(result.pos, val.value)
+
+        if val.type == VariableType().buscar_type("BOOLEAN"):
+            value = 1 if val.value is True else 0
+            self.set_stack(result.pos, value)
+        else:
+            self.set_stack(result.pos, val.value)
 
     def visit_parameter(self, i: Parameter):
         pass

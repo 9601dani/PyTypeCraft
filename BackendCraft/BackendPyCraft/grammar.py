@@ -795,6 +795,10 @@ let trueBool: boolean = true;
 let falseBool: boolean = false;
 console.log(trueBool);
 console.log(falseBool);
+
+falseBool = true;
+
+console.log(falseBool);
 """)
 
 ###############  VISITOR DEBUG  #################
