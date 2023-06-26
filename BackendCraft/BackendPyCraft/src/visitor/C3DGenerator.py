@@ -934,7 +934,49 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_unary_op(self, i: UnaryOperation):
-        pass
+        right = i.right_operator.accept(self)
+        if right is None:
+            self.add_comment('El operador es nulo', i.line, i.column)
+            return None
+
+        if i.operator == OperationType.NEGATIVE:
+            operator = '-'
+            temporal = self.add_temp()
+            self.add_expression_unary(temporal, right.value, operator)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
+
+        elif i.operator == OperationType.POSITIVE:
+            operator = '+'
+            temporal = self.add_temp()
+            self.add_expression_unary(temporal, right.value, operator)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
+        elif i.operator == OperationType.NOT:
+            if right.data_type != VariableType.lista_variables["BOOLEAN"]:
+                self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (!) UNARIO ENTRE VARIABLE DE TIPO BOOLEAN.", i.line, i.column))
+                return None
+
+            result.data_type = VariableType().buscar_type("BOOLEAN")
+            result.value = not right.value
+            result.symbol_type = SymbolType().VARIABLE
+            result.isAny = False
+            return result
+
+        elif i.operator == OperationType.INCREMENT:
+            operator = '+'
+            temporal = self.add_temp()
+            self.add_expression(temporal, right.value, 1, operator)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
+
+        elif i.operator == OperationType.DECREMENT:
+            operator = '-'
+            temporal = self.add_temp()
+            self.add_expression(temporal, right.value, 1, operator)
+            return ReturnC3d(temporal,VariableType().buscar_type("NUMBER"), True)
+
+
 
     def visit_while(self, i: WhileState):
         while_label = self.new_label()
