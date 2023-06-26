@@ -815,8 +815,10 @@ class C3DGenerator(Visitor):
             print(val)
             result = val.accept(self)
             print(str(result))
+            if result is None:
+                continue
 
-            if result.get_tipo() == VariableType().buscar_type("NUMBER"):
+            if result.type == VariableType().buscar_type("NUMBER"):
                 self.add_print('f', result.value)
             elif result.type == VariableType().buscar_type("STRING"):
 
