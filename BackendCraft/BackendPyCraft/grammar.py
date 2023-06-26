@@ -791,8 +791,12 @@ def parse(inp):
     return parser.parse(inp)
 
 instrucciones : Instruction = parse("""
-let daniel="hola";
-console.log("daniel");
+let daniel: string = "mensaje de prueba";
+console.log(daniel);
+
+daniel = "cambiando apuntador";
+console.log(daniel);
+
 """)
 
 ###############  VISITOR DEBUG  #################

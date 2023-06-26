@@ -159,14 +159,15 @@ class C3DGenerator(Visitor):
 
 ######  TODO: MANAGE GOTO ######
     def add_goto(self, label):
-        self.code += f'goto {label};\n'
+        self.code_in(f'goto {label};\n')
+
 #########  TODO: MANAGE IF #########
     def add_if(self, left, right, op, label):
         self.code_in(f'if {left} {op} {right} {{goto {label};}}\n')
 
 #####  TODO: EXPRESIONES #####
     def add_expression(self, result, left, right, op):
-        self.code += f'{result} = {left} {op} {right};\n'
+        self.code_in(f'{result} = {left} {op} {right};\n')
 
     def add_expression_unary(self, result, left, op):
         self.code += f'{result} = {op} {left};\n'
@@ -188,10 +189,10 @@ class C3DGenerator(Visitor):
             self.in_func = False
 #####  TODO: MANAGE STACK #####
     def set_stack(self, pos, value):
-        self.code += f'stack[int({pos})] = {value};\n'
+        self.code_in(f'stack[int({pos})] = {value};\n')
 
     def get_stack(self, place, pos):
-        self.code += f'{place} = stack[int({pos})];\n'
+        self.code_in(f'{place} = stack[int({pos})];\n')
 ###### TODO: MANAGE ENVIROMENT ######
     def new_env(self, size):
         self.code += '/*------NUEVO ENTORNO------*/\n'
@@ -277,9 +278,9 @@ class C3DGenerator(Visitor):
         self.add_ident()
         self.get_heap(temp_c, temp_h)
         self.add_ident()
-        self.add_if(temp_c, '-1', '==', return_lbl)
+        self.add_if(f'heap[int({temp_h})]', '-1', '==', return_lbl)
         self.add_ident()
-        self.add_print_char(temp_c)
+        self.add_print_char(f'heap[int({temp_h})]')
         self.add_ident()
         self.add_expression(temp_h, temp_h, '1', '+')
         self.add_ident()
@@ -593,11 +594,11 @@ class C3DGenerator(Visitor):
                     print("Error al asignar la variable 1")
                     return None
 
-                if val.type != VariableType().buscar_type(i.type):
+                if val.get_tipo() != VariableType().buscar_type(i.type):
                     self.add_comment('Error al asignar la variable, tipos son distintos')
                     return None
 
-                if val.type  == VariableType().buscar_type('STRING'):
+                if val.get_tipo() == VariableType().buscar_type('STRING'):
                     simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), True, i.find)
                     simbolo.set_tipo_aux(val.get_tipo_aux())
                     simbolo.set_length(val.get_length())
@@ -646,10 +647,17 @@ class C3DGenerator(Visitor):
                     simbolo.set_tipo_aux(val.get_tipo_aux())
                     simbolo.set_length(val.get_length())
                     simbolo.set_referencia(val.get_referencia())
+                elif val.get_tipo() == VariableType().buscar_type('STRING'):
+                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), True, i.find)
+                    simbolo.set_tipo_aux(val.get_tipo_aux())
+                    simbolo.set_length(val.get_length())
+                    simbolo.set_referencia(True)
+
                 else:
                     # Guardado y obtencion de variable. Esta tiene la posicion, lo que nos sirve para asignarlo en el heap
-                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), (val.type == VariableType().buscar_type("STRING") or val.type == VariableType().buscar_type("ARRAY")), i.find)
-
+                    in_heap = val.type == VariableType().buscar_type("STRING") or val.type == VariableType().buscar_type("ARRAY")
+                    simbolo = self.symbol_table.set_tabla(i.id, val.get_tipo(), in_heap, i.find)
+                    print("simbolo: ",simbolo)
                 # Obtencion de posicion de la variable
                 temp_pos = simbolo.get_pos()
                 if not simbolo.is_global:
@@ -685,7 +693,7 @@ class C3DGenerator(Visitor):
                 temp_pos = self.add_temp()
                 self.add_expression(temp_pos, 'P', simbolo.pos, "+")
 
-            self.set_stack(temp_pos,i.gosth)
+            self.set_stack(temp_pos, i.gosth)
             self.addComment("Fin de valor de variable")
 
             return temp_pos
@@ -803,7 +811,7 @@ class C3DGenerator(Visitor):
 
     def visit_declaration(self, i: Declaration):
         if i.type is None:
-            self.errors.append(ExceptionPyType("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.", i.line, i.column))
+            # self.errors.append(ExceptionPyType("ERROR EN DECLARACION DE VARIABLE NO TIENE TIPO DE VARIABLE.", i.line, i.column))
             return None
         for instruction in i.instructions:
             variable = instruction.accept(self)
@@ -914,6 +922,8 @@ class C3DGenerator(Visitor):
         if val.type == VariableType().buscar_type("BOOLEAN"):
             value = 1 if val.value is True else 0
             self.set_stack(result.pos, value)
+        elif val.type == VariableType().buscar_type("STRING"):
+            self.set_stack(result.pos, val.value)
         else:
             self.set_stack(result.pos, val.value)
 
@@ -967,8 +977,7 @@ class C3DGenerator(Visitor):
             self.set_heap('H', -1)
             self.next_heap()
 
-            return ReturnC3d(temporal, i.value_type, True)
-
+            return ReturnC3d(temporal, VariableType().buscar_type("STRING"), True)
 
         elif i.value_type == ValueType.ENTERO:
             # tipo= VariableType().buscar_type("NUMBER")
@@ -987,6 +996,10 @@ class C3DGenerator(Visitor):
                 self.add_comment("Variable no encontrada en la tabla de simbolos")
                 print("Variable no encontrada en la tabla de simbolos")
                 return None
+
+            if var_in_table.type == VariableType().buscar_type("STRING"):
+                return ReturnC3d(f'stack[int({var_in_table.pos})]', var_in_table.type, True)
+
             return ReturnC3d(f'stack[int({var_in_table.pos})]', var_in_table.type, False)
 
         # return ReturnC3d(str(i.value),tipo, False)

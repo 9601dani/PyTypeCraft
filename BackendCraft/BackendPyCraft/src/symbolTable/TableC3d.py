@@ -28,7 +28,7 @@ class TableC3d:
             self.tabla[id].setInHeap(inHeap)
             return self.tabla[id]
         else:
-            simbolo = SymC3d(id, tipo, self.size, self.anterior == None, inHeap)
+            simbolo = SymC3d(id, tipo, self.size, self.anterior is None, inHeap)
             self.size += 1
             self.tabla[id] = simbolo
             return self.tabla[id]
