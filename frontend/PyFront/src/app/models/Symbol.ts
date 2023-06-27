@@ -4,5 +4,5 @@ export class Symbol{
   symbol_type: string = '';
   value: any;
   type_modifier: string = '';
-  isAny: boolean = true;
+  isAny: string = 'True';
 }

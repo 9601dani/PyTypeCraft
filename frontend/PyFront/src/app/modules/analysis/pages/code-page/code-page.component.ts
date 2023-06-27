@@ -51,7 +51,6 @@ export class CodePageComponent implements OnInit{
       .subscribe( (value : any) => {
         if(value) {
           const reportModel: ReportModel = ReportModel.getInstance();
-          console.log(value)
           reportModel.symbol_table = value.table;
           // console.log(reportModel.symbol_table)
           reportModel.errors = value.errors;
