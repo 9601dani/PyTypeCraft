@@ -1,7 +1,9 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from fastapi.encoders import jsonable_encoder
+# from fastapi import FastAPI
+# from fastapi.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# from fastapi.encoders import jsonable_encoder
+from flask import Flask, render_template, request
+from flask_cors import CORS
 from src.models.Instruction import Instruction
 from src.symbolTable.SymbolTable import SymbolTable
 from src.visitor.Debugger import Debugger
@@ -17,33 +19,22 @@ import json
 import pickle
 import sys
 
-app = FastAPI()
-origins = [
-    "http://localhost:3000",
-    "34.148.56.163",
-    #TODO: aqui van los dominios
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"], #TODO: aqui van los metodos
-    allow_headers=["*"], #TODO: aqui van los headers
-)
+print(sys.getrecursionlimit())
+sys.setrecursionlimit(2000)
+print(sys.getrecursionlimit())
+text: str
 
-class TextApi(BaseModel):
+app = Flask(__name__)
+CORS(app)
 
-    print(sys.getrecursionlimit())
-    sys.setrecursionlimit(2000)
-    print(sys.getrecursionlimit())
-    text: str
-@app.get("/")
+
+@app.route('/', methods=["GET"])
 def test_api():
     return {"Hello": "from test_api"}
-@app.post("/analisis")
-async def get_text_compiler(content : TextApi):
-    print(content.text)
-    text = content.text
+@app.route('/analisis', methods=['POST'])
+def get_text_compiler():
+    data = request.get_json()
+    text = data['text']
     return ParsearTextoApi(text)
 
 def ParsearTextoApi(texto):
@@ -108,5 +99,4 @@ def ParsearTextoApi(texto):
     #return {"result": "ok"}
 
 if __name__ == "__main__":
-    import uvicorn
-    app.run(app,host = '0.0.0.0', port=4200)
+    app.run(host="0.0.0.0", debug=True, port=8000)
