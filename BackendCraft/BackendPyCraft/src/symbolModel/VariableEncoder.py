@@ -1,6 +1,6 @@
 import json
 from ..models.Variable import Variable
-class ArrayModelEncoder(json.JSONEncoder):
+class VariableEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Variable):
             data = {

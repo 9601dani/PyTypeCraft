@@ -16,7 +16,7 @@ from src.symbolTable.SymC3d import SymC3d
 from src.visitor.C3DGenerator import C3DGenerator
 from src.ObjectError.ExceptionPyTypeEncoder import ExceptionPyTypeEncoder
 from src.symbolModel.ArrayModelEncoder import ArrayModelEncoder
-from src.models.VariableEncoder import VariableEncoder
+from src.symbolModel.VariableEncoder import VariableEncoder
 import grammar
 import json
 import pickle
