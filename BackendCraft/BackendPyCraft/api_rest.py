@@ -20,7 +20,7 @@ import sys
 app = FastAPI()
 origins = [
     "http://localhost:3000",
-    "localhost:3000",
+    "34.148.56.163",
     #TODO: aqui van los dominios
 ]
 app.add_middleware(
@@ -109,4 +109,4 @@ def ParsearTextoApi(texto):
 
 if __name__ == "__main__":
     import uvicorn
-    app.run(app,host = '0.0.0.0', port=8000)
+    app.run(app,host = '0.0.0.0', port=4200)
