@@ -14,6 +14,7 @@ from src.visitor.CstDrawer import CstDrawer
 from src.symbolTable.TableC3d import TableC3d
 from src.symbolTable.SymC3d import SymC3d
 from src.visitor.C3DGenerator import C3DGenerator
+from src.ObjectError.ExceptionPyTypeEncoder import ExceptionPyTypeEncoder
 import grammar
 import json
 import pickle
@@ -91,8 +92,10 @@ def ParsearTextoApi(texto):
     objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console, content)
     #print("#############################OBJETO RETURN")
     # print(objeto_return.__getstate__())
-    return (objeto_return.__getstate__())
-    #return {"result": "ok"}
+    for i in runner.errors:
+        print(json.dumps(i, cls=ExceptionPyTypeEncoder))
+    #return (objeto_return.__getstate__())
+    return {"result": "ok"}
 def parserCod3d(texto):
     ################# C3D #################
     instrucciones : Instruction = grammar.parse(texto)
