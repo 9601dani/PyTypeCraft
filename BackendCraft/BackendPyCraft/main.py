@@ -37,6 +37,12 @@ def get_text_compiler():
     text = data['text']
     return ParsearTextoApi(text)
 
+@app.route('/c3d', methods=['POST'])
+def get_text_c3d():
+    data = request.get_json()
+    text = data['text']
+    return parserCod3d(text)
+
 def ParsearTextoApi(texto):
     grammar.global_arr = []
     errors = grammar.global_arr
