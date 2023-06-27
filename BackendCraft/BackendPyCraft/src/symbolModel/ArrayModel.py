@@ -10,4 +10,4 @@ class ArrayModel:
         self.next = None
 
     def __str__(self):
-        return f"""{self.var.value}"""
+        return f"""{{"ArrayModel": {self.var}}}"""

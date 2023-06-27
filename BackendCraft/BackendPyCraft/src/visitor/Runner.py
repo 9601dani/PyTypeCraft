@@ -759,7 +759,7 @@ class Runner(Visitor):
                         print(array_auxiliar.value.var.value.next)
                         while array_auxiliar1.var.value.next is not None:
                             print("==========")
-                            content = content + " " + str(array_auxiliar1.var.value.next)
+                            content = content + " " + str(array_auxiliar1.var.value.next.value)
                             array_auxiliar1.var.value = array_auxiliar1.var.value.next
                             #content = content + " " + str(array_auxiliar1.value.next)
                             #array_auxiliar1.value = array_auxiliar1.value.next

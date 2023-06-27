@@ -13,10 +13,10 @@ class ModelResponse():
 
     def __getstate__(self):
         return {
-            "table": self.table,
-            "errors": self.errors,
+            "table": [obj.__dict__ for obj in self.table],
+            "errors": [obj.__dict__ for obj in self.errors],
             "console": self.console,
-            "cst": self.cst,
+            "cst": self.cst
         }
 
     def __setstate__(self, state):
