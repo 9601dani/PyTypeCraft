@@ -6,6 +6,7 @@ export class ReportModel{
 
   cstContent: string = '';
   output: string = '';
+  c3d: string = '';
   symbol_table : Symbol[] = [];
   errors: PyError[] = [];
 
