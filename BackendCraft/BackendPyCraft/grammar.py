@@ -865,12 +865,12 @@ def p_error(t):
                             find_column(input, t)))
 
 
-def test_lexer(lexer):
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break  # No more input
-        print(tok)
+# def test_lexer(lexer):
+#    while True:
+#        tok = lexer.token()
+#        if not tok:
+#            break  # No more input
+#        print(tok)
 
 
 import ply.yacc as yacc
@@ -886,16 +886,16 @@ def parse(inp):
     return parser.parse(inp)
 
 
-instrucciones: Instruction = parse("""
-let a = 10;
-let i = 0;
+#instrucciones: Instruction = parse("""
+#let a = 10;
+#let i = 0;
 
-while ( i < a ) {
-    let a = i;
-    i++;
-    console.log(a);
-}
-""")
+#while ( i < a ) {
+#    let a = i;
+#    i++;
+#    console.log(a);
+#}
+#""")
 
 ###############  VISITOR DEBUG  #################
 # errors = []
@@ -945,13 +945,13 @@ while ( i < a ) {
 
 # print("#### CST ####")
 # print(content)
-table = TableC3d()
-code_c3d = C3DGenerator(table)
-code_c3d.cleanAll()
-if instrucciones is not None:
-    for instruccion in instrucciones:
-        instruccion.accept(code_c3d)
-print("#############################CODIGO C3D")
-print(code_c3d.get_code())
-print("#############################TABLA DE SIMBOLOS")
-print(str(code_c3d.symbol_table))
+#table = TableC3d()
+#code_c3d = C3DGenerator(table)
+#code_c3d.cleanAll()
+#if instrucciones is not None:
+#    for instruccion in instrucciones:
+#        instruccion.accept(code_c3d)
+#print("#############################CODIGO C3D")
+#print(code_c3d.get_code())
+#print("#############################TABLA DE SIMBOLOS")
+#print(str(code_c3d.symbol_table))
