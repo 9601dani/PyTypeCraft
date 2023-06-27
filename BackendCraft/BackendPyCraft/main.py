@@ -90,7 +90,7 @@ def ParsearTextoApi(texto):
         print(str(console))
     objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console, content)
     #print("#############################OBJETO RETURN")
-    #print(objeto_return)
+    # print(objeto_return.__getstate__())
     return (objeto_return.__getstate__())
     #return {"result": "ok"}
 def parserCod3d(texto):

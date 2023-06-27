@@ -13,7 +13,7 @@ class ModelResponse():
 
     def __getstate__(self):
         return {
-            "table": self.table,
+            "table": [obj.__dict__ for obj in self.table],
             "errors": self.errors,
             "console": self.console,
             "cst": self.cst
