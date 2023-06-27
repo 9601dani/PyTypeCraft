@@ -14,7 +14,6 @@ export class CodePageComponent implements OnInit{
 
   theme = "vs";
   outValue = '';
-  outPutType:OutPutType = OutPutType.CONSOLE;
 
   model: CodeModel = {
     language: 'typescript',
@@ -52,20 +51,19 @@ export class CodePageComponent implements OnInit{
       .subscribe( (value : any) => {
         if(value) {
           const reportModel: ReportModel = ReportModel.getInstance();
+          console.log(value)
           reportModel.symbol_table = value.table;
           // console.log(reportModel.symbol_table)
           reportModel.errors = value.errors;
           // console.log(reportModel.errors)
           reportModel.cstContent = value.cst;
           // console.log(reportModel.cstContent)
-          reportModel.c3d = value.c3d;
           reportModel.output = ''
           value.console.forEach((it: any) => {
             reportModel.output = reportModel.output.concat(it).concat("\n");
           })
 
           this.outValue = reportModel.output;
-          this.outPutType = OutPutType.CONSOLE;
           Swal.fire({
             position: 'center',
             icon: 'success',
@@ -79,14 +77,32 @@ export class CodePageComponent implements OnInit{
 
   }
 
-  changeOut(out: OutPutType){
-    this.outPutType = out;
-    if (this.outPutType === OutPutType.CONSOLE) {
-      this.outValue = ReportModel.getInstance().output;
-    } else if (this.outPutType === OutPutType.C3D) {
-      this.outValue = ReportModel.getInstance().c3d;
+  getC3D(){
+    let content = this.model.value;
+    if (content.trim().length == 0){
+      Swal.fire({
+        position: 'center',
+        icon: 'question',
+        title: 'No se encontró nada para compilar',
+        showConfirmButton: false,
+        timer: 1500
+      })
+      return;
     }
+    let out = "";
+    let body = { 'text' : content };
+    this.restService.c3d_post(body)
+      .subscribe((value: any) =>{
+        if(value){
+           this.outValue = value.c3d;
+        }
+      })
+    Swal.fire({
+      position: 'center',
+      icon: 'success',
+      title: 'Compilación realizada con éxito',
+      showConfirmButton: false,
+      timer: 1500
+    })
   }
-
-  protected readonly OutPutType = OutPutType;
 }
