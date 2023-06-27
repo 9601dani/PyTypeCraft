@@ -753,13 +753,14 @@ class Runner(Visitor):
                 array_auxiliar= copy.deepcopy(result)
                 while array_auxiliar.value is not None:
                     print(array_auxiliar.value)
-                    content = content + " " + str(array_auxiliar.value)
+                    content = content + " " + array_auxiliar.get_value()
                     try:
                         array_auxiliar1 = copy.deepcopy(array_auxiliar.value)
                         print(array_auxiliar.value.var.value.next)
                         while array_auxiliar1.var.value.next is not None:
                             print("==========")
-                            content = content + " " + str(array_auxiliar1.var.value.next.value)
+                            content = content + " " + array_auxiliar1.var.value.next.get_value()
+                            print(str(array_auxiliar1.var.value.next.value))
                             array_auxiliar1.var.value = array_auxiliar1.var.value.next
                             #content = content + " " + str(array_auxiliar1.value.next)
                             #array_auxiliar1.value = array_auxiliar1.value.next

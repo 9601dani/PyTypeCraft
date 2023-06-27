@@ -11,3 +11,6 @@ class ArrayModel:
 
     def __str__(self):
         return f"""{{"ArrayModel": {self.var}}}"""
+
+    def get_value(self):
+        return self.var.value

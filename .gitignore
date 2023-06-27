@@ -139,6 +139,7 @@ cython_debug/
 # Environments
 .env
 .venv
+.fastapi-env
 env/
 venv/
 ENV/
