@@ -887,7 +887,14 @@ def parse(inp):
 
 
 instrucciones: Instruction = parse("""
-console.log("hola".length());
+let a = 10;
+let i = 0;
+
+while ( i < a ) {
+    let a = i;
+    i++;
+    console.log(a);
+}
 """)
 
 ###############  VISITOR DEBUG  #################

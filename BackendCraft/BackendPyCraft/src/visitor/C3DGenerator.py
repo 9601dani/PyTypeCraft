@@ -881,6 +881,7 @@ class C3DGenerator(Visitor):
         pass
 
     def visit_for(self, i: ForState):
+        self.symbol_table = TableC3d(self.symbol_table)
         i.declaration.accept(self)
         loop_label = self.new_label()
         self.put_label(loop_label)
@@ -899,20 +900,20 @@ class C3DGenerator(Visitor):
             op = i.condition.op_value()
 
         true_label = self.new_label()
+
         self.add_if(left.value, right.value, op, true_label)
         false_label = self.new_label()
         self.add_goto(false_label)
 
         self.put_label(true_label)
+        self.symbol_table.break_lbl = false_label
+        self.symbol_table.continue_lbl = loop_label
         for instruction in i.instructions:
             instruction.accept(self)
-
         i.increment.accept(self)
-
         self.add_goto(loop_label)
         self.put_label(false_label)
-
-
+        self.symbol_table = self.symbol_table.anterior
 
     def visit_function(self, i: FunctionState):
         pass

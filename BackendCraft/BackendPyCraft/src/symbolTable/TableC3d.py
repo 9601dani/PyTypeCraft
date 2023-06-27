@@ -17,15 +17,15 @@ class TableC3d:
             tablaActual = self
             while tablaActual != None:
                 if id in tablaActual.tabla:
-                    tablaActual.tabla[id].setTipo(tipo)
-                    tablaActual.tabla[id].setInHeap(inHeap)
+                    tablaActual.tabla[id].set_tipo(tipo)
+                    tablaActual.tabla[id].set_in_heap(inHeap)
                     return tablaActual.tabla[id]
                 else:
                     tablaActual = tablaActual.anterior
 
         if id in self.tabla:
-            self.tabla[id].setTipo(tipo)
-            self.tabla[id].setInHeap(inHeap)
+            self.tabla[id].set_tipo(tipo)
+            self.tabla[id].set_in_heap(inHeap)
             return self.tabla[id]
         else:
             simbolo = SymC3d(id, tipo, self.size, self.anterior is None, inHeap)
@@ -63,8 +63,8 @@ class TableC3d:
         tablaActual = self
         while tablaActual != None:
             if id in tablaActual.tabla:
-                tablaActual.tabla[id].setTipo(tipo)
-                tablaActual.tabla[id].setInHeap(inHeap)
+                tablaActual.tabla[id].set_tipo(tipo)
+                tablaActual.tabla[id].set_in_heap(inHeap)
                 return tablaActual.tabla[id]
             else:
                 tablaActual = tablaActual.anterior
