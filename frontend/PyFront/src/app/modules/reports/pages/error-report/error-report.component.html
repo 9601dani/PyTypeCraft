@@ -1,1 +1,18 @@
-<p>error-report works!</p>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Linea</th>
+      <th>Columna</th>
+      <th>Mensaje</th>
+      <th>Fecha-Hora</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let error of ReportModel.getInstance().errors">
+      <td>{{error.line}}</td>
+      <td>{{error.column}}</td>
+      <td>{{error.message}}</td>
+      <td>{{error.date_time}}</td>
+    </tr>
+  </tbody>
+</table>

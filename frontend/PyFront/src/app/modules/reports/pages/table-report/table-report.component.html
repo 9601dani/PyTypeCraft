@@ -1,1 +1,20 @@
-<p>table-report works!</p>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Id</th>
+    <th>Tipo de Dato</th>
+    <th>Tipo de Simbolo</th>
+    <th>Valor</th>
+    <th>Any?</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let symbol of ReportModel.getInstance().symbol_table">
+    <td>{{symbol.id}}</td>
+    <td>{{symbol.data_type}}</td>
+    <td>{{symbol.symbol_type}}</td>
+    <td>{{getValue(symbol.value, symbol.symbol_type)}}</td>
+    <td>{{symbol.isAny}}</td>
+  </tr>
+  </tbody>
+</table>
