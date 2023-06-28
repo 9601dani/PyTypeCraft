@@ -4,10 +4,16 @@ from .Instruction import Instruction
 class ArrayState(Instruction):
 
     def node_name(self):
-        pass
+        return f'array_stmt_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'array_statement'
+
+    def vals_name(self):
+        return f'values_{self.line}_{self.column}'
+
+    def vals_value(self):
+        return f'values'
 
     def accept(self, visitor):
         return visitor.visit_array_state(self)

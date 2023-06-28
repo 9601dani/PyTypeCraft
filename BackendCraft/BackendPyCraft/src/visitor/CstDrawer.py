@@ -8,7 +8,24 @@ from ..models import Value, WhileState, UnaryOperation, Return, Parameter, OnlyA
 class CstDrawer(Visitor):
 
     def visit_array_assign(self, i: ArrayAssign):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.call_name()} [label = "{i.call_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.dim_name()} [label = "{i.dim_value()}"]\n'
+        content += f'{i.equals_name()} [label = "{i.equals_value()}"]\n'
+        content += f'{i.node_name()} -> {i.call_name()}\n\n'
+        content += f'{i.node_name()} -> {i.equals_name()}\n\n'
+        content += f'{i.call_name()} -> {i.id_name()}\n\n'
+        content += f'{i.call_name()} -> {i.dim_name()}\n\n'
+
+        for dimension in i.dimensions:
+            content += f'{i.dim_name()} -> {dimension.node_name()}\n\n'
+            content += dimension.accept(self)
+
+        content += f'{i.node_name()} -> {i.value.node_name()}\n\n'
+        content += i.value.accept(self)
+
+        return content
 
     def visit_assignment(self, i: Assignment):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -26,7 +43,17 @@ class CstDrawer(Visitor):
         return content
 
     def visit_array_state(self, i: ArrayState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.vals_name()} [label = "{i.vals_value()}"]\n'
+
+        content += f'{i.node_name()} -> {i.vals_name()}\n\n'
+
+
+        for value in i.values:
+            content += f'{i.vals_name()} -> {value.node_name()}\n\n'
+            content += value.accept(self)
+
+        return content
 
     def visit_binary_op(self, i: BinaryOperation):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -50,10 +77,30 @@ class CstDrawer(Visitor):
         return f'{i.node_name()} [label = "{i.node_value()}"]\n'
 
     def visit_call_arr(self, i: CallArray):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.dim_name()} [label = "{i.dim_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+        content += f'{i.node_name()} -> {i.dim_name()}\n\n'
+
+        for dimension in i.dimensions:
+            content += f'{i.dim_name()} -> {dimension.node_name()}\n\n'
+            content += dimension.accept(self)
+
+        return content
 
     def visit_call_attr(self, i: CallAttribute):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+
+        content += f'{i.id_name()} -> {i.id.node_name()}\n\n'
+        content += i.id.accept(self)
+
+        content += f'{i.attr_name()} [label = "{i.attr_value()}"]\n'
+        content += f'{i.node_name()} -> {i.attr_name()}\n\n'
+
+        return content
 
     def visit_call_fun(self, i: CallFunction):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -107,10 +154,48 @@ class CstDrawer(Visitor):
         return content
 
     def visit_foreach(self, i: ForEachState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
+        content += f'{i.of_name()} [label = "{i.of_value()}"]\n'
+        content += f'{i.assign_name()} [label = "{i.assign_value()}"]\n'
+        content += f'{i.body_name()} [label = "{i.body_value()}"]\n'
+        content += f'{i.node_name()} -> {i.id_name()}\n\n'
+        content += f'{i.node_name()} -> {i.of_name()}\n\n'
+        content += f'{i.node_name()} -> {i.assign_name()}\n\n'
+        content += f'{i.node_name()} -> {i.body_name()}\n\n'
+
+        content += f'{i.assign_name()} -> {i.assignment.node_name()}\n\n'
+        content += i.assignment.accept(self)
+
+        for instruction in i.instructions:
+            content += f'{i.body_name()} -> {instruction.node_name()}\n\n'
+            content += instruction.accept(self)
+
+        return content
 
     def visit_for(self, i: ForState):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.dec_name()} [label = "{i.dec_value()}"]\n'
+        content += f'{i.con_name()} [label = "{i.con_value()}"]\n'
+        content += f'{i.inc_name()} [label = "{i.inc_value()}"]\n'
+        content += f'{i.body_name()} [label = "{i.body_value()}"]\n'
+        content += f'{i.node_name()} -> {i.dec_name()}\n\n'
+        content += f'{i.node_name()} -> {i.con_name()}\n\n'
+        content += f'{i.node_name()} -> {i.inc_name()}\n\n'
+        content += f'{i.node_name()} -> {i.body_name()}\n\n'
+        content += f'{i.dec_name()} -> {i.declaration.node_name()}\n\n'
+        content += f'{i.con_name()} -> {i.condition.node_name()}\n\n'
+        content += f'{i.inc_name()} -> {i.increment.node_name()}\n\n'
+
+        content += i.declaration.accept(self)
+        content += i.condition.accept(self)
+        content += i.increment.accept(self)
+
+        for instruction in i.instructions:
+            content += f'{i.body_name()} -> {instruction.node_name()}\n\n'
+            content += instruction.accept(self)
+
+        return content
 
     def visit_function(self, i: FunctionState):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
@@ -118,7 +203,7 @@ class CstDrawer(Visitor):
         content += f'{i.id_name()} [label = "{i.id_value()}"]\n'
         content += f'{i.node_name()} -> {i.id_name()}\n\n'
 
-        if len(i.parameters) > 0:
+        if i.parameters is not None:
             content += f'{i.params_name()} [label = "{i.params_value()}"]\n'
             content += f'{i.node_name()} -> {i.params_name()}\n\n'
 
@@ -164,10 +249,28 @@ class CstDrawer(Visitor):
         return content
 
     def visit_interface_assign(self, i: InterfaceAssign):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.attrs_name()} [label = "{i.attrs_value()}"]\n'
+        content += f'{i.node_name()} -> {i.attrs_name()}\n\n'
+
+        for attribute in i.attributes:
+            content += f'{i.attrs_name()} -> {attribute.node_name()}\n\n'
+            content += attribute.accept(self)
+
+        return content
 
     def visit_inter_attr_assign(self, i: InterAttributeAssign):
-        return ""
+        content = f'{i.node_name()} [label = "{i.node_value()}"]\n'
+        content += f'{i.node_name()} -> {i.interAttribute.node_name()}\n\n'
+        content += i.interAttribute.accept(self)
+
+        content += f'{i.equals_name()} [label = "{i.equals_value()}"]\n'
+        content += f'{i.node_name()} -> {i.equals_name()}\n\n'
+
+        content += f'{i.node_name()} -> {i.value.node_name()}\n\n'
+        content += i.value.accept(self)
+
+        return content
 
     def visit_interface(self, i: InterfaceState):
         content = f'{i.node_name()} [label = "{i.node_value()}"]\n'

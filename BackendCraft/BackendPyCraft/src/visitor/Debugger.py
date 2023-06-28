@@ -112,7 +112,7 @@ class Debugger(Visitor):
             value: Variable = i.value.accept(self)
             # print(i.type)
             if value is None:
-                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGANCION ", i.line, i.column))
+                self.errors.append(ExceptionPyType("NO SE PUDO REALIZAR LA ASIGNACION ", i.line, i.column))
                 # print("NO SE PUDO REALIZAR LA ASIGNACIÓN")
                 return None
 
@@ -556,8 +556,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.OR:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -569,8 +569,8 @@ class Debugger(Visitor):
             return result
 
         elif i.operator == OperationType.AND:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -795,7 +795,7 @@ class Debugger(Visitor):
             self.errors.append(ExceptionPyType("FOR, NO SE PUDO REALIZAR LA COMPARACIÓN.", i.line, i.column))
 
         else:
-            if condition.data_type is not VariableType().buscar_type("BOOLEAN"):
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("FOR, LA OPERACIÓN DEBE SER DE TIPO BOOLEAN.", i.line, i.column))
 
         for instruction in i.instructions:
@@ -871,7 +871,9 @@ class Debugger(Visitor):
 
         else:
 
-            if condition.data_type != VariableType().buscar_type("BOOLEAN"):
+
+
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("IF, LA CONDICIÓN DEBE SER TIPO BOOLEAN", i.line, i.column))
 
 
@@ -1347,7 +1349,7 @@ class Debugger(Visitor):
 
         else:
 
-            if condition.data_type != VariableType().buscar_type("BOOLEAN"):
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN",i.line, i.column))
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)
@@ -1391,7 +1393,7 @@ class Debugger(Visitor):
         elif i.value_type == ValueType.LITERAL:
             var_in_table = self.symbol_table.find_var_by_id(str(i.value))
             if var_in_table is None:
-                self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE: " + str(i.value) + " EN LA TABLA DE SIMBOLOS, DEBUG",i.line, i.column))
+                self.errors.append(ExceptionPyType("NO SE ENCONTRÓ LA VARIABLE: " + str(i.value) + " EN LA TABLA DE SIMBOLOS",i.line, i.column))
                 return None
 
             if var_in_table.symbol_type == SymbolType().ARRAY or not VariableType().is_primitive(var_in_table.data_type):

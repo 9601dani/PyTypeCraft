@@ -560,8 +560,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.OR:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (||) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -573,8 +573,8 @@ class Runner(Visitor):
             return result
 
         elif i.operator == OperationType.AND:
-            if left.data_type != VariableType().lista_variables("BOOLEAN") or right.data_type != \
-                    VariableType().lista_variables("BOOLEAN"):
+            if left.data_type != VariableType().buscar_type("BOOLEAN") or right.data_type != \
+                    VariableType().buscar_type("BOOLEAN"):
                 # print("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.")
                 self.errors.append(ExceptionPyType("SOLO PUEDE REALIZAR OPERACIONES TIPO (&&) ENTRE VARIABLE DE TIPO BOOLEAN.",i.line,i.column))
                 return None
@@ -750,22 +750,24 @@ class Runner(Visitor):
                 self.errors.append(ExceptionPyType("ERROR EN CONSOLE LOG NO SE PUDO IMPRIMIR EL VALOR.", i.line, i.column))
                 continue
             elif result.symbol_type == "ARRAY":
-                array_auxiliar= copy.deepcopy(result)
-                while array_auxiliar.value is not None:
-                    print(array_auxiliar.value)
-                    content = content + " " + str(array_auxiliar.value)
-                    try:
-                        array_auxiliar1 = copy.deepcopy(array_auxiliar.value)
-                        print(array_auxiliar.value.var.value.next)
-                        while array_auxiliar1.var.value.next is not None:
-                            print("==========")
-                            content = content + " " + str(array_auxiliar1.var.value.next)
-                            array_auxiliar1.var.value = array_auxiliar1.var.value.next
-                            #content = content + " " + str(array_auxiliar1.value.next)
-                            #array_auxiliar1.value = array_auxiliar1.value.next
-                    except:
-                        pass
-                    array_auxiliar.value = array_auxiliar.value.next
+                # array_auxiliar= copy.deepcopy(result)
+                # while array_auxiliar.value is not None:
+                #     print(array_auxiliar.value)
+                #     content = content + " " + array_auxiliar.get_value()
+                #     try:
+                #         array_auxiliar1 = copy.deepcopy(array_auxiliar.value)
+                #         print(array_auxiliar.value.var.value.next)
+                #         while array_auxiliar1.var.value.next is not None:
+                #             print("==========")
+                #             content = content + " " + array_auxiliar1.var.value.next.get_value()
+                #             print(str(array_auxiliar1.var.value.next.value))
+                #             array_auxiliar1.var.value = array_auxiliar1.var.value.next
+                #             #content = content + " " + str(array_auxiliar1.value.next)
+                #             #array_auxiliar1.value = array_auxiliar1.value.next
+                #     except:
+                #         pass
+                #     array_auxiliar.value = array_auxiliar.value.next
+                content = self.getArrayContent(result.value)
             else:
                 content = content + " " + str(result.value)
             #content = content + " " + str(result.value)
@@ -1650,3 +1652,20 @@ class Runner(Visitor):
                 return copy.deepcopy(functionModel)
 
         return None
+
+    def getArrayContent(self, value: ArrayModel):
+        arrayContent = ""
+        current_model = value
+
+        while current_model is not None:
+            variable:Variable = current_model.var
+
+            if variable.symbol_type == SymbolType().ARRAY:
+                arrayContent += self.getArrayContent(variable.value) + ", "
+            else:
+                arrayContent += str(variable.value) + ", "
+
+            current_model = current_model.next
+        arrayContent = arrayContent[:-2]
+        return f'[ {arrayContent} ]'
+

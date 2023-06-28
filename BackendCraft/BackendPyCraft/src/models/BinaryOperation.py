@@ -38,9 +38,9 @@ class BinaryOperation(Instruction):
         elif self.operator == OperationType.MAYOR_QUE:
             return ">"
         elif self.operator == OperationType.DISTINTO_QUE:
-            return "!=="
+            return "!="
         elif self.operator == OperationType.TRIPLE_IGUAL:
-            return "==="
+            return "=="
         elif self.operator == OperationType.MAS:
             return "+"
         elif self.operator == OperationType.MENOS:

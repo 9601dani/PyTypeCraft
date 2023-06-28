@@ -10,3 +10,6 @@ class FunctionModel:
         self.instructions = instructions
         self.isInTable = True
         self.return_type = return_type
+
+    def __str__(self):
+        return f"""{{"Function": id: {self.id}, parameters: {self.parameters}, instructions: {self.instructions}, return_type: {self.return_type}}}"""

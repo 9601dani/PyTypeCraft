@@ -4,10 +4,16 @@ from .Instruction import Instruction
 class InterAttributeAssign(Instruction):
 
     def node_name(self):
-        pass
+        return f'only_assign_{self.line}_{self.column}'
 
     def node_value(self):
-        pass
+        return f'assignment'
+
+    def equals_name(self):
+        return f'eq_{self.line}_{self.column}'
+
+    def equals_value(self):
+        return f'='
 
     def accept(self, visitor):
         return visitor.visit_inter_attr_assign(self)
