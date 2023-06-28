@@ -795,7 +795,7 @@ class Debugger(Visitor):
             self.errors.append(ExceptionPyType("FOR, NO SE PUDO REALIZAR LA COMPARACIÓN.", i.line, i.column))
 
         else:
-            if condition.data_type is not VariableType().buscar_type("BOOLEAN"):
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("FOR, LA OPERACIÓN DEBE SER DE TIPO BOOLEAN.", i.line, i.column))
 
         for instruction in i.instructions:
@@ -871,7 +871,9 @@ class Debugger(Visitor):
 
         else:
 
-            if condition.data_type != VariableType().buscar_type("BOOLEAN"):
+
+
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("IF, LA CONDICIÓN DEBE SER TIPO BOOLEAN", i.line, i.column))
 
 
@@ -1347,7 +1349,7 @@ class Debugger(Visitor):
 
         else:
 
-            if condition.data_type != VariableType().buscar_type("BOOLEAN"):
+            if not isinstance(condition, str) and condition.data_type != VariableType().buscar_type("BOOLEAN"):
                 self.errors.append(ExceptionPyType("LA CONDICIÓN DEBE DE SER TIPO BOOLEAN",i.line, i.column))
 
         temporal_table = SymbolTable(self.symbol_table, ScopeType.LOOP_SCOPE)

@@ -18,14 +18,9 @@ import pickle
 import sys
 
 app = FastAPI()
-origins = [
-    "http://localhost:3000",
-    "34.148.56.163",
-    #TODO: aqui van los dominios
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"], #TODO: aqui van los metodos
     allow_headers=["*"], #TODO: aqui van los headers
@@ -34,8 +29,8 @@ app.add_middleware(
 class TextApi(BaseModel):
 
     print(sys.getrecursionlimit())
-    sys.setrecursionlimit(2000)
-    print(sys.getrecursionlimit())
+    sys.setrecursionlimit(10000000)
+    print("IMPRIMIENDO RECURSION",sys.getrecursionlimit())
     text: str
 @app.get("/")
 def test_api():
@@ -119,6 +114,6 @@ def parserCod3d(texto):
     #print("#############################CODIGO C3D")
     #print(code_c3d.get_code())
 
-if __name__ == "__main__":
-    import uvicorn
-    app.run(app,host = '0.0.0.0', port=4200)
+# if __name__ == "__main__":
+#     import uvicorn
+#     app.run(app,host = '0.0.0.0', port=4200)

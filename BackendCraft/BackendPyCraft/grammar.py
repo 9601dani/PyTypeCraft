@@ -249,6 +249,8 @@ from src.models.CallArray import CallArray
 from src.models.ArrayAssign import ArrayAssign
 from src.visitor.C3DGenerator import C3DGenerator
 from src.symbolTable.TableC3d import TableC3d
+import sys
+sys.setrecursionlimit(10000000)
 
 
 def return_operation_type(operation_type):
@@ -886,48 +888,147 @@ def parse(inp):
     return parser.parse(inp)
 
 
-#instrucciones: Instruction = parse("""
-#let a = 10;
-#let i = 0;
+instrucciones: Instruction = parse("""
+interface Node {
+    value: number;
+    izq: any;
+    der: any;
+};
 
-#while ( i < a ) {
-#    let a = i;
-#    i++;
-#    console.log(a);
-#}
-#""")
+interface Tree {
+    root: any;
+};
 
-###############  VISITOR DEBUG  #################
-# errors = []
-# table= SymbolTable()
-# debbuger= Debugger(table,errors)
-#
-#
-# if instrucciones is not None:
-#    for instruccion in instrucciones:
-#        instruccion.accept(debbuger)
-#
-# errorsR = errors
-# tableR =  SymbolTable()
-# console= []
-# VariableType().clean_types()
-# tableR.symbols = debbuger.symbol_table.getAllFunctions()
-# #################  VISITOR RUNNER  #################
-# print("#################  VISITOR RUNNER  #################")
-# runner = Runner(tableR,errorsR,console)
-# if instrucciones is not None:
-#     for instruccion in instrucciones:
-#         instruccion.accept(runner)
-# print("#############################TABLA DE SIMBOLOS")
-# for i in runner.symbol_table.symbols:
-#     print(str(i))
-# print("#############################ERRORES")
-# if len(runner.errors) > 0:
-#     for error in runner.errors:
-#         print(str(error))
-# print("#############################CONSOLE")
-# for console in runner.console:
-#     print(str(console))
+let arbol: Tree = { root: "" };
+
+function insertar(nodo, value: number): Node {
+    if (typeof(nodo) !== "string") {
+        nodo = { value: value, izq: "", der: "" };
+    } else if (value < nodo.value) {
+        nodo.izq = insertar(nodo.izq, value);
+    } else {
+        nodo.der = insertar(nodo.der, value);
+    }
+    return nodo;
+}
+
+function preOrden(nodo) {
+    if (typeof(nodo) === "Node") {
+        console.log(nodo.value);
+        preOrden(nodo.izq);
+        preOrden(nodo.der);
+    }
+}
+
+function inOrden(nodo: Node) {
+    if (typeof(node.value) === "number") {
+        inOrden(nodo.izq);
+        console.log(nodo.value);
+        inOrden(nodo.der);
+    }
+}
+
+function postOrden(nodo) {
+    if (typeof(nodo) === "Node") {
+        postOrden(nodo.izq);
+        postOrden(nodo.der);
+        console.log(nodo.value);
+    }
+}
+
+function encontrarValor(nodo, valor: number): boolean {
+    let aux: Node = nodo;
+    while (typeof(aux) === "Node") {
+        if (aux.value === valor) {
+            return true;
+        } else if (aux.value > valor) {
+            aux = aux.izq;
+        } else {
+            aux = aux.der;
+        }
+    }
+    return false;
+}
+
+function encontrarValorR(nodo, valor: number): boolean {
+    if (typeof(nodo) !== "Node") {
+        return false;
+    }
+    if (nodo.value === valor) {
+        return true;
+    } else if (nodo.value > valor) {
+        return encontrarValorR(nodo.izq, valor);
+    } else {
+        return encontrarValorR(nodo.der, valor);
+    }
+}
+
+console.log("INSERTANDO DATOS");
+arbol.root = insertar(arbol.root, 35);
+arbol.root = insertar(arbol.root, 15);
+arbol.root = insertar(arbol.root, 55);
+arbol.root = insertar(arbol.root, 4);
+arbol.root = insertar(arbol.root, 67);
+arbol.root = insertar(arbol.root, 100);
+arbol.root = insertar(arbol.root, 36);
+arbol.root = insertar(arbol.root, 10);
+arbol.root = insertar(arbol.root, 1);
+arbol.root = insertar(arbol.root, 3);
+console.log("SE TERMINO DE INSERTAR DATOS");
+
+console.log("PREORDEN");
+preOrden(arbol.root);
+console.log("INORDEN");
+inOrden(arbol.root);
+console.log("POSTORDEN");
+postOrden(arbol.root);
+
+console.log("BUSCANDO VALORES");
+console.log("Existe 7: " , encontrarValor(arbol.root, 7));
+console.log("Existe 36: " , encontrarValor(arbol.root, 36));
+console.log("Existe 1: " , encontrarValor(arbol.root, 1));
+console.log("Existe 58: " , encontrarValor(arbol.root, 58));
+
+console.log("BUSCANDO VALORES RECURSIVAMENTE");
+console.log("Existe 7: " , encontrarValorR(arbol.root, 7));
+console.log("Existe 36: " , encontrarValorR(arbol.root, 36));
+console.log("Existe 1: " , encontrarValorR(arbol.root, 1));
+console.log("Existe 58: " , encontrarValorR(arbol.root, 58));
+
+
+""")
+
+##############  VISITOR DEBUG  #################
+errors = []
+table= SymbolTable()
+debbuger= Debugger(table,errors)
+
+
+if instrucciones is not None:
+   for instruccion in instrucciones:
+       instruccion.accept(debbuger)
+
+errorsR = errors
+tableR =  SymbolTable()
+console= []
+VariableType().clean_types()
+tableR.symbols = debbuger.symbol_table.getAllFunctions()
+#################  VISITOR RUNNER  #################
+print("#################  VISITOR RUNNER  #################")
+runner = Runner(tableR,errorsR,console)
+if instrucciones is not None:
+    for instruccion in instrucciones:
+        instruccion.accept(runner)
+print("#############################TABLA DE SIMBOLOS")
+for i in runner.symbol_table.symbols:
+    print(str(i))
+print("#############################ERRORES")
+if len(runner.errors) > 0:
+    for error in runner.errors:
+        print(str(error))
+print("#############################CONSOLE")
+for console in runner.console:
+    print(str(console))
 # objeto_return= ModelResponse(runner.symbol_table.symbols,runner.errors,runner.console)
 # print("#############################OBJETO RETURN")
 # print(objeto_return)
